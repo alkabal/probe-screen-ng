@@ -1,7 +1,6 @@
-; manual toolchange with automatic tool length probe 
+; manual toolchange with automatic tool length probe
 
 o<psng_manual_change> sub
-o<psng_hook> call [1]
 
 ;(debug, in change tool_in_spindle=#<tool_in_spindle> current_pocket=#<current_pocket>)
 ;(debug, selected_tool=#<selected_tool> selected_pocket=#<selected_pocket>)
@@ -11,69 +10,91 @@ o<psng_hook> call [1]
 #<pocket> = #<selected_pocket>
 
 ; we must execute this only in the milltask interpreter
-; or preview will break, so test for '#<_task>' which is 1 for 
+; or preview will break, so test for '#<_task>' which is 1 for
 ; the milltask interpreter and 0 in the UI's
-O100 if [#<_task> EQ 0]
+o10 if [#<_task> EQ 0]
         (debug, Task ist Null)
-O100     return [999]
-O100 endif
+o10     return [999]
+o10 endif
+
+
+o100 if [#<_hal[probe.ps_searchvel]> LE 0]
+o100 return [-1] ; indicate searchvel <= 0
+o100 endif
+
+o200 if [#<_hal[probe.ps_probevel]> LE 0]
+o200 return [-2] ; indicate probevel <= 0
+o200 endif
+
 
 ;first go up
+F#<_ini[TOOLSENSOR]FAST_SPEED>
 G90
-G53 G0 Z[#<_ini[AXIS_Z]MAX_LIMIT>-0.1]
-; then move to change position
-G53 G0 X[#<_ini[CHANGE_POSITION]X>] Y[#<_ini[CHANGE_POSITION]Y>]
-G53 G0 Z[#<_ini[CHANGE_POSITION]Z>]
+G53 G1 Z[#<_ini[JOINT_2]HOME>] ;think about using [JOINT_2]HOME imo is better
+; then move to change position ;think initially linuscnc have [EMCIO] TOOL_CHANGE_POSITION = 0 0 0 or TOOL_CHANGE_QUILL_UP = 1
+G53 G1 X[#<_ini[CHANGE_POSITION]X>] Y[#<_ini[CHANGE_POSITION]Y>]
+G53 G1 Z[#<_ini[CHANGE_POSITION]Z>]
+
+o<psng_hook> call [1]
 
 ; cancel tool offset
-G49
+;G92.1 ; IS NOT WANTED HERE because this macro is used when program run
+G49 G40
+(MSG,TODO STUDY MORE FOR G10 here and G49 G40 it is really needed ? AND WHY THEY NOT HAVE G43 at end)
 
-; using the code being remapped here means 'use builtin behaviour'
-M6
+o300 if [#<_hal[probe.use_toolmeasurement]> EQ 0 OR #<_selected_tool> EQ 0]
+     M6          ; using the code being remapped here means 'use builtin behaviour' used here for M6T0
+o300 return [3] ; indicate no tool measurement possible with tool 0
+o300 elseif [#<_hal[probe.use_toolmeasurement]> EQ 1 AND #<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0 AND #<_selected_tool> GT 1]
+     (MSG,TOOLSETTER HEIGHT NOT CONFIGURED)
+     (MSG,TOOLCHANGE CANCELED)
+     M2            ; no M6 here for canceling toolchange
+o300 endif
 
-O200 if [#<_hal[probe.use_toolmeasurement]> EQ 0]
-O200 return [3] ; indicate no tool measurement 
-O200 endif
+M6   ; using the code being remapped here means 'use builtin behaviour' used here for M6Tx
 
-G53 G0 X[#<_ini[TOOLSENSOR]X>] Y[#<_ini[TOOLSENSOR]Y>]
-G53 G0 Z[#<_ini[TOOLSENSOR]Z>]
+G53 G1 X[#<_ini[TOOLSENSOR]X>] Y[#<_ini[TOOLSENSOR]Y>]
+G53 G1 Z[#<_ini[TOOLSENSOR]Z>]
 
-O300 if [#<_hal[probe.ps_searchvel]> LE 0]
-O300 return [-1] ; indicate searchvel <= 0 
-O300 endif
-
-O400 if [#<_hal[probe.ps_probevel]> LE 0]
-O400 return [-2] ; indicate probevel <= 0 
-O400 endif
-
-F #<_hal[probe.ps_searchvel]>
 G91
-G38.2 Z #<_ini[TOOLSENSOR]MAXPROBE>
-G38.4 Z2
-G0 Z0.5
-; This is commented out only for sim.
-F #<_hal[probe.ps_probevel]>
-G38.2 Z-3
+G38.2 Z#<_ini[TOOLSENSOR]MAXPROBE>   F#<_hal[probe.ps_searchvel]>
+G38.4 Z#<_hal[probe.ps_probe_latch]> F#<_hal[probe.ps_searchvel]>     ;DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
+G1    Z0.5                           F#<_ini[TOOLSENSOR]RAPID_SPEED>
+G38.2 Z-[#<_hal[probe.ps_probe_latch]>*2] F#<_hal[probe.ps_probevel]>
 
-O500 if [#5070 EQ 0]
+o500 if [#5070 EQ 0]
 G90
-O500 return [-3] ; indicate probe contact failure to epilog
-O500 endif
+o500 return [-3] ; indicate probe contact failure to epilog
+o500 endif
 
 G90
-G53 G0 Z[#<_ini[CHANGE_POSITION]Z>]
+G53 G1 Z[#<_ini[CHANGE_POSITION]Z>] F#<_ini[TOOLSENSOR]RAPID_SPEED>
 
 #<touch_result> = #5063
-#<probeheight> = #<_hal[probe.probeheight]> 
-#<blockheight> = #<_hal[probe.blockheight]>
+#<setterheight>  = #<_hal[probe.setterheight]>
+#<blockheight>  = #<_hal[probe.blockheight]>
 
-;(DEBUG, #<touch_result>  #<probeheight>  #<blockheight>)
+;(DEBUG, #<touch_result>  #<setterheight>  #<blockheight>)
 
-G10 L1 P#<tool> Z[#<touch_result> - #<_hal[probe.probeheight]> + #<_hal[probe.blockheight]>]
+o600 if [#5400 EQ 1]  ;need probe as tool 1
+     (MSG,TODO STUDY MORE FOR ALL G10)
+     ;G10 L20 P0 Z[#<_hal[probe.setterheight]>]                        
+     ;G10 L2 P0 Z[#<_hal[probe.setterheight]>]                            
+     G10 L1 P#<tool> Z[#<touch_result> - #<_hal[probe.setterheight]> + #<_hal[probe.blockheight]>]                             
+o600 else
+     (MSG,TODO STUDY MORE FOR ALL G10)
+     ;G10 L10 P#<tool> Z[#<touch_result> - #<_hal[probe.setterheight]>]                               
+     G10 L1 P#<tool> Z[#<touch_result> - #<_hal[probe.setterheight]> + #<_hal[probe.blockheight]>]  
+o600 endif
+
 G43
+(MSG,TODO what about G41 G42 can be saved at macro start and restored at end : see "lathemacro")
 
 ;G10 L1 P#<tool> Z#<touch_result>
-;G10 L2 P0 Z[#<workpieceheight> + #<probeheight> + #<touch_result>]
+;G10 L2 P0 Z[#<workpieceheight> + #<setterheight> + #<touch_result>]
+
+
+o<psng_hook_end> call
 
 ; signal success be returning a value > 0:
 o<psng_manual_change> endsub [1]

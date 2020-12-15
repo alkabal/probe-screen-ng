@@ -118,7 +118,7 @@ class ProbeScreenClass(object):
     def add_history(
         self,
         tool_tip_text,
-        s="",
+        s=0.,
         xm=0.,
         xc=0.,
         xp=0.,
@@ -173,6 +173,7 @@ class ProbeScreenClass(object):
                 "halcmd getp gmoccapy.error ", shell=True, stdout=PIPE
             ).stdout.read()
         if error:
+        # only in manual mode we will allow jogging the axis at this development state
             self.command.mode(linuxcnc.MODE_MANUAL)
             self.command.wait_complete()
             kind, text = error
@@ -217,7 +218,7 @@ class ProbeScreenClass(object):
                 xc = self.spbtn_offs_x.get_value()
                 yc = self.spbtn_offs_y.get_value()
             else:
-                self.stat.poll()
+                self.stat.poll()                                                           # well it is really needed here
                 xc = (
                     self.stat.position[0]
                     - self.stat.g5x_offset[0]
@@ -245,7 +246,7 @@ class ProbeScreenClass(object):
         return coord
 
     def probed_position_with_offsets(self):
-        self.stat.poll()
+        self.stat.poll()                                                                   # well it is really needed here
         probed_position = list(self.stat.probed_position)
         coord = list(self.stat.probed_position)
         g5x_offset = list(self.stat.g5x_offset)
@@ -281,29 +282,29 @@ class ProbeScreenClass(object):
         self.hal_led_auto_rott.hal_pin.set(gtkcheckbutton.get_active())
         self.prefs.putpref("chk_auto_rott", gtkcheckbutton.get_active(), bool)
 
-    def set_zerro(self, s="XYZ", x=0., y=0., z=0.):
-        if self.chk_set_zero.get_active():
+    def set_zerro(self, c="XYZ", x=0., y=0., z=0.):
+        if self.chk_set_zero.get_active():                                                 # need to study more initally i have think this is used only for angle offset
             #  Z current position
-            self.stat.poll()
+            self.stat.poll()                                                               # well it is really needed here
             tmpz = (
                 self.stat.position[2]
                 - self.stat.g5x_offset[2]
                 - self.stat.g92_offset[2]
                 - self.stat.tool_offset[2]
             )
-            c = "G10 L20 P0"
-            s = s.upper()
-            if "X" in s:
+            s = "G10 L20 P0"                                                               # s and c swapped for convention with other self.gcode(s)
+            c = c.upper()
+            if "X" in c:
                 x += self.spbtn_offs_x.get_value()
-                c += " X%s" % x
-            if "Y" in s:
+                s += " X%c" % x
+            if "Y" in c:
                 y += self.spbtn_offs_y.get_value()
-                c += " Y%s" % y
-            if "Z" in s:
+                s += " Y%c" % y
+            if "Z" in c:
                 tmpz = tmpz - z + self.spbtn_offs_z.get_value()
-                c += " Z%s" % tmpz
-            self.gcode(c)
-            time.sleep(1)
+                s += " Z%c" % tmpz
+        if self.gcode(s) == -1:
+            return
 
     def rotate_coord_system(self, a=0.):
         self.spbtn_offs_angle.set_value(a)
@@ -314,14 +315,14 @@ class ProbeScreenClass(object):
                 s += " X%s" % self.spbtn_offs_x.get_value()
                 s += " Y%s" % self.spbtn_offs_y.get_value()
             else:
-                self.stat.poll()
+                self.stat.poll()                                                           # well it is really needed here
                 x = self.stat.position[0]
                 y = self.stat.position[1]
                 s += " X%s" % x
                 s += " Y%s" % y
             s += " R%s" % a
-            self.gcode(s)
-            time.sleep(1)
+        if self.gcode(s) == -1:
+            return
 
     # -----------
     # JOG BUTTONS
@@ -631,18 +632,20 @@ class ProbeScreenClass(object):
                 return -1
         return 0
 
+########### REMOVED DOES NOT WORK WITH HOOK
     def ocode(self, s, data=None):
-        self.command.mdi(s)
+        self.command.mdi(s)                                                     
         self.stat.poll()
         while self.stat.interp_state != linuxcnc.INTERP_IDLE:
-            if self.error_poll() == -1:
-                return -1
+#            if self.error_poll() == -1:
+#                return -1
             self.command.wait_complete()
             self.stat.poll()
         self.command.wait_complete()
         if self.error_poll() == -1:
             return -1
         return 0
+############ REMOVED DOES NOT WORK WITH HOOK
 
     def z_clearance_down(self, data=None):
         # move Z - z_clearance
@@ -698,27 +701,30 @@ class ProbeScreenClass(object):
         self.prefs.putpref("ps_offs_x", self.spbtn_offs_x.get_value(), float)
         self.command.mode(linuxcnc.MODE_MDI)
         self.command.wait_complete()
-        self.command.mdi("G10 L20 P0 X%f" % self.spbtn_offs_x.get_value())
+        s = "G10 L20 P0 X%f" % self.spbtn_offs_x.get_value()
+        if self.gcode(s) == -1:
+            return
         self.vcp_action_reload.emit("activate")
-        time.sleep(1)
-
+            
     @restore_mode
     def on_btn_set_y_released(self, gtkbutton, data=None):
         self.prefs.putpref("ps_offs_y", self.spbtn_offs_y.get_value(), float)
         self.command.mode(linuxcnc.MODE_MDI)
         self.command.wait_complete()
-        self.command.mdi("G10 L20 P0 Y%f" % self.spbtn_offs_y.get_value())
+        s = "G10 L20 P0 Y%f" % self.spbtn_offs_y.get_value()
+        if self.gcode(s) == -1:
+            return
         self.vcp_action_reload.emit("activate")
-        time.sleep(1)
 
     @restore_mode
     def on_btn_set_z_released(self, gtkbutton, data=None):
         self.prefs.putpref("ps_offs_z", self.spbtn_offs_z.get_value(), float)
         self.command.mode(linuxcnc.MODE_MDI)
         self.command.wait_complete()
-        self.command.mdi("G10 L20 P0 Z%f" % self.spbtn_offs_z.get_value())
+        s = "G10 L20 P0 Z%f" % self.spbtn_offs_z.get_value()
+        if self.gcode(s) == -1:
+            return
         self.vcp_action_reload.emit("activate")
-        time.sleep(1)
 
     @restore_mode
     def on_btn_set_angle_released(self, gtkbutton, data=None):
@@ -738,27 +744,12 @@ class ProbeScreenClass(object):
             s += " Y%.4f" % y
         s += " R%.4f" % self.spbtn_offs_angle.get_value()
         print("s=", s)
-        self.gcode(s)
-        time.sleep(1)
+        if self.gcode(s) == -1:
+            return
 
     # --------------  Command buttons -----------------
     #               Measurement outside
     # -------------------------------------------------
-    # Down
-    @restore_mode
-    def on_down_released(self, gtkbutton, data=None):
-        self.command.mode(linuxcnc.MODE_MDI)
-        self.command.wait_complete()
-        # Start down.ngc
-        if self.ocode("o<psng_down> call") == -1:
-            return
-        a = self.probed_position_with_offsets()
-        self.lb_probe_z.set_text("%.4f" % float(a[2]))
-        self.add_history(
-            gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, a[2], 0, 0
-        )
-        self.set_zerro("Z", 0, 0, a[2])
-
     # X+
     @restore_mode
     def on_xp_released(self, gtkbutton, data=None):
@@ -774,7 +765,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xplus.ngc
+        # Start psng_xplus.ngc
         if self.ocode("o<psng_xplus> call") == -1:
             return
         a = self.probed_position_with_offsets()
@@ -820,7 +811,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start yplus.ngc
+        # Start psng_yplus.ngc
         if self.ocode("o<psng_yplus> call") == -1:
             return
         a = self.probed_position_with_offsets()
@@ -866,7 +857,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xminus.ngc
+        # Start psng_xminus.ngc
         if self.ocode("o<psng_xminus> call") == -1:
             return
         a = self.probed_position_with_offsets()
@@ -912,7 +903,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start yminus.ngc
+        # Start psng_yminus.ngc
         if self.ocode("o<psng_yminus> call") == -1:
             return
         a = self.probed_position_with_offsets()
@@ -961,7 +952,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xplus.ngc
+        # Start psng_xplus.ngc
         if self.ocode("o<psng_xplus> call") == -1:
             return
         # show X result
@@ -985,7 +976,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start yplus.ngc
+        # Start psng_yplus.ngc
         if self.ocode("o<psng_yplus> call") == -1:
             return
         # show Y result
@@ -1033,7 +1024,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xplus.ngc
+        # Start psng_xplus.ngc
         if self.ocode("o<psng_xplus> call") == -1:
             return
         # show X result
@@ -1057,7 +1048,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start yminus.ngc
+        # Start psng_yminus.ngc
         if self.ocode("o<psng_yminus> call") == -1:
             return
         # show Y result
@@ -1104,7 +1095,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xminus.ngc
+        # Start psng_xminus.ngc
         if self.ocode("o<psng_xminus> call") == -1:
             return
         # show X result
@@ -1128,7 +1119,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start yplus.ngc
+        # Start psng_yplus.ngc
         if self.ocode("o<psng_yplus> call") == -1:
             return
         # show Y result
@@ -1176,7 +1167,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xminus.ngc
+        # Start psng_xminus.ngc
         if self.ocode("o<psng_xminus> call") == -1:
             return
         # show X result
@@ -1200,7 +1191,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start yminus.ngc
+        # Start psng_yminus.ngc
         if self.ocode("o<psng_yminus> call") == -1:
             return
         # show Y result
@@ -1247,7 +1238,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xplus.ngc
+        # Start psng_xplus.ngc
         if self.ocode("o<psng_xplus> call") == -1:
             return
         # show X result
@@ -1271,7 +1262,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xminus.ngc
+        # Start psng_xminus.ngc
 
         if self.ocode("o<psng_xminus> call") == -1:
             return
@@ -1286,7 +1277,6 @@ class ProbeScreenClass(object):
         if self.z_clearance_up() == -1:
             return
         # distance to the new center of X from current position
-        #        self.stat.poll()
         #        to_new_xc=self.stat.position[0]-self.stat.g5x_offset[0] - self.stat.g92_offset[0] - self.stat.tool_offset[0] - xcres
         s = "G1 X%f" % xcres
         if self.gcode(s) == -1:
@@ -1304,7 +1294,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start yplus.ngc
+        # Start psng_yplus.ngc
         if self.ocode("o<psng_yplus> call") == -1:
             return
         # show Y result
@@ -1328,7 +1318,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xminus.ngc
+        # Start psng_yminus.ngc
         if self.ocode("o<psng_yminus> call") == -1:
             return
         # show Y result
@@ -1387,7 +1377,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xplus.ngc
+        # Start psng_xplus.ngc
         if self.ocode("o<psng_xplus> call") == -1:
             return
         # show X result
@@ -1408,7 +1398,7 @@ class ProbeScreenClass(object):
         )
         if self.gcode(s) == -1:
             return
-        # Start yplus.ngc
+        # Start psng_yplus.ngc
         if self.ocode("o<psng_yplus> call") == -1:
             return
         # show Y result
@@ -1456,7 +1446,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xplus.ngc
+        # Start psng_xplus.ngc
         if self.ocode("o<psng_xplus> call") == -1:
             return
         # show X result
@@ -1477,7 +1467,7 @@ class ProbeScreenClass(object):
         )
         if self.gcode(s) == -1:
             return
-        # Start yminus.ngc
+        # Start psng_yminus.ngc
         if self.ocode("o<psng_yminus> call") == -1:
             return
         # show Y result
@@ -1525,7 +1515,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xminus.ngc
+        # Start psng_xminus.ngc
         if self.ocode("o<psng_xminus> call") == -1:
             return
         # show X result
@@ -1546,7 +1536,7 @@ class ProbeScreenClass(object):
         )
         if self.gcode(s) == -1:
             return
-        # Start yplus.ngc
+        # Start psng_yplus.ngc
         if self.ocode("o<psng_yplus> call") == -1:
             return
 
@@ -1595,7 +1585,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xminus.ngc
+        # Start psng_xminus.ngc
         if self.ocode("o<psng_xminus> call") == -1:
             return
         # show X result
@@ -1616,7 +1606,7 @@ class ProbeScreenClass(object):
         )
         if self.gcode(s) == -1:
             return
-        # Start yminus.ngc
+        # Start psng_yminus.ngc
         if self.ocode("o<psng_yminus> call") == -1:
             return
         # show Y result
@@ -1666,7 +1656,7 @@ class ProbeScreenClass(object):
         )
         if self.gcode(s) == -1:
             return
-        # Start xminus.ngc
+        # Start psng_xminus.ngc
         if self.ocode("o<psng_xminus> call") == -1:
             return
         # show X result
@@ -1685,7 +1675,7 @@ class ProbeScreenClass(object):
         )
         if self.gcode(s) == -1:
             return
-        # Start xplus.ngc
+        # Start psng_xplus.ngc
         if self.ocode("o<psng_xplus> call") == -1:
             return
         # show X result
@@ -1712,7 +1702,7 @@ class ProbeScreenClass(object):
         )
         if self.gcode(s) == -1:
             return
-        # Start yminus.ngc
+        # Start psng_yminus.ngc
         if self.ocode("o<psng_yminus> call") == -1:
             return
         # show Y result
@@ -1731,7 +1721,7 @@ class ProbeScreenClass(object):
         )
         if self.gcode(s) == -1:
             return
-        # Start yplus.ngc
+        # Start psng_yplus.ngc
         if self.ocode("o<psng_yplus> call") == -1:
             return
         # show Y result
@@ -1764,7 +1754,8 @@ class ProbeScreenClass(object):
         if self.gcode(s) == -1:
             return
         # move Z to start point
-        self.z_clearance_up()
+        if self.z_clearance_up() == -1:
+            return
         self.set_zerro("XY")
 
     # --------------  Command buttons -----------------
@@ -1776,7 +1767,7 @@ class ProbeScreenClass(object):
     # Y+Y+
     @restore_mode
     def on_angle_yp_released(self, gtkbutton, data=None):
-        self.stat.poll()
+        self.stat.poll()                                                                   # well it is really needed here 
         xstart = (
             self.stat.position[0]
             - self.stat.g5x_offset[0]
@@ -1795,7 +1786,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start yplus.ngc
+        # Start psng_yplus.ngc
         if self.ocode("o<psng_yplus> call") == -1:
             return
         # show Y result
@@ -1815,7 +1806,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start yplus.ngc
+        # Start psng_yplus.ngc
         if self.ocode("o<psng_yplus> call") == -1:
             return
         # show Y result
@@ -1853,7 +1844,7 @@ class ProbeScreenClass(object):
     # Y-Y-
     @restore_mode
     def on_angle_ym_released(self, gtkbutton, data=None):
-        self.stat.poll()
+        self.stat.poll()                                                                   # well it is really needed here
         xstart = (
             self.stat.position[0]
             - self.stat.g5x_offset[0]
@@ -1872,7 +1863,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start yminus.ngc
+        # Start psng_yminus.ngc
         if self.ocode("o<psng_yminus> call") == -1:
             return
         # show Y result
@@ -1892,7 +1883,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start yminus.ngc
+        # Start psng_yminus.ngc
         if self.ocode("o<psng_yminus> call") == -1:
             return
         # show Y result
@@ -1929,7 +1920,7 @@ class ProbeScreenClass(object):
     # X+X+
     @restore_mode
     def on_angle_xp_released(self, gtkbutton, data=None):
-        self.stat.poll()
+        self.stat.poll()                                                                   # well it is really needed here
         ystart = (
             self.stat.position[1]
             - self.stat.g5x_offset[1]
@@ -1948,7 +1939,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xplus.ngc
+        # Start psng_xplus.ngc
         if self.ocode("o<psng_xplus> call") == -1:
             return
         # show X result
@@ -1968,7 +1959,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xplus.ngc
+        # Start psng_xplus.ngc
         if self.ocode("o<psng_xplus> call") == -1:
             return
         # show X result
@@ -2005,7 +1996,7 @@ class ProbeScreenClass(object):
     # X-X-
     @restore_mode
     def on_angle_xm_released(self, gtkbutton, data=None):
-        self.stat.poll()
+        self.stat.poll()                                                                   # well it is really needed here
         ystart = (
             self.stat.position[1]
             - self.stat.g5x_offset[1]
@@ -2024,7 +2015,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xminus.ngc
+        # Start psng_xminus.ngc
         if self.ocode("o<psng_xminus> call") == -1:
             return
         # show X result
@@ -2044,7 +2035,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xminus.ngc
+        # Start psng_xminus.ngc
         if self.ocode("o<psng_xminus> call") == -1:
             return
         # show X result
@@ -2078,6 +2069,12 @@ class ProbeScreenClass(object):
             return
         self.rotate_coord_system(alfa)
 
+
+    # --------------  Command buttons -----------------
+    #               Measurement LENGHT
+    # -------------------------------------------------
+    # LENGHT
+    # Move Probe manual under corner 2-3 mm
     # Lx OUT
     @restore_mode
     def on_lx_out_released(self, gtkbutton, data=None):
@@ -2093,7 +2090,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xplus.ngc
+        # Start psng_xplus.ngc
         if self.ocode("o<psng_xplus> call") == -1:
             return
         # show X result
@@ -2122,8 +2119,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xminus.ngc
-
+        # Start psng_xminus.ngc
         if self.ocode("o<psng_xminus> call") == -1:
             return
         # show X result
@@ -2174,7 +2170,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start yplus.ngc
+        # Start psng_yplus.ngc
         if self.ocode("o<psng_yplus> call") == -1:
             return
         # show Y result
@@ -2203,7 +2199,7 @@ class ProbeScreenClass(object):
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xminus.ngc
+        # Start psng_yminus.ngc
         if self.ocode("o<psng_yminus> call") == -1:
             return
         # show Y result
@@ -2256,7 +2252,7 @@ class ProbeScreenClass(object):
         )
         if self.gcode(s) == -1:
             return
-        # Start xminus.ngc
+        # Start psng_xminus.ngc
         if self.ocode("o<psng_xminus> call") == -1:
             return
         # show X result
@@ -2275,7 +2271,7 @@ class ProbeScreenClass(object):
         )
         if self.gcode(s) == -1:
             return
-        # Start xplus.ngc
+        # Start psng_xplus.ngc
         if self.ocode("o<psng_xplus> call") == -1:
             return
         # show X result
@@ -2305,7 +2301,8 @@ class ProbeScreenClass(object):
         if self.gcode(s) == -1:
             return
         # move Z to start point
-        self.z_clearance_up()
+        if self.z_clearance_up() == -1:
+            return
         self.set_zerro("XY")
 
     # Ly IN
@@ -2326,7 +2323,7 @@ class ProbeScreenClass(object):
         )
         if self.gcode(s) == -1:
             return
-        # Start yminus.ngc
+        # Start psng_yminus.ngc
         if self.ocode("o<psng_yminus> call") == -1:
             return
         # show Y result
@@ -2345,7 +2342,7 @@ class ProbeScreenClass(object):
         )
         if self.gcode(s) == -1:
             return
-        # Start yplus.ngc
+        # Start psng_yplus.ngc
         if self.ocode("o<psng_yplus> call") == -1:
             return
         # show Y result
@@ -2376,34 +2373,68 @@ class ProbeScreenClass(object):
         if self.gcode(s) == -1:
             return
         # move Z to start point
-        self.z_clearance_up()
+        if self.z_clearance_up() == -1:
+            return
         self.set_zerro("XY")
 
-    # TOOL DIA
+
+    # TOOL TABLE CREATOR
+    # TOOL DIA : use X only for find tool setter center and use only after that more accurate Y center value for determinig tool diameter
+    # + TOOL lenght Z and the whole sequence is saved as tooltable for later use
+    # IMH this sequence need to be first with probe : first execute psng_down for determinate the table height with toolsetter and think about updating tool setter diameter or probe diameter at same time
+    # IMH this sequence need to be done secondly with other tool using button Dia only off course
+    # ALL OF THIS NEED TO EDIT TOOL TABLE MANUALLY FOR ADD NEW TOOL AND KNOW DIAMETER
+    # i think about saving setterheight using probedtable
     @restore_mode
     def on_tool_dia_released(self, gtkbutton, data=None):
+        tooltable = self.inifile.find("EMCIO", "TOOL_TABLE")
+        if not tooltable:
+            print(_("**** auto_tool_measurement ERROR ****"))
+            print(
+                _(
+                    "**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****"
+                )
+            )
+            sys.exit()
+        print("tool-number = %f" % self.halcomp["toolchange-number"])
+        tooldiameter = self.halcomp["toolchange-diameter"]
+        print("tooldiameter from tooltable =", tooldiameter)    
         self.command.mode(linuxcnc.MODE_MDI)
         self.command.wait_complete()
-        # move XY to Tool Setter point
-        # Start gotots.ngc
         if self.ocode("o<psng_gotots> call") == -1:
+            return        
+        if self.halcomp["toolchange-number"] == 0:
+            print("Please mount a tool and ask M6Tx and check if exist with a correct diameter in the tooltable")
             return
-        # move X - edge_lenght- xy_clearance
+        # show Z result
+        a = self.probed_position_with_offsets()
+        zres = float(a[2])
+        print("zres = ",zres)
+
+####################################################################################################
+####################################################################################################
+        ## start spindle if you use reverse spindle for tool diameter measuring
+        #s = "M4 S%s" % (self.inifile.find("TOOLSENSOR", "REV_ROTATION_SPEED"))            # does not wrok because the rest is not executed but need to test again
+        #if self.gcode(s) == -1:
+        #    return
+####################################################################################################
+####################################################################################################
+
+
+        # move X +
         s = """G91
         G1 X-%f
-        G90""" % (
-            0.5 * self.tsdiam + self.spbtn1_xy_clearance.get_value()
-        )
+        G90""" % (0.5 * (self.tsdiam + tooldiameter) + self.spbtn1_xy_clearance.get_value())
         if self.gcode(s) == -1:
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xplus.ngc
+        # Start psng_xplus.ngc
         if self.ocode("o<psng_xplus> call") == -1:
             return
         # show X result
         a = self.probed_position_with_offsets()
-        xpres = float(a[0]) + 0.5 * self.spbtn1_probe_diam.get_value()
+        xpres = float(a[0]) + 0.5 * self.tsdiam
         #        self.lb_probe_xp.set_text( "%.4f" % xpres )
         # move Z to start point up
         if self.z_clearance_up() == -1:
@@ -2413,24 +2444,21 @@ class ProbeScreenClass(object):
         if self.gcode(s) == -1:
             return
 
-        # move X + tsdiam +  xy_clearance
-        aa = self.tsdiam + self.spbtn1_xy_clearance.get_value()
+        # move X -
         s = """G91
         G1 X%f
-        G90""" % (
-            aa
-        )
+        G90""" % ((0.5*self.tsdiam) + tooldiameter + self.spbtn1_xy_clearance.get_value())
         if self.gcode(s) == -1:
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xminus.ngc
-
+        # Start psng_xminus.ngc
         if self.ocode("o<psng_xminus> call") == -1:
             return
         # show X result
         a = self.probed_position_with_offsets()
-        xmres = float(a[0]) - 0.5 * self.spbtn1_probe_diam.get_value()
+        xmres = float(a[0]) - 0.5 * self.tsdiam
+        print("xmres = ",xmres)
         #        self.lb_probe_xm.set_text( "%.4f" % xmres )
         self.lenght_x()
         xcres = 0.5 * (xpres + xmres)
@@ -2440,27 +2468,24 @@ class ProbeScreenClass(object):
             return
         # go to the new center of X
         s = "G1 X%f" % xcres
+        print("xcenter = ",xcres)
         if self.gcode(s) == -1:
             return
 
-        # move Y - tsdiam/2 - xy_clearance
-        a = 0.5 * self.tsdiam + self.spbtn1_xy_clearance.get_value()
-        s = (
-            """G91
+        # move Y +
+        s = """G91
         G1 Y-%f
-        G90"""
-            % a
-        )
+        G90""" % (0.5 * (self.tsdiam + tooldiameter) + self.spbtn1_xy_clearance.get_value())
         if self.gcode(s) == -1:
             return
         if self.z_clearance_down() == -1:
             return
-        # Start yplus.ngc
+        # Start psng_yplus.ngc
         if self.ocode("o<psng_yplus> call") == -1:
             return
         # show Y result
         a = self.probed_position_with_offsets()
-        ypres = float(a[1]) + 0.5 * self.spbtn1_probe_diam.get_value()
+        ypres = float(a[1]) + 0.5 * self.tsdiam
         #        self.lb_probe_yp.set_text( "%.4f" % ypres )
         # move Z to start point up
         if self.z_clearance_up() == -1:
@@ -2470,36 +2495,34 @@ class ProbeScreenClass(object):
         if self.gcode(s) == -1:
             return
 
-        # move Y + tsdiam +  xy_clearance
-        aa = self.tsdiam + self.spbtn1_xy_clearance.get_value()
+        # move Y -
         s = """G91
         G1 Y%f
-        G90""" % (
-            aa
-        )
+        G90""" % ((0.5*self.tsdiam) + tooldiameter + self.spbtn1_xy_clearance.get_value())
         if self.gcode(s) == -1:
             return
         if self.z_clearance_down() == -1:
             return
-        # Start xminus.ngc
+        # Start psng_yminus.ngc
         if self.ocode("o<psng_yminus> call") == -1:
             return
         # show Y result
         a = self.probed_position_with_offsets()
-        ymres = float(a[1]) - 0.5 * self.spbtn1_probe_diam.get_value()
+        ymres = float(a[1]) - 0.5 * self.tsdiam
         #        self.lb_probe_ym.set_text( "%.4f" % ymres )
         self.lenght_y()
-        # find, show and move to finded  point
+        # find, show and move to finded point
         ycres = 0.5 * (ypres + ymres)
         self.lb_probe_yc.set_text("%.4f" % ycres)
-        diam = self.spbtn1_probe_diam.get_value() + (ymres - ypres - self.tsdiam)
-
+        diam = ymres - ypres
+        print("old tooldiameter from tooltable =", tooldiameter)
+        print("new tooldiameter measured set in tootlable =", diam)
         self.lb_probe_d.set_text("%.4f" % diam)
         # move Z to start point up
         if self.z_clearance_up() == -1:
             return
-        self.stat.poll()
-        tmpz = self.stat.position[2] - 4
+        self.stat.poll()                                                                   # well it is really needed here
+        tmpz = self.stat.position[2] - self.halcomp["ps_z_clearance"]                      # macro use ps_z_clearance*0.7 for allow tool to be en contact with setter pad for diameter measure
         self.add_history(
             gtkbutton.get_tooltip_text(),
             "XcYcZD",
@@ -2515,8 +2538,17 @@ class ProbeScreenClass(object):
             diam,
             0,
         )
-        # move to finded  point
+        # move to new Y center point
         s = "G1 Y%f" % ycres
+        if self.gcode(s) == -1:
+            return
+        # stop spindle if you use reverse spindle for tool diameter measuring
+        s = "M5"
+        if self.gcode(s) == -1:
+            return
+                                                                                           # need to add if self.halcomp["toolchange-number"] =  do other things like s = "G10 L20 P0 Z%f" % (self.halcomp["setterheight"])
+        #s = "G10 L1 P%f R%f" % (self.halcomp["toolchange-number"] ,(0.5*diam)+self.tsoffset)            # Another G10 to check
+        s = "G10 L1 P%f Z%f R%f" % (self.halcomp["toolchange-number"] ,zres ,(0.5*diam)+self.tsoffset)   #0.14 seem to be needed for my setter adding the necessary distance for radial triggering probe (0.07mm each direction)
         if self.gcode(s) == -1:
             return
 
@@ -2544,16 +2576,15 @@ class ProbeScreenClass(object):
         return responce == gtk.RESPONSE_OK
 
         # Here we create a manual tool change dialog
-
     def on_tool_change(self, gtkbutton, data=None):
         change = self.halcomp["toolchange-change"]
-        toolnumber = self.halcomp["toolchange-number"]
-        print("toolnumber =", toolnumber, change)
+        toolprepnumber = self.halcomp["toolchange-prep-number"]
+        print("tool_prep_number =", toolprepnumber, change)
         if change:
-            # if toolnumber = 0 we will get an error because we will not be able to get
+            # if toolprepnumber = 0 we will get an error because we will not be able to get
             # any tooldescription, so we avoid that case
-            if toolnumber == 0:
-                message = _("Please remove the mounted tool and press OK when done")
+            if toolprepnumber == 0:
+                message = _("Please remove the mounted tool and press OK when done") 
             else:
                 tooltable = self.inifile.find("EMCIO", "TOOL_TABLE")
                 if not tooltable:
@@ -2567,10 +2598,10 @@ class ProbeScreenClass(object):
                 CONFIGPATH = os.environ["CONFIG_DIR"]
                 toolfile = os.path.join(CONFIGPATH, tooltable)
                 self.tooledit1.set_filename(toolfile)
-                tooldescr = self.tooledit1.get_toolinfo(toolnumber)[16]
+                tooldescr = self.tooledit1.get_toolinfo(toolprepnumber)[16]
                 message = _(
                     "Please change to tool\n\n# {0:d}     {1}\n\n then click OK."
-                ).format(toolnumber, tooldescr)
+                ).format(toolprepnumber, tooldescr)
             result = self.warning_dialog(message, title=_("Manual Toolchange"))
             if result:
                 self.halcomp["toolchange-changed"] = True
@@ -2578,10 +2609,10 @@ class ProbeScreenClass(object):
                 print(
                     "toolchange abort",
                     self.stat.tool_in_spindle,
-                    self.halcomp["toolchange-number"],
+                    self.halcomp["toolchange-prep-number"],
                 )
                 self.command.abort()
-                self.halcomp["toolchange-number"] = self.stat.tool_in_spindle
+                self.halcomp["toolchange-prep-number"] = self.stat.tool_in_spindle         # this is cancel toolchange so restore the actual tool number
                 self.halcomp["toolchange-change"] = False
                 self.halcomp["toolchange-changed"] = True
                 self.messg = _("Tool Change has been aborted!\n")
@@ -2596,12 +2627,25 @@ class ProbeScreenClass(object):
         zpos = float(self.inifile.find("TOOLSENSOR", "Z"))
         maxprobe = float(self.inifile.find("TOOLSENSOR", "MAXPROBE"))
         tsdiam = float(self.inifile.find("TOOLSENSOR", "TS_DIAMETER"))
+        tsoffset = float(self.inifile.find("TOOLSENSOR", "TS_OFFSET"))
         revrott = float(self.inifile.find("TOOLSENSOR", "REV_ROTATION_SPEED"))
-        return xpos, ypos, zpos, maxprobe, tsdiam, revrott
-
+        return xpos, ypos, zpos, maxprobe, tsdiam ,tsoffset, revrott
+       
+    @restore_mode
     def on_spbtn_probe_height_value_changed(self, gtkspinbutton, data=None):
-        self.halcomp["probeheight"] = gtkspinbutton.get_value()
-        self.prefs.putpref("probeheight", gtkspinbutton.get_value(), float)
+        setterheight = gtkspinbutton.get_value()
+        if setterheight != False:
+            self.halcomp["setterheight"] = setterheight
+            self.prefs.putpref("setterheight", setterheight, float)
+        else:
+            print(_("Conversion error in btn_probe_height Value from pref restored"))
+            self._add_alarm_entry(_("Offset conversion error because off wrong entry"))
+            self.warning_dialog(
+                self,
+                _("Conversion error in btn_probe_height!"),
+                _("Please enter only numerical values\nValues have not been applied"),
+            )
+        self.vcp_action_reload.emit("activate")
         c = "TS Height = " + "%.4f" % gtkspinbutton.get_value()
         i = self.buffer.get_end_iter()
         if i.get_line() > 1000:
@@ -2615,20 +2659,22 @@ class ProbeScreenClass(object):
         blockheight = gtkspinbutton.get_value()
         if blockheight != False:
             self.halcomp["blockheight"] = blockheight
-            self.halcomp["probeheight"] = self.spbtn_probe_height.get_value()
+            self.prefs.putpref("blockheight", blockheight, float)
         else:
-            self.prefs.putpref("blockheight", 0.0, float)
-            print(_("Conversion error in btn_block_height"))
+            print(_("Conversion error in btn_block_height Value from pref restored"))
             self._add_alarm_entry(_("Offset conversion error because off wrong entry"))
             self.warning_dialog(
                 self,
                 _("Conversion error in btn_block_height!"),
                 _("Please enter only numerical values\nValues have not been applied"),
             )
-        # set koordinate system to new origin
+        # set coordinate system to new origin
         self.command.mode(linuxcnc.MODE_MDI)
         self.command.wait_complete()
-        self.command.mdi("G10 L2 P0 Z%s" % blockheight)
+        s = "G10 L2 P0 Z%s" % blockheight                                                  # Another G10 to check
+        #s = "G10 L20 P0 Z%s" % blockheight
+        if self.gcode(s) == -1:
+            return        
         self.vcp_action_reload.emit("activate")
         c = "Workpiece Height = " + "%.4f" % gtkspinbutton.get_value()
         i = self.buffer.get_end_iter()
@@ -2638,53 +2684,84 @@ class ProbeScreenClass(object):
         i.set_line(0)
         self.buffer.insert(i, "%s \n" % c)
 
+
+    # Down probe to table for measuring it and use for other calc and can set G10 L20 Z0 if you tick auto zero     # need to think more about that
+    @restore_mode
+    def on_down_released(self, gtkbutton, data=None):
+        self.command.mode(linuxcnc.MODE_MDI)
+        self.command.wait_complete()
+        if self.ocode("o<psng_down> call") == -1:
+            return        
+        a = self.probed_position_with_offsets()
+        self.halcomp["probedtable"] = float(self.stat.probed_position[2])
+        print("probeposwoffset =", self.probed_position_with_offsets())
+        print("probeposg53 =", self.stat.probed_position)
+        print("probedtable =", self.halcomp["probedtable"])
+        self.lb_probe_z.set_text("%.4f" % float(a[2]))
+        self.add_history(
+            gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, a[2], 0, 0
+        )
+        self.set_zerro("Z", 0, 0, a[2])                                                   # Alkabal initialy removed and put inside the macro G10 L20 P0 Z0 but this work if you tick auto zero...
+
+    # Down probe to tool setter for measuring it vs table probing result
     @restore_mode
     def clicked_btn_probe_tool_setter(self, gtkbutton, data=None):
-        # Start probe_down.ngc
+        # Start psng_probe_down.ngc
         self.command.mode(linuxcnc.MODE_MDI)
         self.command.wait_complete()
-        self.command.mdi("o<psng_probe_down> call")
-        self.stat.poll()
-        while self.stat.interp_state != linuxcnc.INTERP_IDLE:
-            self.command.wait_complete()
-            self.stat.poll()
-        self.command.wait_complete()
+        if self.ocode("o<psng_probe_down> call") == -1:
+            return
         a = self.stat.probed_position
-        self.spbtn_probe_height.set_value(float(a[2]))
+        print("setterheight var a =", float(a[2]))
+        print("probedtable =", self.halcomp["probedtable"])
+        self.spbtn_probe_height.set_value(float(a[2]) - self.halcomp["probedtable"])
         self.add_history(
             gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, a[2], 0, 0
         )
-
+        self.set_zerro("Z", 0, 0, self.spbtn_probe_height.get_value())                     # Alkabal added this because if we know the table position and the setter position is probed you can set correct Z0 directly next time
+        
+    # Down drill bit to tool setter for measuring it vs table probing result
+    @restore_mode
+    def clicked_btn_drill_tool_setter(self, gtkbutton, data=None):
+        # Start psng_drill_down.ngc
+        self.command.mode(linuxcnc.MODE_MDI)
+        self.command.wait_complete()
+        if self.ocode("o<psng_drill_down> call") == -1:
+            return
+        a = self.stat.probed_position
+        print("setterheight var a =", float(a[2]))
+        print("probedtable =", self.halcomp["probedtable"])
+        self.add_history(
+            gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, a[2], 0, 0
+        )
+        
+    # Down probe to workpiece for measuring it vs table probing result                     # possible to think if probedtable = 0 use G10 L20 Z0 or Z#blockheight
     @restore_mode
     def clicked_btn_probe_workpiece(self, gtkbutton, data=None):
-        # Start probe_down.ngc
+        # Start psng_block_down.ngc
         self.command.mode(linuxcnc.MODE_MDI)
         self.command.wait_complete()
-        self.command.mdi("o<psng_block_down> call")
-        self.stat.poll()
-        while self.stat.interp_state != linuxcnc.INTERP_IDLE:
-            self.command.wait_complete()
-            self.stat.poll()
-        self.command.wait_complete()
+        if self.ocode("o<psng_block_down> call") == -1:
+            return
         a = self.stat.probed_position
-        self.spbtn_block_height.set_value(float(a[2]))
+        print("workpiecesheight var a =", float(a[2]))
+        print("probedtable =", self.halcomp["probedtable"])
+        self.spbtn_block_height.set_value(float(a[2]) - self.halcomp["probedtable"])       # NEED THINK ABOUT IF self.halcomp["probedtable"] <=> 0 use self.halcomp["probedtable"] - float(a[2])
         self.add_history(
             gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, a[2], 0, 0
         )
 
+    # Tickbox from gui for enable disable remap
     def on_chk_use_tool_measurement_toggled(self, gtkcheckbutton, data=None):
         if gtkcheckbutton.get_active():
             self.frm_probe_pos.set_sensitive(True)
             self.halcomp["use_toolmeasurement"] = True
-            self.halcomp["probeheight"] = self.spbtn_probe_height.get_value()
-            self.halcomp["blockheight"] = self.spbtn_block_height.get_value()
         else:
             self.frm_probe_pos.set_sensitive(False)
             self.halcomp["use_toolmeasurement"] = False
-            self.halcomp["probeheight"] = 0.0
-            self.halcomp["blockheight"] = 0.0
         self.prefs.putpref("use_toolmeasurement", gtkcheckbutton.get_active(), bool)
         self.hal_led_set_m6.hal_pin.set(gtkcheckbutton.get_active())
+
 
     # --------------------------
     #
@@ -2868,16 +2945,26 @@ class ProbeScreenClass(object):
         self.change_text = builder.get_object("change-text")
         self.halcomp.newpin("number", hal.HAL_FLOAT, hal.HAL_IN)
         # make the pins for tool measurement
-        self.halcomp.newpin("probeheight", hal.HAL_FLOAT, hal.HAL_OUT)
+        self.halcomp.newpin("probedtable", hal.HAL_FLOAT, hal.HAL_OUT)
+        self.halcomp.newpin("setterheight", hal.HAL_FLOAT, hal.HAL_OUT)
         self.halcomp.newpin("blockheight", hal.HAL_FLOAT, hal.HAL_OUT)
         # for manual tool change dialog
         self.halcomp.newpin("toolchange-number", hal.HAL_S32, hal.HAL_IN)
+        self.halcomp.newpin("toolchange-prep-number", hal.HAL_S32, hal.HAL_IN)
         self.halcomp.newpin("toolchange-changed", hal.HAL_BIT, hal.HAL_OUT)
         pin = self.halcomp.newpin("toolchange-change", hal.HAL_BIT, hal.HAL_IN)
         hal_glib.GPin(pin).connect("value_changed", self.on_tool_change)
-        self.halcomp["toolchange-number"] = self.stat.tool_in_spindle
+        self.halcomp["toolchange-prep-number"] = self.stat.tool_in_spindle
+        self.halcomp.newpin("toolchange-diameter", hal.HAL_FLOAT, hal.HAL_IN)
+        
+        self.spbtn_probe_height.set_value(self.prefs.getpref("setterheight", 0.0, float))
+        self.halcomp["setterheight"] = self.spbtn_probe_height.get_value()
+        
+        self.spbtn_block_height.set_value(self.prefs.getpref("blockheight", 0.0, float))
+        self.halcomp["blockheight"] = self.spbtn_block_height.get_value()
+        
         # tool measurement probe settings
-        self.xpos, self.ypos, self.zpos, self.maxprobe, self.tsdiam, self.revrott = (
+        self.xpos, self.ypos, self.zpos, self.maxprobe, self.tsdiam, self.tsoffset, self.revrott = (
             self.get_tool_sensor_data()
         )
         if (
@@ -2886,6 +2973,7 @@ class ProbeScreenClass(object):
             or not self.zpos
             or not self.maxprobe
             or not self.tsdiam
+            or not self.tsoffset
             or not self.revrott
         ):
             self.chk_use_tool_measurement.set_active(False)
@@ -2894,18 +2982,10 @@ class ProbeScreenClass(object):
             print(_("**** no valid probe config in INI File ****"))
             print(_("**** disabled auto tool measurement ****"))
         else:
-            self.spbtn_probe_height.set_value(
-                self.prefs.getpref("probeheight", 0.0, float)
-            )
-            self.spbtn_block_height.set_value(
-                self.prefs.getpref("blockheight", 0.0, float)
-            )
             # to set the hal pin with correct values we emit a toogled
             if self.chk_use_tool_measurement.get_active():
                 self.frm_probe_pos.set_sensitive(True)
                 self.halcomp["use_toolmeasurement"] = True
-                self.halcomp["probeheight"] = self.spbtn_probe_height.get_value()
-                self.halcomp["blockheight"] = self.spbtn_block_height.get_value()
             else:
                 self.frm_probe_pos.set_sensitive(False)
                 self.chk_use_tool_measurement.set_sensitive(True)

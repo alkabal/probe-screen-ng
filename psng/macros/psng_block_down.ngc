@@ -1,27 +1,46 @@
 o<psng_block_down> sub
 o<psng_hook> call [5]
+(DEBUG,block down used for set workpieces height using spinbox blockheight value)
+
+o90 if [#<_hal[probe.probedtable]> EQ 0]
+    (MSG,TABLE POSITION UNKNOW)
+o90 return [-1] ; indicate probedtable = 0
+o90 endif
+
+o100 if [#<_hal[probe.ps_searchvel]> LE 0]
+o100 return [-2] ; indicate searchvel <= 0
+o100 endif
+
+o200 if [#<_hal[probe.ps_probevel]> LE 0]
+o200 return [-3] ; indicate probevel <= 0
+o200 endif
+
+o300 if [#5400 EQ 0]
+     (MSG,PROBE WITH TOOL 0 NOT ALLOWED)
+     M2
+o300 endif
 
 (cancel all Z offsets)
-G49
 G92.1
-G10 L20 P0  Z[#<_hal[axis.z.pos-cmd]>]
+G49 G40
+(MSG,TODO STUDY MORE FOR G10 here and G49 G40 it is really needed ? AND WHY THEY NOT HAVE G43 at end)
+G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>]
 
+#<z>=#<_z> (save current Z position)
 G91
-F #<_hal[probe.ps_searchvel]>
-G38.2 Z[-#<_hal[probe.ps_probe_max]>]
-G1 Z[#<_hal[probe.ps_probe_latch]>] F#<_ini[TOOLSENSOR]RAPID_SPEED>
-F #<_hal[probe.ps_probevel]>
-G4 P0.5
-G38.2 Z[-#<_hal[probe.ps_probe_latch]>*2]
-(G1 Z[#<_hal[probe.ps_probe_max]>] F#<_ini[TOOLSENSOR]RAPID_SPEED>)
+G38.2 Z-#<_hal[probe.ps_probe_max]>  F#<_hal[probe.ps_searchvel]>
+G38.4 Z#<_hal[probe.ps_probe_latch]> F#<_hal[probe.ps_searchvel]>     ;DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
+G1    Z0.5                           F#<_ini[TOOLSENSOR]RAPID_SPEED>
+G38.2 Z-[#<_hal[probe.ps_probe_latch]>*2] F#<_hal[probe.ps_probevel]>
 
-(hardcode distance must not be the same)
-o11 if [#<_metric>]
-	G1 Z4 F#<_ini[TOOLSENSOR]RAPID_SPEED>
-o11 else
-	G1 Z0.2 F#<_ini[TOOLSENSOR]RAPID_SPEED>
-o11 endif
+     (MSG,TODO STUDY MORE WHAT PYTHON DO WITH THAT)
+; ("G10 L2 P0 Z%s" % blockheight) are done inside python code
 
 G90
+(back to start point)
+G1 Z#<z> F#<_ini[TOOLSENSOR]RAPID_SPEED>
+(MSG,TODO what about G43 G41 G42 can be saved at macro start and restored at end : see "lathemacro")
+
+o<psng_hook_end> call
 o<psng_block_down> endsub
 M2

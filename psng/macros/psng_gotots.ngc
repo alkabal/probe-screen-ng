@@ -1,21 +1,47 @@
 o<psng_gotots> sub
 o<psng_hook> call [2]
+(DEBUG,gotos used for update tool table)
 
-F#<_ini[TOOLSENSOR]RAPID_SPEED>
+o90 if [#<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0]
+    (MSG,TOOLSETTER HEIGHT NOT CONFIGURED)
+o90 return [-1] ; indicate setterheight <= 0
+o90 endif
+
+o100 if [#<_hal[probe.ps_searchvel]> LE 0]
+o100 return [-2] ; indicate searchvel <= 0
+o100 endif
+
+o200 if [#<_hal[probe.ps_probevel]> LE 0]
+o200 return [-3] ; indicate probevel <= 0
+o200 endif
+
+o300 if [#5400 EQ 0]
+     (MSG,PROBE WITH TOOL 0 NOT ALLOWED)
+     M2
+o300 endif
+
+F#<_ini[TOOLSENSOR]FAST_SPEED>
 G90
-G53 G1 Z[#<_ini[AXIS_Z]MAX_LIMIT>]
+G53 G1 Z[#<_ini[JOINT_2]HOME>] ;think about using [JOINT_2]HOME imo is better
 G53 G1 X[#<_ini[TOOLSENSOR]X>] Y[#<_ini[TOOLSENSOR]Y>]
 G53 G1 Z[#<_ini[TOOLSENSOR]Z>]
 
+; cancel tool offset + cutter compensation
+G92.1
+G49 G40
+
 G91
-F #<_hal[probe.ps_searchvel]>
-G38.2 Z #<_ini[TOOLSENSOR]MAXPROBE>
-G1 Z[#<_hal[probe.ps_probe_latch]>] F#<_ini[TOOLSENSOR]RAPID_SPEED>
-F #<_hal[probe.ps_probevel]>
-G4 P0.5
-G38.2 Z[-#<_hal[probe.ps_probe_latch]>*2]
-G1 Z4 F#<_ini[TOOLSENSOR]RAPID_SPEED>
+G38.2 Z#<_ini[TOOLSENSOR]MAXPROBE> F#<_hal[probe.ps_searchvel]>
+G38.4 Z#<_hal[probe.ps_probe_latch]> F#<_hal[probe.ps_searchvel]>     ;DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
+G1    Z0.5                           F#<_ini[TOOLSENSOR]RAPID_SPEED>
+G38.2 Z-[#<_hal[probe.ps_probe_latch]>*2] F#<_hal[probe.ps_probevel]>
+
+G1 Z[#<_hal[probe.ps_z_clearance]>*0.7] F#<_ini[TOOLSENSOR]RAPID_SPEED>       ; macro use ps_z_clearance*0.7 for allow tool to be en contact with setter pad for diameter measure
 G90
+
+(MSG,TODO what about G43 G41 G42 can be saved at macro start and restored at end : see "lathemacro")
+
+o<psng_hook_end> call
 o<psng_gotots> endsub
 M2
 

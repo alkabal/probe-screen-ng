@@ -1,22 +1,22 @@
-o<psng_probe_down> sub
-o<psng_hook> call [4]
+o<psng_drill_down> sub
+o<psng_hook> call [10]
 (DEBUG,probe down update only internal setterheight value but why and how is done ?)
 
-o90 if [#<_hal[probe.probedtable]> EQ 0]
-    (MSG,TABLE POSITION UNKNOW)
-o90 return [-1] ; indicate probedtable = 0
+o90 if [#<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0]
+    (MSG,TOOLSETTER HEIGHT NOT CONFIGURED)
+o90 return [-1] ; indicate setterheight <= 0
 o90 endif
 
 o100 if [#<_hal[probe.ps_searchvel]> LE 0]
-o100 return [-2] ; indicate searchvel <= 0
+o100 return [-1] ; indicate searchvel <= 0
 o100 endif
 
 o200 if [#<_hal[probe.ps_probevel]> LE 0]
-o200 return [-3] ; indicate probevel <= 0
+o200 return [-2] ; indicate probevel <= 0
 o200 endif
 
-o300 if [#5400 EQ 0 or #5400 GT 1]
-     (MSG,PROBING TOOLSETTER IS NOT ALLOWED WITHOUT 3D PROBE AS TOOL 1)
+o300 if [#5400 LT 2]
+     (MSG,TOOLLENGHT WITH TOOL 0 or PROBE NOT ALLOWED)
      M2
 o300 endif
 
@@ -38,11 +38,13 @@ G38.4 Z#<_hal[probe.ps_probe_latch]> F#<_hal[probe.ps_searchvel]>     ;DO NOT WO
 G1    Z0.5                           F#<_ini[TOOLSENSOR]RAPID_SPEED>
 G38.2 Z-[#<_hal[probe.ps_probe_latch]>*2] F#<_hal[probe.ps_probevel]>
 
-; only internal setterheight value are changed inside python code
+(MSG,TODO add the logic for update tool table)
+; why we don't set Z something here ? (like machine table height vs tool setter probing result ?)
+(MSG,TODO what about G43 G41 G42 can be saved at macro start and restored at end : see "lathemacro")
 
 G90
 G53 G1 Z[#<_ini[TOOLSENSOR]Z>] F#<_ini[TOOLSENSOR]RAPID_SPEED>
 
 o<psng_hook_end> call
-o<psng_probe_down> endsub
+o<psng_drill_down> endsub
 M2
