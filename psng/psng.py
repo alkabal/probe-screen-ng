@@ -283,7 +283,7 @@ class ProbeScreenClass(object):
         self.prefs.putpref("chk_auto_rott", gtkcheckbutton.get_active(), bool)
 
     def set_zerro(self, c="XYZ", x=0., y=0., z=0.):
-        if self.chk_set_zero.get_active():                                                 # need to study more initally i have think this is used only for angle offset
+        if self.chk_set_zero.get_active():
             #  Z current position
             self.stat.poll()                                                               # well it is really needed here
             tmpz = (

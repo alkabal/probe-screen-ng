@@ -12,13 +12,11 @@ o<psng_hook_end> sub
 ; value "psng_manual_change".
 #<hooked_macro_end> = #1
 
-             ;(MSG, PSNG HOOK END)
+             ;(MSG,PSNG HOOK END)
              M65 P1  ; activate probe output to motion.probe-inpute (logic inverted)
              M65 P2  ; activate setter output to motion.probe-inpute (logic inverted)
-             
-             M64 P0  ; After success probing clear all notification (turn on digital output immediately)
-             G4 P 1
-             M65 P0  ; reset flasg for clear all notification (turn off digital output immediately)
+
+o<clear-axis-notif> call
 
 o<psng_hook_end> endsub
 M2
