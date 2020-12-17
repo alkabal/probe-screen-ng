@@ -17,6 +17,7 @@
 ; 7 = psng_xplus
 ; 8 = psng_yminus
 ; 9 = psng_yplus
+;10 = psng_drill_down
 
 
 o<psng_hook> sub

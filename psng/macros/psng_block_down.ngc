@@ -2,10 +2,10 @@ o<psng_block_down> sub
 o<psng_hook> call [5]
 (DEBUG,block down used for set workpieces height using spinbox blockheight value)
 
-o90 if [#<_hal[probe.probedtable]> EQ 0]
-    (MSG,TABLE POSITION UNKNOW)
-o90 return [-1] ; indicate probedtable = 0
-o90 endif
+;o90 if [#<_hal[probe.probedtable]> EQ 0]
+;    (MSG,TABLE POSITION UNKNOW)
+;o90 return [-1] ; indicate probedtable = 0
+;o90 endif
 
 o100 if [#<_hal[probe.ps_searchvel]> LE 0]
 o100 return [-2] ; indicate searchvel <= 0
@@ -22,9 +22,9 @@ o300 endif
 
 (cancel all Z offsets)
 G92.1
-G49 G40
-(MSG,TODO STUDY MORE FOR G10 here and G49 G40 it is really needed ? AND WHY THEY NOT HAVE G43 at end)
-G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>]
+G49
+(MSG,TODO STUDY MORE FOR G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>] AND WHY THEY NOT HAVE G43 at end)
+;G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>]
 
 #<z>=#<_z> (save current Z position)
 G91
@@ -33,8 +33,7 @@ G38.4 Z#<_hal[probe.ps_probe_latch]> F#<_hal[probe.ps_searchvel]>     ;DO NOT WO
 G1    Z0.5                           F#<_ini[TOOLSENSOR]RAPID_SPEED>
 G38.2 Z-[#<_hal[probe.ps_probe_latch]>*2] F#<_hal[probe.ps_probevel]>
 
-     (MSG,TODO STUDY MORE WHAT PYTHON DO WITH THAT)
-; ("G10 L2 P0 Z%s" % blockheight) are done inside python code
+     (MSG,TODO STUDY MORE WHAT PYTHON DO WITH THAT "G10 L2 P0 Z%s" % blockheight for now not work like i want)
 
 G90
 (back to start point)

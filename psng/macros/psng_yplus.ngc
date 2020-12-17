@@ -14,6 +14,12 @@ o300 if [#5400 EQ 0]
      M2
 o300 endif
 
+;ALKABAL ADD QUESTION : no need to cancel tool offset or cutercomp here if probe is used from tool table with diameter in tooltable ?
+; cancel tool offset + cutter compensation
+;G92.1
+;G49 G40      ; for create tool table with diameter compensation this is needed to cancel cutercomp here
+;ALKABAL ADD QUESTION : no need to cancel tool offset or cutercomp here ?
+
 #<y>=#<_y> (save start Y position) 
 G91
 G38.2 Y#<_hal[probe.ps_probe_max]>    F#<_hal[probe.ps_searchvel]>

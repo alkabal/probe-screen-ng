@@ -16,7 +16,7 @@ o200 return [-3] ; indicate probevel <= 0
 o200 endif
 
 o300 if [#5400 EQ 0]
-     (MSG,PROBE WITH TOOL 0 NOT ALLOWED)
+     (MSG,PROBE TABLE WITH TOOL 0 NOT ALLOWED)
      M2
 o300 endif
 

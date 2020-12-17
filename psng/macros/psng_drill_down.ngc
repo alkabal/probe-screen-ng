@@ -1,6 +1,6 @@
 o<psng_drill_down> sub
 o<psng_hook> call [10]
-(DEBUG,probe down update only internal setterheight value but why and how is done ?)
+(DEBUG,BETA TEST FOR CREATE TOOL TABLE Z)
 
 o90 if [#<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0]
     (MSG,TOOLSETTER HEIGHT NOT CONFIGURED)
@@ -15,22 +15,20 @@ o200 if [#<_hal[probe.ps_probevel]> LE 0]
 o200 return [-2] ; indicate probevel <= 0
 o200 endif
 
-o300 if [#5400 LT 2]
-     (MSG,TOOLLENGHT WITH TOOL 0 or PROBE NOT ALLOWED)
+o300 if [#5400 LT 1]
+     (MSG,TOOLLENGHT WITH TOOL 0 NOT ALLOWED)
      M2
 o300 endif
 
-F#<_ini[TOOLSENSOR]FAST_SPEED>
 G90
+F#<_ini[TOOLSENSOR]FAST_SPEED>
 G53 G1 Z[#<_ini[JOINT_2]HOME>] ;think about using [JOINT_2]HOME imo is better
 G53 G1 X[#<_ini[TOOLSENSOR]X>] Y[#<_ini[TOOLSENSOR]Y>]
 G53 G1 Z[#<_ini[TOOLSENSOR]Z>]
 
 (cancel all Z offsets)
 G92.1
-G49 G40
-(MSG,TODO STUDY MORE FOR G10 here and G49 G40 it is really needed ? AND WHY THEY NOT HAVE G43 at end)
-G10 L20 P0  Z[#<_hal[axis.z.pos-cmd]>]
+G49
 
 G91
 G38.2 Z#<_ini[TOOLSENSOR]MAXPROBE>   F#<_hal[probe.ps_searchvel]>
@@ -38,12 +36,16 @@ G38.4 Z#<_hal[probe.ps_probe_latch]> F#<_hal[probe.ps_searchvel]>     ;DO NOT WO
 G1    Z0.5                           F#<_ini[TOOLSENSOR]RAPID_SPEED>
 G38.2 Z-[#<_hal[probe.ps_probe_latch]>*2] F#<_hal[probe.ps_probevel]>
 
-(MSG,TODO add the logic for update tool table)
-; why we don't set Z something here ? (like machine table height vs tool setter probing result ?)
-(MSG,TODO what about G43 G41 G42 can be saved at macro start and restored at end : see "lathemacro")
+;#<touch_result> = #5063
+
+     G10 L10 P#5400 Z[#<_hal[probe.setterheight]>]
+     G4 P0.2
+     G43
 
 G90
-G53 G1 Z[#<_ini[TOOLSENSOR]Z>] F#<_ini[TOOLSENSOR]RAPID_SPEED>
+F#<_ini[TOOLSENSOR]FAST_SPEED>
+G53 G1 Z[#<_ini[CHANGE_POSITION]Z>]
+G53 G1 X[#<_ini[CHANGE_POSITION]X>] Y[#<_ini[CHANGE_POSITION]Y>]
 
 o<psng_hook_end> call
 o<psng_drill_down> endsub

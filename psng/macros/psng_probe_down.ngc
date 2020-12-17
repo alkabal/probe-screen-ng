@@ -3,7 +3,7 @@ o<psng_hook> call [4]
 (DEBUG,probe down update only internal setterheight value but why and how is done ?)
 
 o90 if [#<_hal[probe.probedtable]> EQ 0]
-    (MSG,TABLE POSITION UNKNOW)
+    (MSG,BEFORE MEASURE TOOL SETTER HEIGH YOU NEED TO PROBE TABLE !)
 o90 return [-1] ; indicate probedtable = 0
 o90 endif
 
@@ -28,9 +28,9 @@ G53 G1 Z[#<_ini[TOOLSENSOR]Z>]
 
 (cancel all Z offsets)
 G92.1
-G49 G40
-(MSG,TODO STUDY MORE FOR G10 here and G49 G40 it is really needed ? AND WHY THEY NOT HAVE G43 at end)
-G10 L20 P0  Z[#<_hal[axis.z.pos-cmd]>]
+G49
+(MSG,TODO STUDY MORE FOR G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>] AND WHY THEY NOT HAVE G43 at end)
+G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>]
 
 G91
 G38.2 Z#<_ini[TOOLSENSOR]MAXPROBE>   F#<_hal[probe.ps_searchvel]>
@@ -41,7 +41,9 @@ G38.2 Z-[#<_hal[probe.ps_probe_latch]>*2] F#<_hal[probe.ps_probevel]>
 ; only internal setterheight value are changed inside python code
 
 G90
-G53 G1 Z[#<_ini[TOOLSENSOR]Z>] F#<_ini[TOOLSENSOR]RAPID_SPEED>
+F#<_ini[TOOLSENSOR]FAST_SPEED>
+G53 G1 Z[#<_ini[CHANGE_POSITION]Z>]
+G53 G1 X[#<_ini[CHANGE_POSITION]X>] Y[#<_ini[CHANGE_POSITION]Y>]
 
 o<psng_hook_end> call
 o<psng_probe_down> endsub

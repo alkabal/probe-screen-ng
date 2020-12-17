@@ -2384,7 +2384,6 @@ class ProbeScreenClass(object):
     # IMH this sequence need to be first with probe : first execute psng_down for determinate the table height with toolsetter and think about updating tool setter diameter or probe diameter at same time
     # IMH this sequence need to be done secondly with other tool using button Dia only off course
     # ALL OF THIS NEED TO EDIT TOOL TABLE MANUALLY FOR ADD NEW TOOL AND KNOW DIAMETER
-    # i think about saving setterheight using probedtable
     @restore_mode
     def on_tool_dia_released(self, gtkbutton, data=None):
         tooltable = self.inifile.find("EMCIO", "TOOL_TABLE")
@@ -2685,7 +2684,7 @@ class ProbeScreenClass(object):
         self.buffer.insert(i, "%s \n" % c)
 
 
-    # Down probe to table for measuring it and use for other calc and can set G10 L20 Z0 if you tick auto zero     # need to think more about that
+    # Down probe to table for measuring it and use for calculate tool setter height and can set G10 L20 Z0 if you tick auto zero     # need to think more about that
     @restore_mode
     def on_down_released(self, gtkbutton, data=None):
         self.command.mode(linuxcnc.MODE_MDI)
@@ -2709,28 +2708,28 @@ class ProbeScreenClass(object):
         # Start psng_probe_down.ngc
         self.command.mode(linuxcnc.MODE_MDI)
         self.command.wait_complete()
-        if self.ocode("o<psng_probe_down> call") == -1:
-            return
-        a = self.stat.probed_position
-        print("setterheight var a =", float(a[2]))
-        print("probedtable =", self.halcomp["probedtable"])
-        self.spbtn_probe_height.set_value(float(a[2]) - self.halcomp["probedtable"])
-        self.add_history(
-            gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, a[2], 0, 0
-        )
-        self.set_zerro("Z", 0, 0, self.spbtn_probe_height.get_value())                     # Alkabal added this because if we know the table position and the setter position is probed you can set correct Z0 directly next time
-        
-    # Down drill bit to tool setter for measuring it vs table probing result
-    @restore_mode
-    def clicked_btn_drill_tool_setter(self, gtkbutton, data=None):
-        # Start psng_drill_down.ngc
-        self.command.mode(linuxcnc.MODE_MDI)
-        self.command.wait_complete()
+#        if self.ocode("o<psng_probe_down> call") == -1:                                 ################################# REMOVED ONLY FOR PLAY WITH DRIL IN PROBE_DOWN MACRO UNTIL I UPDATE THE GUI       
+#            return
+#        a = self.stat.probed_position
+#        print("setterheight var a =", float(a[2]))
+#        print("probedtable =", self.halcomp["probedtable"])
+#        self.spbtn_probe_height.set_value(float(a[2]) - self.halcomp["probedtable"])    
+#        self.add_history(
+#            gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, a[2], 0, 0
+#        )
+#        self.set_zerro("Z", 0, 0, self.spbtn_probe_height.get_value())                     # Alkabal added this because if we know the table position and the setter position is probed you can set correct Z0 directly next time
+#        
+#    # Down drill bit to tool setter for measuring it vs table probing result
+#    @restore_mode
+#    def clicked_btn_drill_tool_setter(self, gtkbutton, data=None):
+#        # Start psng_drill_down.ngc
+#        self.command.mode(linuxcnc.MODE_MDI)
+#        self.command.wait_complete()
         if self.ocode("o<psng_drill_down> call") == -1:
             return
         a = self.stat.probed_position
-        print("setterheight var a =", float(a[2]))
-        print("probedtable =", self.halcomp["probedtable"])
+        print("zres tool =", float(a[2]))        
+        print("setterheight =", self.halcomp["setterheight"])
         self.add_history(
             gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, a[2], 0, 0
         )
@@ -2744,9 +2743,11 @@ class ProbeScreenClass(object):
         if self.ocode("o<psng_block_down> call") == -1:
             return
         a = self.stat.probed_position
+        print("probeposwoffset =", self.probed_position_with_offsets())
+        print("probeposg53 =", self.stat.probed_position)
         print("workpiecesheight var a =", float(a[2]))
-        print("probedtable =", self.halcomp["probedtable"])
-        self.spbtn_block_height.set_value(float(a[2]) - self.halcomp["probedtable"])       # NEED THINK ABOUT IF self.halcomp["probedtable"] <=> 0 use self.halcomp["probedtable"] - float(a[2])
+        print("probedtable =", self.halcomp["probedtable"])                              #WANTED here calculate pieces height using probe with know lenght vs tool setter
+        self.spbtn_block_height.set_value(float(a[2]) - self.halcomp["probedtable"])
         self.add_history(
             gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, a[2], 0, 0
         )

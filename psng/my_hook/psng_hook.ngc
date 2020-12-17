@@ -96,7 +96,7 @@ o<psng_hook> sub
         o121 endif
 
 ;Mode 2 & 4 PROBE IS NOT ALLWAYS NEEDED BUT SETTER IS ALLWAYS NEEDED TOOL ALREADY IN SPINDLE
-   o110 elseif [#<hooked_macro> EQ 2 OR #<hooked_macro> EQ 4]
+   o110 elseif [#<hooked_macro> EQ 2 OR #<hooked_macro> EQ 4 OR #<hooked_macro> EQ 10]
         M5 M9 ; stop spindle, mist+flood off useless but paranoid mode
              
         o131 if [#5400 EQ 1 AND #<_hal[and2.combined-probe.in0]> EQ 0 AND #<_hal[and2.combined-setter.in0]> EQ 0]
@@ -138,7 +138,7 @@ o<psng_hook> sub
              (MSG,MOUNT AND CONNECT TOUCH PROBE FOR TOOLCHANGE 1)
              M65 P1  ; activate probe output to motion.probe-inpute
              M65 P2  ; activate setter output to motion.probe-inpute
-             MSG,NEED TO UNPAUSE)
+             (MSG,NEED TO UNPAUSE)
              M0                                                                                                  ; need to found a way for wait until probe is connected
         o141 elseif [#<_selected_tool> EQ 1 AND #<_hal[and2.combined-probe.in0]> EQ 0 AND #<_hal[and2.combined-setter.in0]> EQ 0]
              (MSG,SETTER AND TOUCH PROBE FOR TOOLCHANGE 1 SEEM TO BE READY)
