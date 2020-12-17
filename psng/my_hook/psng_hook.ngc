@@ -163,12 +163,6 @@ o<psng_hook> sub
              #<error> = 1
         o141 endif
 
-;Mode 10 todo drill
-   o110 elseif [#<hooked_macro> EQ 10]
-        (MSG,TODO DRILL DOWN TO TOOL SETTER OR NEED TO ADD IN OTHER MODE)
-        M5 M9 ; stop spindle, mist+flood off useless but paranoid mode
-        M0
-
    o110 else
         ; nothing to do here
         (MSG,PSNG HOOK NUMBER FAIL : call_hook #<hooked_macro>)

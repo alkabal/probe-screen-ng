@@ -4,6 +4,7 @@ o<psng_hook> call [4]
 
 o90 if [#<_hal[probe.probedtable]> EQ 0]
     (MSG,BEFORE MEASURE TOOL SETTER HEIGH YOU NEED TO PROBE TABLE !)
+    (MSG,If you do not have probe you can set value manually !)
 o90 return [-1] ; indicate probedtable = 0
 o90 endif
 
