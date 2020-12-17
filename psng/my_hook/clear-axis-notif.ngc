@@ -6,9 +6,9 @@ o<clear-axis-notif> sub
 ;net clear-axis-message => axisui.notifications-clear
 
              M65 P0  ; reset flasg before clear if last state stay on for be sure this is done (turn off digital output immediately)
-             G4 P1
+             G4 P0.2
              M64 P0  ; After success probing clear all notification (turn on digital output immediately)
-             G4 P1
+             G4 P0.2
              M65 P0  ; reset flasg after clear all notification (turn off digital output immediately)
              
 o<clear-axis-notif> endsub 
