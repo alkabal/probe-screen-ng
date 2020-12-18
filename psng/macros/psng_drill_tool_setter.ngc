@@ -1,6 +1,6 @@
-o<psng_gotots> sub
-o<psng_hook> call [2]
-(DEBUG,gotos used for update tool table)
+o<psng_drill_tool_setter> sub
+o<psng_hook> call [10]
+(DEBUG,BETA TEST FOR CREATE TOOL TABLE Z)
 
 o90 if [#<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0]
     (MSG,TOOLSETTER HEIGHT NOT CONFIGURED)
@@ -15,8 +15,8 @@ o200 if [#<_hal[probe.ps_probevel]> LE 0]
 o200 return [-3] ; indicate probevel <= 0
 o200 endif
 
-o300 if [#5400 EQ 0]
-     (MSG,MEASURE TOOL DIAMETER AND LENGHT NOT ALLOWED WITH TOOL 0)
+o300 if [#5400 LT 1]
+     (MSG,TOOLLENGHT WITH TOOL 0 NOT ALLOWED)
      M2
 o300 endif
 
@@ -28,9 +28,9 @@ G53 G1 X[#<_ini[TOOLSENSOR]X>] Y[#<_ini[TOOLSENSOR]Y>]
 G4 P0.2
 G53 G1 Z[#<_ini[TOOLSENSOR]Z>]
 
-(cancel all Z offsets)(+ cutter compensation for diameter measurement)
+(cancel all Z offsets)
 G92.1
-G49 G40
+G49
 
 G91
 G38.2 Z#<_ini[TOOLSENSOR]MAXPROBE>         F#<_hal[probe.ps_searchvel]>
@@ -38,15 +38,17 @@ G38.4 Z#<_hal[probe.ps_probe_latch]>       F#<_hal[probe.ps_searchvel]>     ; DO
 G1    Z0.2                                 F#<_ini[TOOLSENSOR]RAPID_SPEED>
 G4    P0.2
 G38.2 Z-[#<_hal[probe.ps_probe_latch]>*2]  F#<_hal[probe.ps_probevel]>
-G1    Z[#<_hal[probe.ps_z_clearance]>*0.7] F#<_ini[TOOLSENSOR]RAPID_SPEED>   ; macro use ps_z_clearance*0.7 for allow tool to be en contact with setter pad for diameter measure
 G90
 
 #<touch_result> = #5063
 G10 L1 P#5400 Z[#<touch_result> - #<_hal[probe.setterheight]>]
+G43
 
-;G43 here is not really wanted but need test
+F#<_ini[TOOLSENSOR]FAST_SPEED>
+G53 G1 Z[#<_ini[CHANGE_POSITION]Z>]
+G53 G1 X[#<_ini[CHANGE_POSITION]X>] Y[#<_ini[CHANGE_POSITION]Y>]
+G43
 
 o<psng_hook_end> call
-o<psng_gotots> endsub
+o<psng_drill_tool_setter> endsub
 M2
-

@@ -4,9 +4,17 @@
 ; This macro check multiple probe status and inhibit one or other if missing and not used for actual job
 
 o<psng_hook> sub
-; The #1 variable will be set to the name of the macro being hooked. For
-; example, when o<psng_manual_change> is called, #1 will be set to the
-; value "psng_manual_change".
+; Hooked Macro ID -> Name Table
+; 1 = psng_manual_change
+; 2 = psng_gotots
+; 3 = psng_down
+; 4 = psng_probe_tool_setter
+; 5 = psng_probe_workpiece
+; 6 = psng_xminus
+; 7 = psng_xplus
+; 8 = psng_yminus
+; 9 = psng_yplus
+;10 = psng_drill_tool_setter
 
 #<hooked_macro> = #1
 #<error> = 0
@@ -64,7 +72,7 @@ o<psng_hook> sub
              (MSG,NEED TO UNPAUSE)
              M0
 ;        o121 elseif [#5400 EQ 1 AND #<_hal[and2.combined-probe.in0]> EQ 0 AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<flagvalue_after_gotots>]
-:             M5 M9 ; stop spindle, mist+flood off useless but paranoid mode
+;             M5 M9 ; stop spindle, mist+flood off useless but paranoid mode
 ;             (MSG,PROBE AS TOOL 1 AND SETTER SEEM TO BE READY FOR DIAMETER MEASUREMENT)
 ;             M64 P1  ; deactivate probe output to motion.probe-inpute for use TOOL SETTER FOR MEASURING PROBE diameter
 ;             M65 P2  ; activate setter output to motion.probe-inpute

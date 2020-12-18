@@ -20,17 +20,17 @@ o300 endif
 ;G49 G40      ; for create tool table with diameter compensation this is needed to cancel cutercomp here
 ;ALKABAL ADD QUESTION : no need to cancel tool offset or cutercomp here ?
 
-#<y>=#<_y> (save start Y position) 
+#<y>=#<_y> (save start Y position)
 G91
-G38.2 Y#<_hal[probe.ps_probe_max]>    F#<_hal[probe.ps_searchvel]>
-G38.4 Y-#<_hal[probe.ps_probe_latch]> F#<_hal[probe.ps_searchvel]>     ;DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
-G1    Y-0.5                           F#<_ini[TOOLSENSOR]RAPID_SPEED>
+G38.2 Y#<_hal[probe.ps_probe_max]>       F#<_hal[probe.ps_searchvel]>
+G38.4 Y-#<_hal[probe.ps_probe_latch]>    F#<_hal[probe.ps_searchvel]>     ;DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
+G1    Y-0.5                              F#<_ini[TOOLSENSOR]RAPID_SPEED>
 G38.2 Y[#<_hal[probe.ps_probe_latch]>*2] F#<_hal[probe.ps_probevel]>
 (print, probe Y=#5062 )
 G90
 (back to start point)
-G1 Y#<y> F#<_ini[TOOLSENSOR]RAPID_SPEED> 
-	
-o<psng_hook_end> call 
+G1 Y#<y> F#<_ini[TOOLSENSOR]RAPID_SPEED>
+
+o<psng_hook_end> call
 o<psng_yplus> endsub
 M2

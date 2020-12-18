@@ -22,9 +22,9 @@ o300 endif
 
 #<x>=#<_x> (save start X position) 
 G91
-G38.2 X-#<_hal[probe.ps_probe_max]>  F#<_hal[probe.ps_searchvel]>
-G38.4 X#<_hal[probe.ps_probe_latch]> F#<_hal[probe.ps_searchvel]>     ;DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
-G1    X0.5                           F#<_ini[TOOLSENSOR]RAPID_SPEED>
+G38.2 X-#<_hal[probe.ps_probe_max]>       F#<_hal[probe.ps_searchvel]>
+G38.4 X#<_hal[probe.ps_probe_latch]>      F#<_hal[probe.ps_searchvel]>     ;DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
+G1    X0.5                                F#<_ini[TOOLSENSOR]RAPID_SPEED>
 G38.2 X-[#<_hal[probe.ps_probe_latch]>*2] F#<_hal[probe.ps_probevel]>
 (print, probe X=#5061 )
 G90
