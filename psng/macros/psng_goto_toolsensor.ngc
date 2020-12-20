@@ -1,0 +1,14 @@
+o<psng_goto_toolsensor> sub
+
+;first go up
+G90
+F#<_ini[TOOLSENSOR]FAST_SPEED>
+G53 G1 Z[#<_ini[JOINT_2]HOME>]                        ; imo is better than [#<_ini[AXIS_Z]MAX_LIMIT>-0.1]
+G4 P0.0
+; then move to sensor position
+G53 G1 X[#<_ini[TOOLSENSOR]X>] Y[#<_ini[TOOLSENSOR]Y>]
+G4 P0.0
+G53 G1 Z[#<_ini[TOOLSENSOR]Z>]
+
+o<psng_goto_toolsensor> endsub
+M2

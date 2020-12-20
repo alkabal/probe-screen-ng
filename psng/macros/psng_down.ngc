@@ -1,8 +1,7 @@
 o<psng_down> sub
 o<psng_hook> call [3]
-(DEBUG,down used for table probing before probe setter for determinate setter height from table)
 
-;o90 if [#<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0] OR #<_hal[probe.probedtable]> EQ 0
+;o90 if [#<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0]
 ;    (MSG,TOOLSETTER HEIGHT NOT CONFIGURED)       ; THIS IS NORMAL IN THIS MACRO : DO NOT USE
 ;o90 return [-1] ; indicate setterheight <= 0
 ;o90 endif
@@ -22,12 +21,11 @@ o300 endif
 
 #<z>=#<_z> (save current Z position)
 
-G91
-G38.2 Z-#<_hal[probe.ps_probe_max]>        F#<_hal[probe.ps_searchvel]>
-G38.4 Z#<_hal[probe.ps_probe_latch]>       F#<_hal[probe.ps_searchvel]>     ; DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
-G1    Z0.2                                 F#<_ini[TOOLSENSOR]RAPID_SPEED>
-G38.2 Z-[#<_hal[probe.ps_probe_latch]>*2]  F#<_hal[probe.ps_probevel]>
-G90
+o<psng_start_touch_probing> call
+
+;o400 if [#<_hal[probe.set_zero]> EQ 1]
+;     G10 L20 P0 Z#<_hal[probe.ps_offs_z]>
+;o400 endif
 
 (back to start point)
 G1 Z#<z> F#<_ini[TOOLSENSOR]RAPID_SPEED>

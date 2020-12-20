@@ -17,7 +17,6 @@ o10 if [#<_task> EQ 0]
 o10     return [999]
 o10 endif
 
-
 o100 if [#<_hal[probe.ps_searchvel]> LE 0]
 o100 return [-1] ; indicate searchvel <= 0
 o100 endif
@@ -26,55 +25,44 @@ o200 if [#<_hal[probe.ps_probevel]> LE 0]
 o200 return [-2] ; indicate probevel <= 0
 o200 endif
 
-;first go up
-G90
-F#<_ini[TOOLSENSOR]FAST_SPEED>
-G53 G1 Z[#<_ini[JOINT_2]HOME>] ;think about using [JOINT_2]HOME imo is better
-G4 P0.2
-; then move to change position ;think initially linuscnc have [EMCIO] TOOL_CHANGE_POSITION = 0 0 0 or TOOL_CHANGE_QUILL_UP = 1
-G53 G1 X[#<_ini[CHANGE_POSITION]X>] Y[#<_ini[CHANGE_POSITION]Y>]
-G4 P0.2
-G53 G1 Z[#<_ini[CHANGE_POSITION]Z>]
-
+o<psng_goto_changepos> call
 o<psng_hook> call [1]
 
-; cancel tool offset
-;G92.1 ; IS NOT WANTED HERE because this macro is used when program run
-G49
-
-
-; NEED TO ADD A CHECK IF #5400 EQ #<tool> display toolchange confirmation actually this is not like that
+; NEED TO ADD A CHECK IF #5400 EQ #<tool> display toolchange confirmation actually if you ask same tool the popup is not displayed and the process start immediatly
 
 o300 if [#<_hal[probe.use_toolmeasurement]> EQ 0 OR #<_selected_tool> EQ 0]
      M6          ; using the code being remapped here means 'use builtin behaviour' used here for M6T0
      G43
+     o<psng_hook_end> call
 o300 return [3] ; indicate no tool measurement possible with tool 0
 o300 elseif [#<_hal[probe.use_toolmeasurement]> EQ 1 AND #<_selected_tool> GT 0 AND [#<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0]]
      (MSG,TOOLSETTER HEIGHT NOT CONFIGURED)
      (MSG,TOOLCHANGE CANCELED)
+     o<psng_hook_end> call
      M2            ; no M6 here for canceling toolchange
 o300 endif
 
 M6   ; using the code being remapped here means 'use builtin behaviour' used here for M6Tx
 
-G53 G1 X[#<_ini[TOOLSENSOR]X>] Y[#<_ini[TOOLSENSOR]Y>]
-G53 G1 Z[#<_ini[TOOLSENSOR]Z>]
+o<psng_goto_toolsensor> call                                                ; with G90 inside
 
-G91
-G38.2 Z#<_ini[TOOLSENSOR]MAXPROBE>         F#<_hal[probe.ps_searchvel]>
-G38.4 Z#<_hal[probe.ps_probe_latch]>       F#<_hal[probe.ps_searchvel]>     ; DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
-G1    Z0.2                                 F#<_ini[TOOLSENSOR]RAPID_SPEED>
-G4    P0.2
-G38.2 Z-[#<_hal[probe.ps_probe_latch]>*2]  F#<_hal[probe.ps_probevel]>
-G90
+; cancel tool offset
+;G92.1                                                                      ; IS NOT WANTED HERE because this macro is used when program run or if needed better is use pause than reset
+G49
+G10 L2 P0 Z0 ; reset G54 offset for correct tool measurement                ; need to thinbk about use save restore like gotos
+
+o<psng_start_setter_probing> call
 
 o500 if [#5070 EQ 0]
 o500 return [-3] ; indicate probe contact failure to epilog
 o500 endif
 
 #<touch_result> = #5063
-G10 L1 P#<tool> Z[#<touch_result> - #<_hal[probe.setterheight]> + #<_hal[probe.blockheight]>]
-G53 G1 Z[#<_ini[CHANGE_POSITION]Z>] F#<_ini[TOOLSENSOR]FAST_SPEED>
+G10 L1 P#<tool> Z[#<touch_result> - #<_hal[probe.setterheight]>]
+G10 L2 P0 Z#<_hal[probe.blockheight]> ; apply G54 offset again after correct tool measurement      ; need to thinbk about use save restore like gotos
+
+(back to Z home position only)
+G53 G1 Z[#<_ini[JOINT_2]HOME>] F#<_ini[TOOLSENSOR]FAST_SPEED> ; imo is better than [#<_ini[CHANGE_POSITION]Z>]
 G43
 
 ;(DEBUG,Zvalue:#<touch_result> Setter;#<_hal[probe.setterheight]>, Block:#<_hal[probe.blockheight]>)

@@ -1,0 +1,12 @@
+o<psng_start_setter_probing> sub
+
+G91
+G38.2 Z#<_ini[TOOLSENSOR]MAXPROBE>         F#<_hal[probe.ps_searchvel]>
+G38.4 Z#<_hal[probe.ps_probe_latch]>       F#<_hal[probe.ps_searchvel]>     ; DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
+G1    Z0.2                                 F#<_hal[probe.ps_searchvel]> 
+G4 P0.0
+G38.2 Z-[#<_hal[probe.ps_probe_latch]>*2]  F#<_hal[probe.ps_probevel]>
+G90
+
+o<psng_start_setter_probing> endsub
+M2

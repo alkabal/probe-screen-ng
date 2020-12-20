@@ -12,11 +12,15 @@ o<psng_hook_end> sub
 ; value "psng_manual_change".
 #<hooked_macro_end> = #1
 
+   o110 if [#<hooked_macro_end> EQ 2]
+        o<clear-axis-notif> call                  ; I do not understand what append but without this diam measurement fail after Z
+   o110 else
              ;(MSG,PSNG HOOK END)
              M65 P1  ; activate probe output to motion.probe-inpute (logic inverted)
              M65 P2  ; activate setter output to motion.probe-inpute (logic inverted)
+             o<clear-axis-notif> call
+   o110 endif
 
-o<clear-axis-notif> call
 
 o<psng_hook_end> endsub
 M2

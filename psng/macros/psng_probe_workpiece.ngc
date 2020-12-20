@@ -1,6 +1,5 @@
 o<psng_probe_workpiece> sub
 o<psng_hook> call [5]
-(DEBUG,block down used for set workpieces height using spinbox blockheight value)
 
 o90 if [[#<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0] AND #<_hal[probe.probedtable]> EQ 0]
     (MSG,TOOLSETTER HEIGHT OR TABLE POSITION NOT PROBED/CONFIGURED)
@@ -20,28 +19,20 @@ o300 if [#5400 EQ 0 OR #5400 GT 1]
      M2
 o300 endif
 
-(cancel all Z offsets)
-G92.1
-G49
-G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>]
+(cancel Z offsets)
+;G92.1
+;G49
+G10 L2 P0 Z0 ; reset G54 offset for correct tool measurement
 
 #<z>=#<_z> (save current Z position)
 
-G91
-G38.2 Z-#<_hal[probe.ps_probe_max]>        F#<_hal[probe.ps_searchvel]>
-G38.4 Z#<_hal[probe.ps_probe_latch]>       F#<_hal[probe.ps_searchvel]>     ; DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
-G1    Z0.2                                 F#<_ini[TOOLSENSOR]RAPID_SPEED>
-G38.2 Z-[#<_hal[probe.ps_probe_latch]>*2]  F#<_hal[probe.ps_probevel]>
-G90
+o<psng_start_touch_probing> call
 
-(MSG,TODO STUDY MORE WHAT PYTHON DO WITH THAT "G10 L2 P0 Z%s" % blockheight for now not work like i want)
+; "G10 L2 P0 Z%s" % blockheight is done inside python code due to multiple possibility for set workpieces height
+
 (back to start point)
 G1 Z#<z> F#<_ini[TOOLSENSOR]RAPID_SPEED>         
-
-; exemple calcul sans les compensation d'outil en simulation avecx le setter on se retrouve par exemple en G53 a -106  a voir pour ajouter le tool seter height (valeur connu entre ts et outil) ts = 40 outil =-146
-
-; au final il faut peut etre juste connaitre la valeur du Z de la table d'outil et la retranché a la valeur actuel           
-           
+          
 o<psng_hook_end> call
 o<psng_probe_workpiece> endsub
 M2

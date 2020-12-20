@@ -1,6 +1,5 @@
-o<psng_drill_tool_setter> sub
-o<psng_hook> call [10]
-(DEBUG,BETA TEST FOR CREATE TOOL TABLE Z)
+o<psng_diam_tool_setter> sub
+o<psng_hook> call [2]
 
 o90 if [#<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0]
     (MSG,TOOLSETTER HEIGHT NOT CONFIGURED)
@@ -15,16 +14,17 @@ o200 if [#<_hal[probe.ps_probevel]> LE 0]
 o200 return [-3] ; indicate probevel <= 0
 o200 endif
 
-o300 if [#5400 LT 1]
-     (MSG,TOOLLENGHT WITH TOOL 0 NOT ALLOWED)
+o300 if [#5400 EQ 0]
+     (MSG,MEASURE TOOL DIAMETER AND LENGHT NOT ALLOWED WITH TOOL 0)
      M2
 o300 endif
 
 o<psng_goto_toolsensor> call                                                ; with G90 inside
 
-(cancel all Z offsets)
+
+(cancel all Z offsets)(+ cutter compensation for diameter measurement)
 G92.1                                                                       ; use pause can be better than reset ???
-G49
+G49 ;G40                                                                     
 
  o400  if [#<_coord_system> EQ 540]
        #<backup_offset> = #5223
@@ -52,13 +52,19 @@ G10 L2 P0 Z0                                                                ; re
 
 o<psng_start_setter_probing> call
 
+G91
+G1    Z[#<_hal[probe.ps_z_clearance]>*0.7] F#<_hal[probe.ps_searchvel]>    ; macro use ps_z_clearance*0.7 for allow tool to be en contact with setter pad for diam measure
+G90
+
 #<touch_result> = #5063
-;#<backup_offset> = #1
+;#<backup_offset> = #1                                                     ; does not work for restoring value
+    (DEBUG,touch #<touch_result> backoffset #<backup_offset>)
 G10 L1 P#5400 Z[#<touch_result> - #<_hal[probe.setterheight]>]
 G10 L2 P0     Z#<backup_offset>
-G43
 
-o<psng_goto_changepos> call
-o<psng_hook_end> call
-o<psng_drill_tool_setter> endsub
+; next for x+ x- y+ y- done inside python code
+
+o<psng_hook_end> call [2]                          ; workaround not wanted here need to be inside python code after other movement but without this i have some issue after Z the program fail
+o<psng_diam_tool_setter> endsub
 M2
+

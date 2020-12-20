@@ -1,9 +1,9 @@
 o<psng_probe_tool_setter> sub
 o<psng_hook> call [4]
-(DEBUG,probe down update only internal setterheight value but why and how is done ?)
 
 o90 if [#<_hal[probe.probedtable]> EQ 0]
-    (MSG,BEFORE MEASURE TOOL SETTER HEIGH YOU NEED TO PROBE TABLE !)(MSG,If you do not have probe you can set value manually !)
+    (MSG,BEFORE MEASURE TOOL SETTER HEIGH YOU NEED TO PROBE TABLE !)
+    (MSG,If you do not have probe you can set value manually !)
 o90 return [-1] ; indicate probedtable = 0
 o90 endif
 
@@ -20,33 +20,18 @@ o300 if [#5400 EQ 0 or #5400 GT 1]
      M2
 o300 endif
 
-G90
-F#<_ini[TOOLSENSOR]FAST_SPEED>
-G53 G1 Z[#<_ini[JOINT_2]HOME>] ;think about using [JOINT_2]HOME imo is better
-G4 P0.2
-G53 G1 X[#<_ini[TOOLSENSOR]X>] Y[#<_ini[TOOLSENSOR]Y>]
-G4 P0.2
-G53 G1 Z[#<_ini[TOOLSENSOR]Z>]
+o<psng_goto_toolsensor> call
 
 (cancel all Z offsets)
 G92.1
 G49
 G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>]     (MSG,TODO STUDY MORE FOR G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>] AND WHY THEY NOT HAVE G43 at end)
 
-G91
-G38.2 Z#<_ini[TOOLSENSOR]MAXPROBE>         F#<_hal[probe.ps_searchvel]>
-G38.4 Z#<_hal[probe.ps_probe_latch]>       F#<_hal[probe.ps_searchvel]>     ; DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
-G1    Z0.2                                 F#<_ini[TOOLSENSOR]RAPID_SPEED>
-G4    P0.2
-G38.2 Z-[#<_hal[probe.ps_probe_latch]>*2]  F#<_hal[probe.ps_probevel]>
-G90
+o<psng_start_setter_probing> call
 
 ; only internal setterheight value are changed inside python code
 
-F#<_ini[TOOLSENSOR]FAST_SPEED>
-G53 G1 Z[#<_ini[CHANGE_POSITION]Z>]
-G53 G1 X[#<_ini[CHANGE_POSITION]X>] Y[#<_ini[CHANGE_POSITION]Y>]
-
+o<psng_goto_changepos> call
 o<psng_hook_end> call
 o<psng_probe_tool_setter> endsub
 M2

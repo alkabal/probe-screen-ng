@@ -6,28 +6,23 @@
 o<psng_hook> sub
 ; Hooked Macro ID -> Name Table
 ; 1 = psng_manual_change
-; 2 = psng_gotots
+; 2 = psng_diam_tool_setter
 ; 3 = psng_down
 ; 4 = psng_probe_tool_setter
 ; 5 = psng_probe_workpiece
 ; 6 = psng_xminus
-; 7 = psng_xplus
-; 8 = psng_yminus
-; 9 = psng_yplus
-;10 = psng_drill_tool_setter
+; 6 = psng_xplus
+; 6 = psng_yminus
+; 6 = psng_yplus
+; 7 = psng_drill_tool_setter
 
 #<hooked_macro> = #1
 #<error> = 0
 
   o<clear-axis-notif> call
 
-   o110 if [#<hooked_macro> LT 1 OR #<hooked_macro> GT 10]
-        M5 M9 ; stop spindle, mist+flood off useless but paranoid mode
-        ; nothing to do here
-        (MSG,ERROR UNROCONIZED HOOK #<hooked_macro>)
-        M65 P1  ; activate probe output to motion.probe-inpute
-        M65 P2  ; activate setter output to motion.probe-inpute
-        M2
+   o110 if [#<hooked_macro> LT 1 OR #<hooked_macro> GT 7]
+        #<error> = 888
    o110 return
 
 ;Mode 3 & 5 PROBE IS ALLWAYS NEEDED AND SETTER NEVER NEEDED
@@ -42,24 +37,19 @@ o<psng_hook> sub
                   (MSG,!!! INHIBIT UNUSED MISSING SETTER)
                   M64 P2  ; deactivate setter output to motion.probe-inpute
              o112 endif
-             (MSG,NEED TO UNPAUSE)                                            ; with old style prgram exit here https://github.com/linuxcnc-probe-screen/probe-screen-ng/pull/15#issuecomment-745364320
+             (MSG,NEED TO UNPAUSE)                                          ; with old style prgram exit here https://github.com/linuxcnc-probe-screen/probe-screen-ng/pull/15#issuecomment-745364320
              M0
         o111 elseif [#5400 GT 1 AND #<_hal[and2.combined-probe.in0]> EQ 0]
              (MSG,PROBE WITHOUT TOOL 1 AS PROBE NOT ALLOWED)
              M65 P1  ; activate probe output to motion.probe-inpute
              M65 P2  ; activate setter output to motion.probe-inpute
              M2
-        o111 elseif [#5400 EQ 0]
-             (MSG,PROBE WITH TOOL 0 NOT ALLOWED)
-             M65 P1  ; activate probe output to motion.probe-inpute
-             M65 P2  ; activate setter output to motion.probe-inpute
-             M2
         o111 else
-             #<error> = 3.5
+             #<error> = #<hooked_macro>
         o111 endif
 
-;Mode 6 to 9 PROBE AND SETTER ARE NOT ALLWAYS NEEDED
-   o110 elseif [#<hooked_macro> GT 5 AND #<hooked_macro> LT 10]
+;Mode 6 PROBE AND SETTER ARE NOT ALLWAYS NEEDED
+   o110 elseif [#<hooked_macro> EQ 6]
         o121 if [#5400 EQ 1 AND #<_hal[and2.combined-probe.in0]> EQ 0]
              M5 M9 ; stop spindle, mist+flood off useless but paranoid mode
              (MSG,PROBE AS TOOL 1 SEEM TO BE READY)
@@ -71,13 +61,6 @@ o<psng_hook> sub
              o122 endif
              (MSG,NEED TO UNPAUSE)
              M0
-;        o121 elseif [#5400 EQ 1 AND #<_hal[and2.combined-probe.in0]> EQ 0 AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<flagvalue_after_gotots>]
-;             M5 M9 ; stop spindle, mist+flood off useless but paranoid mode
-;             (MSG,PROBE AS TOOL 1 AND SETTER SEEM TO BE READY FOR DIAMETER MEASUREMENT)
-;             M64 P1  ; deactivate probe output to motion.probe-inpute for use TOOL SETTER FOR MEASURING PROBE diameter
-;             M65 P2  ; activate setter output to motion.probe-inpute
-;             (MSG,NEED TO UNPAUSE)
-;             M0
         o121 elseif [#5400 GT 1 AND #<_hal[and2.combined-setter.in0]> EQ 0]
              o123 if [#<_hal[and2.combined-probe.in0]> EQ 0]
                   M5 M9 ; stop spindle, mist+flood off useless but paranoid mode
@@ -93,18 +76,12 @@ o<psng_hook> sub
                   (MSG,NEED TO UNPAUSE)
                   M0
              o123 endif
-        o121 elseif [#5400 EQ 0]
-             M5 M9 ; stop spindle, mist+flood off useless but paranoid mode
-             (MSG,PROBE WITH TOOL 0 NOT ALLOWED)
-             M65 P1  ; activate probe output to motion.probe-inpute
-             M65 P2  ; activate setter output to motion.probe-inpute
-             M2
         o121 else
-             #<error> = 6.9
+             #<error> = #<hooked_macro>
         o121 endif
 
 ;Mode 2 & 4 PROBE IS NOT ALLWAYS NEEDED BUT SETTER IS ALLWAYS NEEDED TOOL ALREADY IN SPINDLE
-   o110 elseif [#<hooked_macro> EQ 2 OR #<hooked_macro> EQ 4 OR #<hooked_macro> EQ 10]
+   o110 elseif [#<hooked_macro> EQ 2 OR #<hooked_macro> EQ 4 OR #<hooked_macro> EQ 7]
         M5 M9 ; stop spindle, mist+flood off useless but paranoid mode
              
         o131 if [#5400 EQ 1 AND #<_hal[and2.combined-probe.in0]> EQ 0 AND #<_hal[and2.combined-setter.in0]> EQ 0]
@@ -126,13 +103,8 @@ o<psng_hook> sub
                   (MSG,NEED TO UNPAUSE)
                   M0
              o132 endif
-        o131 elseif [#5400 EQ 0]
-             (MSG,PROBE WITH TOOL 0 NOT ALLOWED)
-             M65 P1  ; activate probe output to motion.probe-inpute
-             M65 P2  ; activate setter output to motion.probe-inpute
-             M2
         o131 else
-             #<error> = 2.4
+             #<error> = #<hooked_macro>
         o131 endif
 
 ;Mode 1 TOOLCHANGE ONLY
@@ -146,8 +118,9 @@ o<psng_hook> sub
              (MSG,MOUNT AND CONNECT TOUCH PROBE FOR TOOLCHANGE 1)
              M65 P1  ; activate probe output to motion.probe-inpute
              M65 P2  ; activate setter output to motion.probe-inpute
-             (MSG,NEED TO UNPAUSE)
-             M0                                                                                                  ; need to found a way for wait until probe is connected
+             ;(MSG,NEED TO UNPAUSE)
+             ;M0                                                                                                  ; need to found a way for wait until probe is connected
+             M2                                                                                                  ; need to found a way for wait until probe is connected
         o141 elseif [#<_selected_tool> EQ 1 AND #<_hal[and2.combined-probe.in0]> EQ 0 AND #<_hal[and2.combined-setter.in0]> EQ 0]
              (MSG,SETTER AND TOUCH PROBE FOR TOOLCHANGE 1 SEEM TO BE READY)
              M65 P1  ; activate probe output to motion.probe-inpute
@@ -160,24 +133,21 @@ o<psng_hook> sub
              (MSG,!!! REMOVE AND UNCONNECT TOUCH PROBE FOR TOOLCHANGE > 2)
              M64 P1  ; deactivate probe output to motion.probe-inpute
              M65 P2  ; activate setter output to motion.probe-inpute
-             (MSG,NEED TO UNPAUSE)
-             M0                                                                                                   ; need to found a way for wait until probe is unconnected
+             ;(MSG,NEED TO UNPAUSE)
+             ;M0                                                                                                  ; need to found a way for wait until probe is unconnected
+             M2                                                                                                  ; need to found a way for wait until probe is connected
         o141 elseif [#<_selected_tool> EQ 0]
              ;(MSG,RESET TOOL NUMBER)
              M65 P1  ; activate probe output to motion.probe-inpute
              M65 P2  ; activate setter output to motion.probe-inpute
-             ;M2 NO NEED TO CANCEL HERE M6T0 is used for reset actual tool
+             ;M2 ; DO NOT CANCEL HERE M6T0 is used for reset actual tool
         o141 else
-             #<error> = 1
+             #<error> = #<hooked_macro>
         o141 endif
 
    o110 else
         ; nothing to do here
-        (MSG,PSNG HOOK NUMBER FAIL : call_hook #<hooked_macro>)
-        M5 M9 ; stop spindle, mist+flood off useless but paranoid mode
-        M65 P1  ; activate probe output to motion.probe-inpute
-        M65 P2  ; activate setter output to motion.probe-inpute
-        M2
+        #<error> = 999
    o110 endif
 
 
@@ -185,21 +155,26 @@ o<psng_hook> sub
    o200 if [#<error> GT 0]
              M5 M9 ; stop spindle, mist+flood off useless but paranoid mode
              
-             o201 if [#<_hal[and2.combined-probe.in0]> EQ 1 AND #<_hal[and2.combined-setter.in0]> EQ 1]
+             o201 if [#<error> EQ 888 OR #<error> EQ 999]
+                  (MSG,PSNG HOOK NUMBER FAIL : call_hook #<hooked_macro>)e
+                  M65 P1  ; activate probe output to motion.probe-inpute
+                  M65 P2  ; activate setter output to motion.probe-inpute
+             o201 elseif [#5400 EQ 0]
+                  (MSG,PROBE WITH TOOL 0 NOT ALLOWED)
+                  M65 P1  ; activate probe output to motion.probe-inpute
+                  M65 P2  ; activate setter output to motion.probe-inpute
+             o201 elseif [#<_hal[and2.combined-probe.in0]> EQ 1 AND #<_hal[and2.combined-setter.in0]> EQ 1]
                   (MSG,ERROR PROBE AND TOOL SETTER MISSING)
                   M65 P1  ; activate probe output to motion.probe-inpute
                   M65 P2  ; activate setter output to motion.probe-inpute
-                  M2
              o201 elseif [#<_hal[and2.combined-probe.in0]> EQ 1]
                   (MSG,ERROR PROBE MISSING OR TOOL SELECTED IS NOT 1)
                   M64 P1  ; deactivate probe output to motion.probe-inpute
                   M65 P2  ; activate setter output to motion.probe-inpute
-                  M2
              o201 elseif [#<_hal[and2.combined-setter.in0]> EQ 1]
                   (MSG,ERROR TOOL SETTER MISSING)
                   M65 P1  ; activate probe output to motion.probe-inpute
                   M64 P2  ; deactivate setter output to motion.probe-inpute
-                  M2
              o201 else
                   ; nothing to do here
                   (MSG,PSNG HOOK FAIL AND CANCEL THE WHOLE OPERATION)
@@ -208,8 +183,8 @@ o<psng_hook> sub
                   (DEBUG,tool #5400, asked_tool #<_selected_tool>, setter_error #<_hal[and2.combined-setter.in0]>, probe_error #<_hal[and2.combined-probe.in0]>, call_hook #<hooked_macro>, error_flag #<error>)
                   M65 P1  ; activate probe output to motion.probe-inpute
                   M65 P2  ; activate setter output to motion.probe-inpute
-                  M2
              o201 endif
+                  M2
    o200 endif
 
 
