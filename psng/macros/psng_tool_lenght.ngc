@@ -1,4 +1,4 @@
-o<psng_drill_tool_setter> sub
+o<psng_tool_lenght> sub
 o<psng_hook> call [10]
 (DEBUG,BETA TEST FOR CREATE TOOL TABLE Z)
 
@@ -60,5 +60,5 @@ G43
 
 o<psng_goto_changepos> call
 o<psng_hook_end> call
-o<psng_drill_tool_setter> endsub
+o<psng_tool_lenght> endsub
 M2

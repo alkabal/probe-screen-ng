@@ -2489,9 +2489,8 @@ class ProbeScreenClass(object):
         print("tooldiameter from tooltable =", tooldiameter)
         self.command.mode(linuxcnc.MODE_MDI)
         self.command.wait_complete()
-        if self.ocode("o<psng_diam_tool_setter> call") == -1:
+        if self.ocode("o<psng_tool_diameter> call") == -1:
             return
-        #self.ocode("o<psng_diam_tool_setter> call")
         if self.halcomp["toolchange-number"] == 0:
             print("Please mount a tool and ask M6Tx and check if exist with a correct diameter in the tooltable")
             return
@@ -2788,7 +2787,7 @@ class ProbeScreenClass(object):
         # Start psng_drill_tool_setter.ngc
         self.command.mode(linuxcnc.MODE_MDI)
         self.command.wait_complete()
-        if self.ocode("o<psng_drill_tool_setter> call") == -1:
+        if self.ocode("o<psng_tool_lenght> call") == -1:
             return
         a = self.stat.probed_position
         print("probeposwoffset =", self.probed_position_with_offsets())

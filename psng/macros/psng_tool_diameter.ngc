@@ -1,4 +1,4 @@
-o<psng_diam_tool_setter> sub
+o<psng_tool_diameter> sub
 o<psng_hook> call [2]
 
 o90 if [#<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0]
@@ -65,6 +65,6 @@ G10 L2 P0     Z#<backup_offset>
 ; next for x+ x- y+ y- done inside python code
 
 o<psng_hook_end> call [2]                          ; workaround not wanted here need to be inside python code after other movement but without this i have some issue after Z the program fail
-o<psng_diam_tool_setter> endsub
+o<psng_tool_diameter> endsub
 M2
 
