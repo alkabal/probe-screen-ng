@@ -36,9 +36,10 @@ o300 if [#<_hal[probe.use_toolmeasurement]> EQ 0 OR #<_selected_tool> EQ 0]
      o<psng_hook_end> call
 o300 return [3] ; indicate no tool measurement possible with tool 0
 o300 elseif [#<_hal[probe.use_toolmeasurement]> EQ 1 AND #<_selected_tool> GT 0 AND [#<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0]]
+     o<psng_hook_end> call
      (MSG,TOOLSETTER HEIGHT NOT CONFIGURED)
      (MSG,TOOLCHANGE CANCELED)
-     o<psng_hook_end> call
+     G4P0.2
      M2            ; no M6 here for canceling toolchange
 o300 endif
 

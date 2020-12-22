@@ -1,0 +1,36 @@
+o<psng_probe_table> sub
+o<psng_hook> call [3]
+
+;o90 if [#<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0]
+;    (MSG,TOOLSETTER HEIGHT NOT CONFIGURED)       ; THIS IS NORMAL IN THIS MACRO : DO NOT USE
+;o90 return [-1] ; indicate setterheight <= 0
+;o90 endif
+
+o100 if [#<_hal[probe.ps_searchvel]> LE 0]
+o100 return [-2] ; indicate searchvel <= 0
+o100 endif
+
+o200 if [#<_hal[probe.ps_probevel]> LE 0]
+o200 return [-3] ; indicate probevel <= 0
+o200 endif
+
+o300 if [#5400 EQ 0 OR #5400 GT 1]
+     (MSG,PROBE TABLE WITH TOOL 0 NOT ALLOWED)
+     G4P0.2
+     M2
+o300 endif
+
+#<z>=#<_z> (save current Z position)
+
+o<psng_start_touch_probing> call
+
+;o400 if [#<_hal[probe.set_zero]> EQ 1]
+;     G10 L20 P0 Z#<_hal[probe.ps_offs_z]>
+;o400 endif
+
+(back to start point)
+G1 Z#<z> F#<_ini[TOOLSENSOR]RAPID_SPEED>
+
+o<psng_hook_end> call
+o<psng_probe_table> endsub
+M2

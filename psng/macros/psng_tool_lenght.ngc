@@ -1,5 +1,5 @@
 o<psng_tool_lenght> sub
-o<psng_hook> call [10]
+o<psng_hook> call [7]
 (DEBUG,BETA TEST FOR CREATE TOOL TABLE Z)
 
 o90 if [#<_hal[probe.setterheight]> EQ 0 OR #<_hal[probe.setterheight]> LT 0]
@@ -17,6 +17,7 @@ o200 endif
 
 o300 if [#5400 LT 1]
      (MSG,TOOLLENGHT WITH TOOL 0 NOT ALLOWED)
+     G4P0.2
      M2
 o300 endif
 

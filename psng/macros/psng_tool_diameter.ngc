@@ -16,6 +16,7 @@ o200 endif
 
 o300 if [#5400 EQ 0]
      (MSG,MEASURE TOOL DIAMETER AND LENGHT NOT ALLOWED WITH TOOL 0)
+     G4P0.2
      M2
 o300 endif
 

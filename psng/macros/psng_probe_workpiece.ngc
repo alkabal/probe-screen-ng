@@ -16,11 +16,12 @@ o200 endif
 
 o300 if [#5400 EQ 0 OR #5400 GT 1]
      (MSG,PROBING WORKPIECE IS NOT ALLOWED WITHOUT 3D PROBE AS TOOL 1)
+     G4P0.2
      M2
 o300 endif
 
 (cancel Z offsets)
-;G92.1
+;G92.1                                                           ; Need to think about that here
 ;G49
 G10 L2 P0 Z0 ; reset G54 offset for correct tool measurement
 
