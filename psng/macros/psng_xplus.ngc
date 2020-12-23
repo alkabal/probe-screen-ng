@@ -1,5 +1,8 @@
 o<psng_xplus> sub
-o<psng_hook> call [6]                   ; particular case this is not wanted here but need to be added in python code
+
+#<hook_flag_diameter> = #1
+
+o<psng_hook> call [6] [#<hook_flag_diameter>]   ; particular case this is not wanted here but need to be added in python code
 
 o100 if [#<_hal[probe.ps_searchvel]> LE 0]
 o100 return [-1] ; indicate searchvel <= 0

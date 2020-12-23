@@ -65,7 +65,12 @@ G10 L2 P0     Z#<backup_offset>
 
 ; next for x+ x- y+ y- done inside python code
 
-o<psng_hook_end> call [2]                          ; workaround not wanted here need to be inside python code after other movement but without this i have some issue after Z the program fail
+(start spindle if you use reverse spindle for tool diameter measuring)
+ o500 if [#5400 GT 1 AND #<_hal[probe.use_rotate_spindle]> EQ 1 AND #<_hal[and2.combined-probe.in0]> EQ 1]
+      M4 S#<_ini[TOOLSENSOR]REV_ROTATION_SPEED>
+ o500 endif
+
+o<psng_hook_end> call                           ; workaround this is not really wanted here but this seem to be needed to clear message before try next XY move
 o<psng_tool_diameter> endsub
 M2
 
