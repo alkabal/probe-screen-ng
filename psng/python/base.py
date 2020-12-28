@@ -112,20 +112,20 @@ class ProbeScreenBase(object):
         self.stat.poll()
         while self.stat.interp_state != linuxcnc.INTERP_IDLE:
             if self.error_poll() == -1:
-                print("interp_err_status = %s" % self.stat.interp_state)
-                print("interp_err_queue = %s" % self.stat.queue)
-                print("interp_err_operator = %s" % linuxcnc.OPERATOR_ERROR)
-                print("interp_err_nml = %s" % linuxcnc.NML_ERROR)
-                return -1
+            #    print("interp_err_status = %s" % self.stat.interp_state)
+            #    print("interp_err_queue = %s" % self.stat.queue)
+            #    print("interp_err_operator = %s" % linuxcnc.OPERATOR_ERROR)
+            #    print("interp_err_nml = %s" % linuxcnc.NML_ERROR)
+            #    return -1
             self.command.wait_complete()
             self.stat.poll()
         self.command.wait_complete()
         if self.error_poll() == -1:
-            print("interp_err2_status = %s" % self.stat.interp_state)
-            print("interp_err2_queue = %s" % self.stat.queue)
-            print("interp_err2_operator = %s" % linuxcnc.OPERATOR_ERROR)
-            print("interp_err2_nml = %s" % linuxcnc.NML_ERROR)
-            return -1
+        #    print("interp_err2_status = %s" % self.stat.interp_state)
+        #    print("interp_err2_queue = %s" % self.stat.queue)
+        #    print("interp_err2_operator = %s" % linuxcnc.OPERATOR_ERROR)
+        #    print("interp_err2_nml = %s" % linuxcnc.NML_ERROR)
+        #    return -1
         return 0
 
     def error_poll(self):  
@@ -160,16 +160,16 @@ class ProbeScreenBase(object):
                 "halcmd getp gmoccapy.error ", shell=True, stdout=PIPE
             ).stdout.read()
 
-            # Somethong need to be done for add to gmoccapy a hal pin probe.user.abort
+            # Something need to be done for add to gmoccapy a hal pin probe.user.abort
 
         else:
             print("Unable to poll %s GUI for errors" % self.display)
             return -1
         
-        print("check_abort_axisrc %s" % abort_axisrc)
-        print("check_abort_halui %s" % abort_halui)
-        print("check_stop_halui %s" % stop_halui)
-        print("check_abort_axisui %s" % abort_axisui)
+        #print("check_abort_axisrc %s" % abort_axisrc)
+        #print("check_abort_halui %s" % abort_halui)
+        #print("check_stop_halui %s" % stop_halui)
+        #print("check_abort_axisui %s" % abort_axisui)
             
         if "TRUE" in abort_axisrc or "TRUE" in abort_halui or "TRUE" in stop_halui or "TRUE" in abort_axisui:
             text = "Program stopped by user"
@@ -388,14 +388,14 @@ class ProbeScreenBase(object):
         g5x_offset = list(self.stat.g5x_offset)
         g92_offset = list(self.stat.g92_offset)
         tool_offset = list(self.stat.tool_offset)
-        print "g5x_offset=",g5x_offset
-        print "g92_offset=",g92_offset
-        print "tool_offset=",tool_offset
-        print "actual position=",self.stat.actual_position
-        print "position=",self.stat.position
-        print "joint_actual position=",self.stat.joint_actual_position
-        print "joint_position=",self.stat.joint_position
-        print "probed position=",self.stat.probed_position
+        #print "g5x_offset=",g5x_offset
+        #print "g92_offset=",g92_offset
+        #print "tool_offset=",tool_offset
+        #print "actual position=",self.stat.actual_position
+        #print "position=",self.stat.position
+        #print "joint_actual position=",self.stat.joint_actual_position
+        #print "joint_position=",self.stat.joint_position
+        #print "probed position=",self.stat.probed_position
         for i in range(0, len(probed_position) - 1):
             coord[i] = (
                 probed_position[i] - g5x_offset[i] - g92_offset[i] - tool_offset[i]

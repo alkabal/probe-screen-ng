@@ -46,6 +46,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
             "chk_use_tool_measurement"
         )
         self.tool_dia = self.builder.get_object("tool_dia")
+        self.down = self.builder.get_object("down")                                                       # It is something outdated ?
 
         self.chk_use_tool_measurement.set_active(
             self.prefs.getpref("use_toolmeasurement", False, bool)
