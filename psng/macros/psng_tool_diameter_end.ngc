@@ -1,0 +1,13 @@
+o<psng_tool_diameter_end> sub
+
+M5                                   ; stop spindle if you use reverse spindle for tool diameter measuring
+
+G43                                  ; need think about add G41 or similar here
+
+#<_hook_flag_diameter> = 0           ; reset diam flag for restore standard result in hook
+
+o<psng_goto_changepos> call
+o<psng_hook_end> call
+o<psng_tool_diameter_end> endsub
+M2
+

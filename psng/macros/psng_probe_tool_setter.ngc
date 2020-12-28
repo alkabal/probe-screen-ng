@@ -1,25 +1,31 @@
 o<psng_probe_tool_setter> sub
 o<psng_hook> call [4]
 
-; first go up then move to tool sensor position
-G90
-G53 G0 Z[#<_ini[AXIS_Z]MAX_LIMIT>+#<_ini[PROBE_SCREEN]Z_SAFE_TRAVEL_OFFSET>]
-G53 G0 X[#<_ini[TOOLSENSOR]X>] Y[#<_ini[TOOLSENSOR]Y>]
-G53 G0 Z[#<_ini[TOOLSENSOR]Z>]
+o<psng_config_check> call
+
+o90 if [#<_hal[probe.probedtable]> EQ 0]
+     o<psng_hook_end> call
+    (ABORT,BEFORE MEASURE TOOL SETTER HEIGH YOU NEED TO PROBE TABLE OR SET IT MANUALLY!)
+o90 endif
+
+o300 if [#<_current_tool> LT 1 OR #<_current_tool> GT 1]
+     o<psng_hook_end> call
+     (ABORT,PROBING TOOLSETTER IS NOT ALLOWED WITHOUT 3D PROBE AS TOOL 1)
+o300 endif
+
+o<psng_goto_toolsensor> call
 
 (cancel all Z offsets)
 G92.1
 G49
-G10 L20 P0  Z[#<_hal[axis.z.pos-cmd]>]
+G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>]
 
-G91
-F #<_hal[probe.ps_searchvel]>
-G38.2 Z #<_ini[TOOLSENSOR]MAXPROBE>
-G1 Z[#<_hal[probe.ps_probe_latch]>] F#<_ini[TOOLSENSOR]RAPID_SPEED>
-F #<_hal[probe.ps_probevel]>
-G4 P0.5
-G38.2 Z[-#<_hal[probe.ps_probe_latch]>*2]
-G90
-G53 G1 Z[#<_ini[TOOLSENSOR]Z>] F#<_ini[TOOLSENSOR]RAPID_SPEED>	
+o<psng_start_setter_probing> call
+
+; only internal setterheight value are changed inside python code
+
+
+o<psng_goto_changepos> call
+o<psng_hook_end> call
 o<psng_probe_tool_setter> endsub
 M2

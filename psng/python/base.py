@@ -112,20 +112,42 @@ class ProbeScreenBase(object):
         self.stat.poll()
         while self.stat.interp_state != linuxcnc.INTERP_IDLE:
             if self.error_poll() == -1:
+                print("interp_err_status = %s" % self.stat.interp_state)
+                print("interp_err_queue = %s" % self.stat.queue)
+                print("interp_err_operator = %s" % linuxcnc.OPERATOR_ERROR)
+                print("interp_err_nml = %s" % linuxcnc.NML_ERROR)
                 return -1
             self.command.wait_complete()
             self.stat.poll()
         self.command.wait_complete()
         if self.error_poll() == -1:
+            print("interp_err2_status = %s" % self.stat.interp_state)
+            print("interp_err2_queue = %s" % self.stat.queue)
+            print("interp_err2_operator = %s" % linuxcnc.OPERATOR_ERROR)
+            print("interp_err2_nml = %s" % linuxcnc.NML_ERROR)
             return -1
         return 0
 
-    def error_poll(self):
+    def error_poll(self):  
+        
+        abort_halui = Popen(
+            "halcmd getp halui.abort ", shell=True, stdout=PIPE
+        ).stdout.read()
+        stop_halui = Popen(
+            "halcmd getp halui.program.stop ", shell=True, stdout=PIPE
+        ).stdout.read()
+      
         if "axis" in self.display:
             # AXIS polls for errors every 0.2 seconds, so we wait slightly longer to make sure it's happened.
             time.sleep(0.25)
             error_pin = Popen(
                 "halcmd getp probe.user.error ", shell=True, stdout=PIPE
+            ).stdout.read()
+            abort_axisrc = Popen(
+                "halcmd getp probe.user.abort ", shell=True, stdout=PIPE
+            ).stdout.read()
+            abort_axisui = Popen(
+                "halcmd getp axisui.abort ", shell=True, stdout=PIPE
             ).stdout.read()
 
         elif "gmoccapy" in self.display:
@@ -138,8 +160,23 @@ class ProbeScreenBase(object):
                 "halcmd getp gmoccapy.error ", shell=True, stdout=PIPE
             ).stdout.read()
 
+            # Somethong need to be done for add to gmoccapy a hal pin probe.user.abort
+
         else:
             print("Unable to poll %s GUI for errors" % self.display)
+            return -1
+        
+        print("check_abort_axisrc %s" % abort_axisrc)
+        print("check_abort_halui %s" % abort_halui)
+        print("check_stop_halui %s" % stop_halui)
+        print("check_abort_axisui %s" % abort_axisui)
+            
+        if "TRUE" in abort_axisrc or "TRUE" in abort_halui or "TRUE" in stop_halui or "TRUE" in abort_axisui:
+            text = "Program stopped by user"
+            self.add_history("Error: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+            print("Error", text)
+            self.command.mode(linuxcnc.MODE_MANUAL)
+            self.command.wait_complete()
             return -1
 
         if "TRUE" in error_pin:
@@ -341,9 +378,9 @@ class ProbeScreenBase(object):
             if "Z" in s:
                 tmpz = tmpz - z + self.halcomp["ps_offs_z"]
                 c += " Z%s" % tmpz
-            self.gcode(c)
-            time.sleep(1)
-
+            if self.gcode(c) == -1:                                                                                 # Need your review choosing this or only self.gcode(c) timesleep
+               return
+               
     def probed_position_with_offsets(self):
         self.stat.poll()
         probed_position = list(self.stat.probed_position)
@@ -351,7 +388,14 @@ class ProbeScreenBase(object):
         g5x_offset = list(self.stat.g5x_offset)
         g92_offset = list(self.stat.g92_offset)
         tool_offset = list(self.stat.tool_offset)
-
+        print "g5x_offset=",g5x_offset
+        print "g92_offset=",g92_offset
+        print "tool_offset=",tool_offset
+        print "actual position=",self.stat.actual_position
+        print "position=",self.stat.position
+        print "joint_actual position=",self.stat.joint_actual_position
+        print "joint_position=",self.stat.joint_position
+        print "probed position=",self.stat.probed_position
         for i in range(0, len(probed_position) - 1):
             coord[i] = (
                 probed_position[i] - g5x_offset[i] - g92_offset[i] - tool_offset[i]

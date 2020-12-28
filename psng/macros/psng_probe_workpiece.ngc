@@ -1,27 +1,32 @@
 o<psng_probe_workpiece> sub
 o<psng_hook> call [5]
 
-(cancel all Z offsets)
-G49
-G92.1
-G10 L20 P0  Z[#<_hal[axis.z.pos-cmd]>]
+o<psng_config_check> call
 
-G91
-F #<_hal[probe.ps_searchvel]>
-G38.2 Z[-#<_hal[probe.ps_probe_max]>]
-G1 Z[#<_hal[probe.ps_probe_latch]>] F#<_ini[TOOLSENSOR]RAPID_SPEED>
-F #<_hal[probe.ps_probevel]>
-G4 P0.5
-G38.2 Z[-#<_hal[probe.ps_probe_latch]>*2]
-(G1 Z[#<_hal[probe.ps_probe_max]>] F#<_ini[TOOLSENSOR]RAPID_SPEED>)
+o90 if [#<_hal[probe.setterheight]> LE 0 AND #<_hal[probe.probedtable]> EQ 0]
+     o<psng_hook_end> call
+    (ABORT,TOOLSETTER HEIGHT OR TABLE POSITION NOT PROBED/CONFIGURED)
+o90 endif
 
-(hardcode distance must not be the same)
-o11 if [#<_metric>]
-	G1 Z4 F#<_ini[TOOLSENSOR]RAPID_SPEED>
-o11 else
-	G1 Z0.2 F#<_ini[TOOLSENSOR]RAPID_SPEED>
-o11 endif
+o300 if [#<_current_tool> LT 1 OR #<_current_tool> GT 1]
+     o<psng_hook_end> call
+     (ABORT,PROBING WORKPIECE IS NOT ALLOWED WITHOUT 3D PROBE AS TOOL 1)
+o300 endif
 
-G90
+(cancel Z offsets But use tool offset)
+G43          ; force tool offset for correct calc
+G10 L2 P0 Z0 ; reset G54 offset for correct pieces measurement
+
+#<z>=#<_z> (save current Z position)
+
+o<psng_start_touch_probing> call
+
+; "G10 L2 P0 Z%s" % blockheight is done inside python code due to multiple possibility for set workpieces height
+
+(back to start point)
+G1 Z#<z> F#<_ini[TOOLSENSOR]RAPID_SPEED>   
+
+          
+o<psng_hook_end> call
 o<psng_probe_workpiece> endsub
 M2
