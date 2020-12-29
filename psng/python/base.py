@@ -116,7 +116,7 @@ class ProbeScreenBase(object):
             #    print("interp_err_queue = %s" % self.stat.queue)
             #    print("interp_err_operator = %s" % linuxcnc.OPERATOR_ERROR)
             #    print("interp_err_nml = %s" % linuxcnc.NML_ERROR)
-            #    return -1
+                return -1
             self.command.wait_complete()
             self.stat.poll()
         self.command.wait_complete()
@@ -125,18 +125,18 @@ class ProbeScreenBase(object):
         #    print("interp_err2_queue = %s" % self.stat.queue)
         #    print("interp_err2_operator = %s" % linuxcnc.OPERATOR_ERROR)
         #    print("interp_err2_nml = %s" % linuxcnc.NML_ERROR)
-        #    return -1
+            return -1
         return 0
 
-    def error_poll(self):  
-        
+    def error_poll(self):
+
         abort_halui = Popen(
             "halcmd getp halui.abort ", shell=True, stdout=PIPE
         ).stdout.read()
         stop_halui = Popen(
             "halcmd getp halui.program.stop ", shell=True, stdout=PIPE
         ).stdout.read()
-      
+
         if "axis" in self.display:
             # AXIS polls for errors every 0.2 seconds, so we wait slightly longer to make sure it's happened.
             time.sleep(0.25)
@@ -165,12 +165,12 @@ class ProbeScreenBase(object):
         else:
             print("Unable to poll %s GUI for errors" % self.display)
             return -1
-        
+
         #print("check_abort_axisrc %s" % abort_axisrc)
         #print("check_abort_halui %s" % abort_halui)
         #print("check_stop_halui %s" % stop_halui)
         #print("check_abort_axisui %s" % abort_axisui)
-            
+
         if "TRUE" in abort_axisrc or "TRUE" in abort_halui or "TRUE" in stop_halui or "TRUE" in abort_axisui:
             text = "Program stopped by user"
             self.add_history("Error: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -380,7 +380,7 @@ class ProbeScreenBase(object):
                 c += " Z%s" % tmpz
             if self.gcode(c) == -1:                                                                                 # Need your review choosing this or only self.gcode(c) timesleep
                return
-               
+
     def probed_position_with_offsets(self):
         self.stat.poll()
         probed_position = list(self.stat.probed_position)

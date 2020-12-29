@@ -48,12 +48,6 @@
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">1</property>
   </object>
-  <object class="GtkAdjustment" id="adj_setter_height">
-    <property name="lower">-2000</property>
-    <property name="upper">2000</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
   <object class="GtkAdjustment" id="adj_probe_latch">
     <property name="upper">100</property>
     <property name="step_increment">0.10000000000000001</property>
@@ -66,6 +60,12 @@
   </object>
   <object class="GtkAdjustment" id="adj_search_vel">
     <property name="upper">10000</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adj_setter_height">
+    <property name="lower">-2000</property>
+    <property name="upper">2000</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
@@ -97,6 +97,7 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="EMC_Action_Reload" id="vcp_action_reload"/>
   <object class="GtkWindow" id="window1">
     <property name="can_focus">False</property>
     <property name="border_width">1</property>
@@ -2238,85 +2239,6 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="down">
-                            <property name="width_request">72</property>
-                            <property name="height_request">58</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="tooltip_text" translatable="yes">Z-</property>
-                            <signal name="released" handler="on_btn_probe_table_released" swapped="no"/>
-                            <child>
-                              <object class="GtkImage" id="image12">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="pixbuf">icons/down.png</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="x">450</property>
-                            <property name="y">72</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="tool_dia">
-                            <property name="width_request">72</property>
-                            <property name="height_request">58</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="tooltip_text" translatable="yes">Tool diam</property>
-                            <signal name="released" handler="on_btn_tool_dia_released" swapped="no"/>
-                            <child>
-                              <object class="GtkImage" id="image47">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="pixbuf">icons/tool_dia.png</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="x">750</property>
-                            <property name="y">72</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkCheckButton" id="chk_use_rotate_spindle">
-                            <property name="height_request">35</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="relief">half</property>
-                            <property name="image_position">bottom</property>
-                            <property name="draw_indicator">True</property>
-                            <signal name="toggled" handler="on_chk_use_rotate_spindle_toggled" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="x">775</property>
-                            <property name="y">30</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="HAL_LED" id="hal_led_rotate_spindle">
-                            <property name="width_request">35</property>
-                            <property name="height_request">35</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="blink_color">#a0a0a0a0a0a0</property>
-                            <property name="led_blink_rate">500</property>
-                            <property name="led_shiny">True</property>
-                            <property name="off_color">#a0a0a0a0a0a0</property>
-                            <property name="on_color">#a0a0a0a0a0a0</property>
-                            <property name="pick_color_blink">#d8d84242ffff</property>
-                            <property name="pick_color_off">#a0a0a0a0a0a0</property>
-                          </object>
-                          <packing>
-                            <property name="x">815</property>
-                            <property name="y">35</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkButton" id="lx_out">
                             <property name="width_request">104</property>
                             <property name="height_request">62</property>
@@ -2411,14 +2333,208 @@
                             <property name="label_xalign">0</property>
                             <child>
                               <object class="GtkAlignment" id="alignment1">
-                                <property name="width_request">200</property>
-                                <property name="height_request">30</property>
+                                <property name="width_request">500</property>
+                                <property name="height_request">125</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkFixed" id="fixed3">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <child>
+                                      <object class="GtkButton" id="down">
+                                        <property name="width_request">90</property>
+                                        <property name="height_request">65</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="tooltip_text" translatable="yes">Z-</property>
+                                        <signal name="released" handler="on_btn_probe_table_released" swapped="no"/>
+                                        <child>
+                                          <object class="GtkImage" id="image12">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="pixbuf">icons/down.png</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="x">2</property>
+                                        <property name="y">55</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="tool_lenght">
+                                        <property name="width_request">90</property>
+                                        <property name="height_request">65</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="tooltip_text" translatable="yes">Tool lenght</property>
+                                        <signal name="released" handler="on_btn_tool_lenght_released" swapped="no"/>
+                                        <child>
+                                          <object class="GtkImage" id="image52">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="pixbuf">icons/tool_lenght.png</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="x">410</property>
+                                        <property name="y">55</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="btn_probe_tool_setter">
+                                        <property name="use_action_appearance">False</property>
+                                        <property name="related_action">vcp_action_reload</property>
+                                        <property name="width_request">100</property>
+                                        <property name="height_request">80</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="tooltip_text" translatable="yes">TS Height</property>
+                                        <property name="use_underline">True</property>
+                                        <signal name="clicked" handler="on_btn_probe_tool_setter_released" swapped="no"/>
+                                        <child>
+                                          <object class="GtkImage" id="image45">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="pixbuf">icons/ts_height.png</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="x">110</property>
+                                        <property name="y">40</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton" id="spbtn_setter_height">
+                                        <property name="width_request">90</property>
+                                        <property name="height_request">40</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="invisible_char">●</property>
+                                        <property name="width_chars">8</property>
+                                        <property name="invisible_char_set">True</property>
+                                        <property name="primary_icon_activatable">False</property>
+                                        <property name="secondary_icon_activatable">False</property>
+                                        <property name="primary_icon_sensitive">True</property>
+                                        <property name="secondary_icon_sensitive">True</property>
+                                        <property name="adjustment">adj_setter_height</property>
+                                        <property name="digits">3</property>
+                                        <property name="numeric">True</property>
+                                        <signal name="key-press-event" handler="on_spbtn_setter_height_key_press_event" swapped="no"/>
+                                        <signal name="value-changed" handler="on_spbtn_setter_height_value_changed" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="x">210</property>
+                                        <property name="y">75</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="tool_dia">
+                                        <property name="width_request">90</property>
+                                        <property name="height_request">65</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="tooltip_text" translatable="yes">Tool diam</property>
+                                        <signal name="released" handler="on_btn_tool_dia_released" swapped="no"/>
+                                        <child>
+                                          <object class="GtkImage" id="image47">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="pixbuf">icons/tool_dia.png</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="x">310</property>
+                                        <property name="y">55</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="label1">
+                                        <property name="width_request">150</property>
+                                        <property name="height_request">40</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">&lt;b&gt;Rotate spindle&lt;/b&gt;</property>
+                                        <property name="use_markup">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="x">350</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkCheckButton" id="chk_use_rotate_spindle">
+                                        <property name="width_request">25</property>
+                                        <property name="height_request">25</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="relief">half</property>
+                                        <property name="image_position">bottom</property>
+                                        <property name="draw_indicator">True</property>
+                                        <signal name="toggled" handler="on_chk_use_rotate_spindle_toggled" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="x">290</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="label9">
+                                        <property name="width_request">90</property>
+                                        <property name="height_request">40</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">TS Height</property>
+                                      </object>
+                                      <packing>
+                                        <property name="x">210</property>
+                                        <property name="y">30</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="HAL_LED" id="hal_led_rotate_spindle">
+                                        <property name="width_request">100</property>
+                                        <property name="height_request">80</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="blink_color">#a0a0a0a0a0a0</property>
+                                        <property name="led_blink_rate">500</property>
+                                        <property name="led_shiny">True</property>
+                                        <property name="off_color">#a0a0a0a0a0a0</property>
+                                        <property name="on_color">#a0a0a0a0a0a0</property>
+                                        <property name="pick_color_blink">#d8d84242ffff</property>
+                                        <property name="pick_color_off">#a0a0a0a0a0a0</property>
+                                      </object>
+                                      <packing>
+                                        <property name="x">325</property>
+                                        <property name="y">5</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="HAL_LED" id="hal_led_set_m6">
+                                        <property name="width_request">100</property>
+                                        <property name="height_request">80</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="blink_color">#0dbfef8050f4</property>
+                                        <property name="led_blink_rate">0</property>
+                                        <property name="led_shiny">True</property>
+                                        <property name="off_color">#a0a0a0a0a0a0</property>
+                                        <property name="on_color">#0dbfef8050f4</property>
+                                        <property name="pick_color_blink">#0dbfef8050f4</property>
+                                        <property name="pick_color_off">#a0a0a0a0a0a0</property>
+                                      </object>
+                                      <packing>
+                                        <property name="x">40</property>
+                                      </packing>
+                                    </child>
                                   </object>
                                 </child>
                               </object>
@@ -2428,8 +2544,8 @@
                             </child>
                           </object>
                           <packing>
-                            <property name="x">530</property>
-                            <property name="y">1</property>
+                            <property name="x">440</property>
+                            <property name="y">5</property>
                           </packing>
                         </child>
                         <child>
@@ -2460,7 +2576,7 @@
                         <child>
                           <object class="GtkSpinButton" id="spbtn_block_height">
                             <property name="width_request">90</property>
-                            <property name="height_request">35</property>
+                            <property name="height_request">40</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="invisible_char">●</property>
@@ -2478,7 +2594,7 @@
                           </object>
                           <packing>
                             <property name="x">100</property>
-                            <property name="y">40</property>
+                            <property name="y">35</property>
                           </packing>
                         </child>
                         <child>
@@ -2490,75 +2606,13 @@
                           </object>
                           <packing>
                             <property name="x">105</property>
-                            <property name="y">10</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="btn_probe_tool_setter">
-                            <property name="use_action_appearance">False</property>
-                            <property name="related_action">vcp_action_reload</property>
-                            <property name="width_request">100</property>
-                            <property name="height_request">80</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="tooltip_text" translatable="yes">TS Height</property>
-                            <property name="use_underline">True</property>
-                            <signal name="clicked" handler="on_btn_probe_tool_setter_released" swapped="no"/>
-                            <child>
-                              <object class="GtkImage" id="image45">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="pixbuf">icons/ts_height.png</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="x">550</property>
-                            <property name="y">50</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkSpinButton" id="spbtn_setter_height">
-                            <property name="width_request">90</property>
-                            <property name="height_request">35</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="invisible_char">●</property>
-                            <property name="width_chars">8</property>
-                            <property name="invisible_char_set">True</property>
-                            <property name="primary_icon_activatable">False</property>
-                            <property name="secondary_icon_activatable">False</property>
-                            <property name="primary_icon_sensitive">True</property>
-                            <property name="secondary_icon_sensitive">True</property>
-                            <property name="adjustment">adj_setter_height</property>
-                            <property name="digits">3</property>
-                            <property name="numeric">True</property>
-                            <signal name="key-press-event" handler="on_spbtn_setter_height_key_press_event" swapped="no"/>
-                            <signal name="value-changed" handler="on_spbtn_setter_height_value_changed" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="x">650</property>
-                            <property name="y">93</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label9">
-                            <property name="width_request">100</property>
-                            <property name="height_request">35</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">TS Height</property>
-                          </object>
-                          <packing>
-                            <property name="x">650</property>
-                            <property name="y">50</property>
+                            <property name="y">5</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkCheckButton" id="chk_use_tool_measurement">
-                            <property name="width_request">100</property>
-                            <property name="height_request">35</property>
+                            <property name="width_request">25</property>
+                            <property name="height_request">25</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -2569,7 +2623,7 @@
                           </object>
                           <packing>
                             <property name="x">450</property>
-                            <property name="y">30</property>
+                            <property name="y">10</property>
                           </packing>
                         </child>
                         <child>
@@ -2582,63 +2636,8 @@
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
-                            <property name="x">440</property>
-                            <property name="y">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="HAL_LED" id="hal_led_set_m6">
-                            <property name="width_request">35</property>
-                            <property name="height_request">35</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="blink_color">#0dbfef8050f4</property>
-                            <property name="led_blink_rate">0</property>
-                            <property name="led_shiny">True</property>
-                            <property name="off_color">#a0a0a0a0a0a0</property>
-                            <property name="on_color">#0dbfef8050f4</property>
-                            <property name="pick_color_blink">#0dbfef8050f4</property>
-                            <property name="pick_color_off">#a0a0a0a0a0a0</property>
-                          </object>
-                          <packing>
-                            <property name="x">490</property>
-                            <property name="y">35</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label1">
-                            <property name="width_request">140</property>
-                            <property name="height_request">35</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Rotate spindle&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
-                          </object>
-                          <packing>
-                            <property name="x">765</property>
-                            <property name="y">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="tool_lenght">
-                            <property name="width_request">72</property>
-                            <property name="height_request">58</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="tooltip_text" translatable="yes">Tool lenght</property>
-                            <signal name="released" handler="on_btn_tool_lenght_released" swapped="no"/>   
-                            <child>
-                              <object class="GtkImage" id="image52">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="pixbuf">icons/tool_lenght.png</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="x">870</property>
-                            <property name="y">72</property>
+                            <property name="x">510</property>
+                            <property name="y">15</property>
                           </packing>
                         </child>
                       </object>
@@ -2727,5 +2726,4 @@
       </object>
     </child>
   </object>
-  <object class="EMC_Action_Reload" id="vcp_action_reload"/>
 </interface>

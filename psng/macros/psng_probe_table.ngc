@@ -8,12 +8,12 @@ o300 if [#<_current_tool> LT 1 OR #<_current_tool> GT 1]
      (ABORT,PROBE TABLE WITH TOOL 0 NOT ALLOWED)
 o300 endif
 
-#<z>=#<_z> (save current Z position)
 
 (cancel all Z offsets)
 G92.1
 G49
 G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>]
+#<z>=#<_z> (save current Z position)
 
 o<psng_start_touch_probing> call
 

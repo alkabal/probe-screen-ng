@@ -114,22 +114,24 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         else:
             # to set the hal pin with correct values we emit a toogled
             if self.chk_use_tool_measurement.get_active():
-                self.frm_probe_pos.set_sensitive(True)
+                self.frm_probe_pos.set_sensitive(False)
                 self.halcomp["use_toolmeasurement"] = True
             else:
-                self.frm_probe_pos.set_sensitive(False)
+                self.frm_probe_pos.set_sensitive(True)
                 self.chk_use_tool_measurement.set_sensitive(True)
 
     # ----------------
     # Remap M6 Buttons
     # ----------------
     # Tickbox from gui for enable disable remap (with saving pref)
+    # Logic is now inverted for set.sensitive this is more logic : when remap is enabled you can't change settings so setting to be done before activate remap.
     def on_chk_use_tool_measurement_toggled(self, gtkcheckbutton, data=None):
         if gtkcheckbutton.get_active():
-            self.frm_probe_pos.set_sensitive(True)
-            self.halcomp["use_toolmeasurement"] = True
-        else:
             self.frm_probe_pos.set_sensitive(False)
+            self.halcomp["use_toolmeasurement"] = True
+            self.halcomp["use_rotate_spindle"] = False
+        else:
+            self.frm_probe_pos.set_sensitive(True)
             self.halcomp["use_toolmeasurement"] = False
         self.prefs.putpref("use_toolmeasurement", gtkcheckbutton.get_active(), bool)
         self.hal_led_set_m6.hal_pin.set(gtkcheckbutton.get_active())
