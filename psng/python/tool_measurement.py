@@ -55,7 +55,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         self.chk_use_rotate_spindle = self.builder.get_object(
             "chk_use_rotate_spindle"
         )
-        
+
         # make the pins for tool measurement
         self.halcomp.newpin("use_toolmeasurement", hal.HAL_BIT, hal.HAL_OUT)
         self.halcomp.newpin("probedtable", hal.HAL_FLOAT, hal.HAL_OUT)
@@ -74,11 +74,11 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
 
         self.halcomp.newpin("toolchange-diameter", hal.HAL_FLOAT, hal.HAL_IN)
         self.halcomp.newpin("use_rotate_spindle", hal.HAL_BIT, hal.HAL_OUT)
-        
+
         if self.chk_use_rotate_spindle.get_active():
             self.halcomp["use_rotate_spindle"] = True
             self.hal_led_rotate_spindle.hal_pin.set(1)
-            
+
         self._init_tool_sensor_data()
 
     # Read the ini file config [TOOLSENSOR] section
@@ -96,7 +96,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
 
         self.spbtn_block_height.set_value(self.prefs.getpref("blockheight", 0.0, float))
         self.halcomp["blockheight"] = self.spbtn_block_height.get_value()
-        
+
         if (
             not self.xpos
             or not self.ypos
@@ -129,7 +129,6 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         if gtkcheckbutton.get_active():
             self.frm_probe_pos.set_sensitive(False)
             self.halcomp["use_toolmeasurement"] = True
-            self.halcomp["use_rotate_spindle"] = False
         else:
             self.frm_probe_pos.set_sensitive(True)
             self.halcomp["use_toolmeasurement"] = False
@@ -143,9 +142,9 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
             self.hal_led_rotate_spindle.hal_pin.set(gtkcheckbutton.get_active())
         else:
             self.halcomp["use_rotate_spindle"] = False
-            self.hal_led_rotate_spindle.hal_pin.set(gtkcheckbutton.get_active()) 
-        
-  
+            self.hal_led_rotate_spindle.hal_pin.set(gtkcheckbutton.get_active())
+
+
 
     # Spinbox for setter height with autosave value inside machine pref file
     def on_spbtn_setter_height_key_press_event(self, gtkspinbutton, data=None):
@@ -188,9 +187,18 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
             self.buffer.delete(i, self.buffer.get_end_iter())
         i.set_line(0)
         self.buffer.insert(i, "%s \n" % c)
-        
+
     # Down drill bit to tool setter for measuring it vs table probing result
     def on_btn_tool_lenght_released(self, gtkbutton, data=None):
+        tooltable = self.inifile.find("EMCIO", "TOOL_TABLE")
+        if not tooltable:
+            print(_("**** auto_tool_measurement ERROR ****"))
+            print(
+                _(
+                    "**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****"
+                )
+            )
+            sys.exit()
         # Start psng_tool_lenght.ngc
         if self.ocode("o<psng_tool_lenght> call") == -1:
             return
@@ -199,7 +207,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         self.display_result_z(tlres)
         print("tool lenght =", tlres)
         self.add_history(gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, tlres, 0, 0)
-        
+
     # Down probe to tool setter for measuring it vs table probing result
     def on_btn_probe_tool_setter_released(self, gtkbutton, data=None):
         # Start psng_probe_tool_setter.ngc
@@ -310,8 +318,8 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         xcres = 0.5 * (xpres + xmres)
         #    print("xcres = ",xcres)
         self.display_result_xc(xcres)
-        
-        
+
+
         # move Z to start point up
         if self.z_clearance_up() == -1:
             return
@@ -362,14 +370,14 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         ycres = 0.5 * (ypres + ymres)
         #    print("ycres = ",ycres)
         self.display_result_yc(ycres)
-        
+
         diam = ymres - ypres
         diamofsset = diam + (2*self.tsoffset)
         print("old tooldiameter from tooltable =", tooldiameter)
         print("new tooldiameter measured =", diam)
         print("new tooldiameter compensated set in tootlable =", diamofsset)
         self.display_result_d(diam)
-        
+
         self.stat.poll()                                                                      # well it is really needed here
         self.add_history(
             gtkbutton.get_tooltip_text(),

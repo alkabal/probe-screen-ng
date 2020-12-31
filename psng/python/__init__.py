@@ -24,6 +24,7 @@ from .settings import ProbeScreenSettings
 from .tool_measurement import ProbeScreenToolMeasurement
 from .workpiece_measurement import ProbeScreenWorkpieceMeasurement
 from .zero import ProbeScreenZero
+from .input_management import ProbeScreenInputManagement
 
 
 def get_handlers(halcomp, builder, useropts):
@@ -35,4 +36,5 @@ def get_handlers(halcomp, builder, useropts):
         ProbeScreenToolMeasurement(halcomp, builder, useropts),
         ProbeScreenWorkpieceMeasurement(halcomp, builder, useropts),
         ProbeScreenLengthMeasurement(halcomp, builder, useropts),
+        ProbeScreenInputManagement(halcomp, builder, useropts),
     ]

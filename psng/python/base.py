@@ -141,13 +141,13 @@ class ProbeScreenBase(object):
             # AXIS polls for errors every 0.2 seconds, so we wait slightly longer to make sure it's happened.
             time.sleep(0.25)
             error_pin = Popen(
-                "halcmd getp probe.user.error ", shell=True, stdout=PIPE
+                "halcmd getp axisui.error ", shell=True, stdout=PIPE
             ).stdout.read()
-            abort_axisrc = Popen(
-                "halcmd getp probe.user.abort ", shell=True, stdout=PIPE
-            ).stdout.read()
+            #error_pin = Popen(
+            #    "halcmd getp axisui.user.error ", shell=True, stdout=PIPE
+            #).stdout.read()
             abort_axisui = Popen(
-                "halcmd getp axisui.abort ", shell=True, stdout=PIPE
+                "halcmd getp axisui.user.abort ", shell=True, stdout=PIPE
             ).stdout.read()
 
         elif "gmoccapy" in self.display:
@@ -155,12 +155,11 @@ class ProbeScreenBase(object):
             # setting, so we wait slightly longer to make sure it's happened.
             ms = int(self.inifile.find("DISPLAY", "CYCLE_TIME") or 250) + 50
             time.sleep(ms / 100)
-
             error_pin = Popen(
                 "halcmd getp gmoccapy.error ", shell=True, stdout=PIPE
             ).stdout.read()
 
-            # Something need to be done for add to gmoccapy a hal pin probe.user.abort
+            # Something need to be done for add to gmoccapy a hal pin gmoccapy.probe.user.abort gmoccapy.probe.user.error
 
         else:
             print("Unable to poll %s GUI for errors" % self.display)
@@ -171,13 +170,6 @@ class ProbeScreenBase(object):
         #print("check_stop_halui %s" % stop_halui)
         #print("check_abort_axisui %s" % abort_axisui)
 
-        if "TRUE" in abort_axisrc or "TRUE" in abort_halui or "TRUE" in stop_halui or "TRUE" in abort_axisui:
-            text = "Program stopped by user"
-            self.add_history("Error: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-            print("Error", text)
-            self.command.mode(linuxcnc.MODE_MANUAL)
-            self.command.wait_complete()
-            return -1
 
         if "TRUE" in error_pin:
             text = "See notification popup"
@@ -186,7 +178,13 @@ class ProbeScreenBase(object):
             self.command.mode(linuxcnc.MODE_MANUAL)
             self.command.wait_complete()
             return -1
-
+        elif "TRUE" in abort_axisui or "TRUE" in abort_halui or "TRUE" in stop_halui:
+            text = "Program stopped by user"
+            self.add_history("Info: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+            print("Info", text)
+            self.command.mode(linuxcnc.MODE_MANUAL)
+            self.command.wait_complete()
+            return -1
         return 0
 
     # --------------------------

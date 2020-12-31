@@ -37,7 +37,7 @@ o<psng_hook> sub
                   M64 P2  ; deactivate setter output to motion.probe-inpute
              o112 endif
              M0
-             o<clear-axis-notif> call                                                             ; with old style prgram exit here https://github.com/linuxcnc-probe-screen/probe-screen-ng/pull/15#issuecomment-745364320
+             o<clear-axis-notif> call
         o111 elseif [#<_current_tool> GT 1 AND #<_hal[and2.combined-probe.in0]> EQ 0]
              (MSG,PROBING WITHOUT TOOL 1 AS PROBE NOT ALLOWED)
              M65 P1  ; activate probe output to motion.probe-inpute
@@ -58,7 +58,7 @@ o<psng_hook> sub
                   (MSG,PROBE AS TOOL 1 SEEM TO BE READY)
                   (MSG,NEED TO UNPAUSE)
                   M65 P1  ; activate probe output to motion.probe-inpute
-                  M65 P2  ; activate setter output to motion.probe-inpute              ;Keep this for safety is something fail with probe the setter can stop the job this can append using tool diameter measurement with probe
+                  M65 P2  ; activate setter output to motion.probe-inpute   ;Keep this for safety is something touch the setter when the job is executed this can stop the job
                   o123 if [#<_hal[and2.combined-setter.in0]> EQ 1]
                        (MSG,!!! INHIBIT UNUSED BUT MISSING SETTER)
                        M64 P2  ; deactivate setter output to motion.probe-inpute
@@ -68,12 +68,12 @@ o<psng_hook> sub
              o122 elseif [#<_hook_flag_diameter> EQ 1]
                   (MSG,PROBE AS TOOL 1 SEEM TO BE READY FOR PROBE AUTODIAMETER)
                   M65 P1  ; activate probe output to motion.probe-inpute
-                  M65 P2  ; activate setter output to motion.probe-inpute              ;Keep this for safety is something fail with probe the setter can stop the job this can append using tool diameter measurement with probe
+                  M65 P2  ; activate setter output to motion.probe-inpute   ;Keep this for safety
                   o124 if [#<_hal[and2.combined-setter.in0]> EQ 1]
                        (MSG,!!! INHIBIT UNUSED BUT MISSING SETTER)
                        M64 P2  ; deactivate setter output to motion.probe-inpute
                   o124 endif
-                  M1                                                                   ; M1 is better here allowing user to pause or bypass pause for diameter measurement
+                  M1                                                        ; M1 is better here allowing user to pause or bypass pause for diameter measurement
              o122 endif
         o121 elseif [#<_current_tool> GT 1 AND #<_hal[and2.combined-setter.in0]> EQ 0]
              o125 if [#<_hal[and2.combined-probe.in0]> EQ 0]
@@ -85,11 +85,11 @@ o<psng_hook> sub
                   (ABORT,PLEASE REMOVE TOUCH PROBE AND TRY AGAIN)
              ;o125 return [-10]
              o125 elseif [#<_hook_flag_diameter> EQ 1]
-                  ;M5 M9 ; stop spindle, mist+flood off useless but paranoid mode         ;DO NOT DO HERE BECAUSE SPINDLE REVERSE RUN IS POSSIBLE USING TOOL > 2 DIAMETER MEASUREMENT
-                  (MSG,USE REAL TOOL FOR DIAMETER MEASUREMENT)
+                  ;M5 M9 ; stop spindle, mist+flood off useless but paranoid mode   ;DO NOT DO HERE BECAUSE SPINDLE REVERSE RUN IS POSSIBLE USING TOOL > 2 DIAMETER MEASUREMENT
+                  ;(MSG,USE REAL TOOL FOR DIAMETER MEASUREMENT)
                   M64 P1  ; deactivate probe output to motion.probe-inpute
                   M65 P2  ; activate setter output to motion.probe-inpute
-                  M1                                                                      ; M1 is better here allowing user to pause or bypass pause for diameter measurement
+                  M1                                                        ; M1 is better here allowing user to pause or bypass pause for diameter measurement
              o125 endif
         o121 else
              #<error> = #<hooked_macro>

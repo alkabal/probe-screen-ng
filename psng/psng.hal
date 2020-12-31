@@ -13,3 +13,15 @@ net tool-prep-number       probe.toolchange-prep-number <=   iocontrol.0.tool-pr
 net tool-prep-loop         iocontrol.0.tool-prepare     <=   iocontrol.0.tool-prepared
 net tool-diameter          probe.toolchange-diameter    <=   halui.tool.diameter
 
+unlinkp  motion.digital-out-01
+unlinkp  motion.digital-out-02
+
+
+net touch-probe-not-in <= probe.probe_inhibited
+net touch-setter-not-in <= probe.setter_inhibited
+
+net touch-probe-inv-lock => probe.probe_connected
+net touch-setter-inv-lock => probe.setter_connected
+
+
+
