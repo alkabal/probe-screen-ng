@@ -141,11 +141,8 @@ class ProbeScreenBase(object):
             # AXIS polls for errors every 0.2 seconds, so we wait slightly longer to make sure it's happened.
             time.sleep(0.25)
             error_pin = Popen(
-                "halcmd getp axisui.error ", shell=True, stdout=PIPE
+                "halcmd getp axisui.user.error ", shell=True, stdout=PIPE
             ).stdout.read()
-            #error_pin = Popen(
-            #    "halcmd getp axisui.user.error ", shell=True, stdout=PIPE
-            #).stdout.read()
             abort_axisui = Popen(
                 "halcmd getp axisui.user.abort ", shell=True, stdout=PIPE
             ).stdout.read()
@@ -165,7 +162,6 @@ class ProbeScreenBase(object):
             print("Unable to poll %s GUI for errors" % self.display)
             return -1
 
-        #print("check_abort_axisrc %s" % abort_axisrc)
         #print("check_abort_halui %s" % abort_halui)
         #print("check_stop_halui %s" % stop_halui)
         #print("check_abort_axisui %s" % abort_axisui)
