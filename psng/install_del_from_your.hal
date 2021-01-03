@@ -6,9 +6,3 @@
 #net tool-number iocontrol.0.tool-number
 #net tool-prep-number iocontrol.0.tool-prep-number => hal_manualtoolchange.number
 #net tool-prepare-loopback iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
-
-
-
-# For use clear axis notification You also need to use a POSTGUI_HALFILE file and add this inside
-net clear-axis-message <= motion.digital-out-00
-net clear-axis-message => axisui.notifications-clear-info

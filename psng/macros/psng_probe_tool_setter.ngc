@@ -1,5 +1,4 @@
 o<psng_probe_tool_setter> sub
-;o<psng_hook> call [4]
 
 o<psng_config_check> call
 
@@ -28,6 +27,5 @@ o<psng_start_setter_probing> call
 G43
 
 o<psng_goto_changepos> call
-;o<psng_hook_end> call
 o<psng_probe_tool_setter> endsub
 M2

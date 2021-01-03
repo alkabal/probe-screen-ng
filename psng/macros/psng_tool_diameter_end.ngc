@@ -5,7 +5,6 @@ M5                                   ; stop spindle if you use reverse spindle f
 G43                                  ; need think about add G41 or similar here
 
 o<psng_goto_changepos> call
-;o<psng_hook_end> call
 o<psng_tool_diameter_end> endsub
 M2
 

@@ -83,7 +83,6 @@ class ProbeScreenBase(object):
         self._lb_probe_yc = self.builder.get_object("lb_probe_yc")
         self._lb_probe_a = self.builder.get_object("lb_probe_a")
 
-
     # --------------------------
     #
     #  MDI Command Methods
@@ -163,7 +162,7 @@ class ProbeScreenBase(object):
                 "halcmd getp gmoccapy.error ", shell=True, stdout=PIPE
             ).stdout.read()
 
-            # Something need to be done for add to gmoccapy a hal pin gmoccapy.abort 
+            # Something need to be done for add to gmoccapy a hal pin gmoccapy.abort
 
         else:
             print("Unable to poll %s GUI for errors" % self.display)

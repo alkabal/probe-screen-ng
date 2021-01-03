@@ -7,10 +7,6 @@ o<psng_hook_end> sub
 ; You should NOT edit this file directly, instead, you should copy this file
 ; from the psng/macros folder, to the macros folder and edit the copy.
 
-; The #1 variable will be set to the name of the macro being hooked. For
-; example, when o<psng_manual_change> is called, #1 will be set to the
-; value "psng_manual_change".
-#<hooked_macro_end> = #1
 
 o<psng_hook_end> endsub
 M2

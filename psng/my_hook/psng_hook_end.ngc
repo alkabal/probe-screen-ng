@@ -1,3 +1,4 @@
+o<psng_hook_end> sub
 ; End users can copy this file to their macros folder and edit as necessary.
 
 ; This is useful to allow machine specific logic, such as checking HAL input
@@ -5,12 +6,6 @@
 
 ; You should NOT edit this file directly, instead, you should copy this file
 ; from the psng/macros folder, to the macros folder and edit the copy.
-
-o<psng_hook_end> sub
-; The #1 variable will be set to the name of the macro being hooked. For
-; example, when o<psng_manual_change> is called, #1 will be set to the
-; value "psng_manual_change".
-#<hooked_macro_end> = #1
 
              M65 P1  ; activate probe output to motion.probe-inpute (logic inverted)
              M65 P2  ; activate setter output to motion.probe-inpute (logic inverted)
