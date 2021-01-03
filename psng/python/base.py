@@ -83,6 +83,7 @@ class ProbeScreenBase(object):
         self._lb_probe_yc = self.builder.get_object("lb_probe_yc")
         self._lb_probe_a = self.builder.get_object("lb_probe_a")
 
+
     # --------------------------
     #
     #  MDI Command Methods
@@ -141,11 +142,17 @@ class ProbeScreenBase(object):
             # AXIS polls for errors every 0.2 seconds, so we wait slightly longer to make sure it's happened.
             time.sleep(0.25)
             error_pin = Popen(
-                "halcmd getp axisui.user.error ", shell=True, stdout=PIPE
+                "halcmd getp axisui.error ", shell=True, stdout=PIPE
             ).stdout.read()
             abort_axisui = Popen(
-                "halcmd getp axisui.user.abort ", shell=True, stdout=PIPE
+                "halcmd getp axisui.abort ", shell=True, stdout=PIPE
             ).stdout.read()
+            #error_pin = Popen(
+            #    "halcmd getp axisui.user.error ", shell=True, stdout=PIPE
+            #).stdout.read()
+            #abort_axisui = Popen(
+            #    "halcmd getp axisui.user.abort ", shell=True, stdout=PIPE
+            #).stdout.read()
 
         elif "gmoccapy" in self.display:
             # gmoccapy polls for errors every 0.25 seconds, OR whatever value is in the [DISPLAY]CYCLE_TIME ini
@@ -156,12 +163,13 @@ class ProbeScreenBase(object):
                 "halcmd getp gmoccapy.error ", shell=True, stdout=PIPE
             ).stdout.read()
 
-            # Something need to be done for add to gmoccapy a hal pin gmoccapy.probe.user.abort gmoccapy.probe.user.error
+            # Something need to be done for add to gmoccapy a hal pin gmoccapy.abort 
 
         else:
             print("Unable to poll %s GUI for errors" % self.display)
             return -1
 
+        #print("check_abort_axisrc %s" % abort_axisrc)
         #print("check_abort_halui %s" % abort_halui)
         #print("check_stop_halui %s" % stop_halui)
         #print("check_abort_axisui %s" % abort_axisui)

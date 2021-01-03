@@ -39,6 +39,8 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
 
     # Lx OUT
     def on_lx_out_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move X - edge_lenght- xy_clearance
         tmpx = self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"]
         s = """G91
@@ -109,9 +111,13 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # Ly OUT
     def on_ly_out_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move Y - edge_lenght- xy_clearance
         tmpy = self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"]
         s = """G91
@@ -183,9 +189,13 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # Lx IN
     def on_lx_in_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         if self.z_clearance_down() == -1:
             return
         # move X - edge_lenght Y + xy_clearance
@@ -247,9 +257,13 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
         if self.z_clearance_up() == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # Ly IN
     def on_ly_in_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         if self.z_clearance_down() == -1:
             return
         # move Y - edge_lenght + xy_clearance
@@ -312,3 +326,5 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
         if self.z_clearance_up() == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return

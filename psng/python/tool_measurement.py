@@ -192,13 +192,11 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
     def on_btn_tool_lenght_released(self, gtkbutton, data=None):
         tooltable = self.inifile.find("EMCIO", "TOOL_TABLE")
         if not tooltable:
-            print(_("**** auto_tool_measurement ERROR ****"))
-            print(
-                _(
-                    "**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****"
-                )
-            )
-            sys.exit()
+            self.gcode("(ABORT,**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****)")
+            print(_("**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****"))
+            return
+        if self.ocode("o<psng_hook> call [10]") == -1:
+            return
         # Start psng_tool_lenght.ngc
         if self.ocode("o<psng_tool_lenght> call") == -1:
             return
@@ -207,9 +205,13 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         self.display_result_z(tlres)
         print("tool lenght =", tlres)
         self.add_history(gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, tlres, 0, 0)
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # Down probe to tool setter for measuring it vs table probing result
     def on_btn_probe_tool_setter_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [4]") == -1:
+            return
         # Start psng_probe_tool_setter.ngc
         if self.ocode("o<psng_probe_tool_setter> call") == -1:
             return
@@ -220,9 +222,13 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         print("probedtable =", self.halcomp["probedtable"])
         self.spbtn_setter_height.set_value(tsres)
         self.add_history(gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, tsres, 0, 0)
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # Down probe to workpiece for measuring it vs Know tool setter height
     def on_btn_probe_workpiece_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [5]") == -1:
+            return
         # Start psng_probe_workpiece.ngc
         if self.ocode("o<psng_probe_workpiece> call") == -1:
             return
@@ -233,9 +239,13 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         print("setterheight", self.halcomp["setterheight"])
         self.spbtn_block_height.set_value(pwres)                                                                    # this call update automatically the offset for workpiece
         self.add_history(gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, pwres, 0, 0)
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # Down probe to table for measuring it and use for calculate tool setter height and can set G10 L20 Z0 if you tick auto zero
     def on_btn_probe_table_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [3]") == -1:
+            return
         # Start psng_probe_table.ngc
         if self.ocode("o<psng_probe_table> call") == -1:
             return
@@ -246,6 +256,8 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         print("probedtable =", ptres)
         self.add_history(gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, ptres, 0, 0)
         self.set_zerro("Z", 0, 0, ptres)                                                                  # Using auto zero tickbox
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # TOOL TABLE CREATOR
     # TOOL DIA : use X only for find tool setter center and use only after that more accurate Y center value for determinig tool diameter
@@ -256,21 +268,19 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
     def on_btn_tool_dia_released(self, gtkbutton, data=None):
         tooltable = self.inifile.find("EMCIO", "TOOL_TABLE")
         if not tooltable:
-            print(_("**** auto_tool_measurement ERROR ****"))
-            print(
-                _(
-                    "**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****"
-                )
-            )
-            sys.exit()
+            self.gcode("(ABORT,**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****)")
+            print(_("**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****"))
+            return
+        toolnumber = self.halcomp["toolchange-number"]
         tooldiameter = self.halcomp["toolchange-diameter"]
         print("tool-number = %f" % self.halcomp["toolchange-number"])
         print("tooldiameter from tooltable =", tooldiameter)
+            
+        if self.ocode("o<psng_hook> call [2]") == -1:
+            return
         if self.ocode("o<psng_tool_diameter> call") == -1:
             return
-        if self.halcomp["toolchange-number"] == 0:
-            print("Please mount a tool and ask M6Tx and check if exist with a correct diameter in the tooltable")
-            return
+            
         # show Z result
         a = self.probed_position_with_offsets()
         zres = ((float(a[2])) - self.halcomp["setterheight"])
@@ -285,10 +295,16 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         G90""" % (tmpx)
         if self.gcode(s) == -1:
             return
+             
+        if self.ocode("o<psng_tool_diameter_check> call") == -1:
+            self.gcode("(ABORT,TOOL DIAMETER MEASUREMENT STOPPED)")
+            print("TOOL DIAMETER MEASUREMENT STOPPED")
+            return  
+            
         if self.z_clearance_down() == -1:
             return
         # Start psng_xplus.ngc
-        if self.ocode("o<psng_xplus> call [1]") == -1:
+        if self.ocode("o<psng_xplus> call") == -1:
             return
         # show X result
         a = self.probed_position_with_offsets()
@@ -308,7 +324,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         if self.z_clearance_down() == -1:
             return
         # Start psng_xminus.ngc
-        if self.ocode("o<psng_xminus> call [1]") == -1:
+        if self.ocode("o<psng_xminus> call") == -1:
             return
         # show X result
         a = self.probed_position_with_offsets()
@@ -340,7 +356,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         if self.z_clearance_down() == -1:
             return
         # Start psng_yplus.ngc
-        if self.ocode("o<psng_yplus> call [1]") == -1:
+        if self.ocode("o<psng_yplus> call") == -1:
             return
         # show Y result
         a = self.probed_position_with_offsets()
@@ -360,7 +376,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         if self.z_clearance_down() == -1:
             return
         # Start psng_yminus.ngc
-        if self.ocode("o<psng_yminus> call [1]") == -1:
+        if self.ocode("o<psng_yminus> call") == -1:
             return
         # show Y result
         a = self.probed_position_with_offsets()
@@ -372,10 +388,10 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         self.display_result_yc(ycres)
 
         diam = ymres - ypres
-        diamofsset = diam + (2*self.tsoffset)
+        diamwithofsset = diam + (2*self.tsoffset)
         print("old tooldiameter from tooltable =", tooldiameter)
         print("new tooldiameter measured =", diam)
-        print("new tooldiameter compensated set in tootlable =", diamofsset)
+        print("new tooldiameter compensated set in tootlable =", diamwithofsset)
         self.display_result_d(diam)
 
         self.stat.poll()                                                                      # well it is really needed here
@@ -391,15 +407,17 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
             0,
             0,
             zres,
-            diamofsset,
+            diamwithofsset,
             0,
         )
-        s = "G10 L1 P%f R%f" % (self.halcomp["toolchange-number"],(0.5*diamofsset))                # 0.14 seem to be needed for my setter adding the necessary distance for radial triggering probe (0.07mm each direction)
+        s = "G10 L1 P%f R%f" % (self.halcomp["toolchange-number"],(0.5*diamwithofsset))           # 0.14 seem to be needed for my setter adding the necessary distance for radial triggering probe (0.07mm each direction)
         if self.gcode(s) == -1:
             return
         if self.ocode("o<psng_tool_diameter_end> call") == -1:                                    # replace Z clearence and goto new center Y with return to tool change positon
+            return        
+        if self.ocode("o<psng_hook_end> call") == -1:
             return
-
+                
 
     # Here we create a manual tool change dialog
     def on_tool_change(self, gtkbutton, data=None):
@@ -407,42 +425,40 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         toolnumber = self.halcomp["toolchange-number"]
         toolprepnumber = self.halcomp["toolchange-prep-number"]
         print("tool-number =", toolnumber)
-        print("tool_prep_number =", toolprepnumber, change)
+        print("tool_prep_number =", toolprepnumber)
         if change:
             # if toolprepnumber = 0 we will get an error because we will not be able to get
             # any tooldescription, so we avoid that case
             if toolprepnumber == 0:
-                message = _("Please remove the mounted tool and press OK when done")
+                 print(_("**** RESET TO TOOL 0 ****"))
+                 self.halcomp["toolchange-changed"] = True
             else:
                 tooltable = self.inifile.find("EMCIO", "TOOL_TABLE")
                 if not tooltable:
-                    print(_("**** auto_tool_measurement ERROR ****"))
-                    print(
-                        _(
-                            "**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****"
-                        )
-                    )
-                    sys.exit()
-                CONFIGPATH = os.environ["CONFIG_DIR"]
-                toolfile = os.path.join(CONFIGPATH, tooltable)
-                self.tooledit1.set_filename(toolfile)
-                tooldescr = self.tooledit1.get_toolinfo(toolprepnumber)[16]
-                message = _(
-                    "Please change to tool\n\n# {0:d}     {1}\n\n then click OK."
-                ).format(toolprepnumber, tooldescr)
-            result = self.warning_dialog(message, title=_("Manual Toolchange"))
-            if result:
+                    self.gcode("(ABORT,**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****)")
+                    print(_("**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****"))
+                    return
+#                CONFIGPATH = os.environ["CONFIG_DIR"]
+#                toolfile = os.path.join(CONFIGPATH, tooltable)
+#                self.tooledit1.set_filename(toolfile)
+#                tooldescr = self.tooledit1.get_toolinfo(toolprepnumber)[16]
+#                message = _(
+#                    "Please change to tool\n\n# {0:d}     {1}\n\n then click OK."
+#                ).format(toolprepnumber, tooldescr)
+#            result = self.warning_dialog(message, title=_("Manual Toolchange"))
+#            if toolnumber == toolprepnumber:
                 self.halcomp["toolchange-changed"] = True
-            else:
-                print(
-                    "toolchange abort",
-                    toolnumber,
-                    self.halcomp["toolchange-prep-number"],
-                )
-                self.command.abort()
-                self.halcomp["toolchange-prep-number"] = toolnumber
-                self.halcomp["toolchange-change"] = False  # Is there any reason to do this to input pin ?
-                self.halcomp["toolchange-changed"] = True
-                self.warning_dialog(message)
+#            else:
+#                print(
+#                    "toolchange aborted",
+#                    toolnumber,
+#                    self.halcomp["toolchange-prep-number"],
+#                )
+#                self.command.abort()
+#                self.halcomp["toolchange-prep-number"] = toolnumber
+#                self.halcomp["toolchange-change"] = False  # Is there any reason to do this to input pin ?
+#                self.halcomp["toolchange-changed"] = True
+#                #self.warning_dialog("TOOLCHANGE ABORTED")
+#                self.gcode("(ABORT,**** TOOLCHANGE ABORTED ****)")
         else:
             self.halcomp["toolchange-changed"] = False

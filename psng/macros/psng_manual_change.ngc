@@ -6,7 +6,7 @@ o<psng_manual_change> sub
 ;(DEBUG,selected_tool=#<selected_tool> selected_pocket=#<selected_pocket>)
 
 ;otherwise after the M6 this information is gone!
-;#<tool> = #<selected_tool>
+#<tool> = #<selected_tool>
 #<pocket> = #<selected_pocket>
 
 ; we must execute this only in the milltask interpreter
@@ -23,6 +23,18 @@ o<psng_goto_changepos> call
 o100 if [#<_hal[probe.use_toolmeasurement]> EQ 0 OR #<_selected_tool> EQ 0]
      o110 if [#<_current_tool> EQ #<_selected_tool>]
           (MSG,SAME TOOL AS ACTUAL ASKED AND VALIDATED AUTOMATICALLY)
+          G43
+     o110 elseif [#<_hal[probe.use_toolmeasurement]> EQ 0 AND #<_selected_tool> GT 0] 
+          (DEBUG,PLEASE CHANGE TO TOOL #<_selected_tool>)
+          (MSG,NEED TO UNPAUSE OR ABORT)
+          M0
+     o<clear-axis-notif> call
+     G43
+     o110 elseif [#<_selected_tool> EQ 0]
+         (DEBUG,PLEASE REMOVE TOOL)
+         (MSG,NEED TO UNPAUSE OR ABORT)
+         M0
+     o<clear-axis-notif> call
      o110 endif
      M6          ; using the code being remapped here means 'use builtin behaviour' used here for M6T0
      G43
@@ -31,31 +43,40 @@ o100 return [3] ; indicate no tool measurement possible with tool 0
 o100 else
      o120 if [#<_current_tool> EQ #<_selected_tool>]
           (MSG,SAME TOOL AS ACTUAL SO MEASUREMENT START AUTOMATICALLY)
-          (MSG,NEED TO UNPAUSE)
+          (MSG,NEED TO UNPAUSE OR ABORT)
           M0
+          o<clear-axis-notif> call
      o120 endif
      
      o130 if [#<_hal[probe.ps_searchvel]> LE 0]
-         (MSG,SEARCH VELOCITY NOT CONFIGURED)
+          (MSG,SEARCH VELOCITY NOT CONFIGURED)
+          (MSG,TOOLCHANGE CANCELED)
      o130 return [-1] ; indicate searchvel <= 0
      o130 endif
      
      o140 if [#<_hal[probe.ps_probevel]> LE 0]
-         (MSG,PROBE VELOCITY NOT CONFIGURED)
+          (MSG,PROBE VELOCITY NOT CONFIGURED)
+          (MSG,TOOLCHANGE CANCELED)
      o140 return [-2] ; indicate probevel <= 0
      o140 endif
 
-     o150 if [#<_hal[probe.use_toolmeasurement]> EQ 1 AND #<_selected_tool> GT 0 AND #<_hal[probe.setterheight]> LE 0]
+     o150 if [#<_hal[probe.setterheight]> LE 0]
           (MSG,TOOLSETTER HEIGHT NOT CONFIGURED)
           (MSG,TOOLCHANGE CANCELED)
           ;G4P0.2
           ;M2            ; no M6 here for canceling toolchange
      o150 return [-3]
-     o150 endif
-
-     o<psng_hook> call [1]
-     
+     o150 endif     
 o100 endif
+
+o<psng_hook> call [1]
+
+o200 if [#<_current_tool> NE #<_selected_tool>]
+     (DEBUG,PLEASE CHANGE TO TOOL #<_selected_tool>)
+     (MSG,NEED TO UNPAUSE OR ABORT)
+     M0
+     o<clear-axis-notif> call
+o200 endif
 
 M6   ; using the code being remapped here means 'use builtin behaviour' used here for M6Tx
 
@@ -64,7 +85,7 @@ o<psng_goto_toolsensor> call                                                ; wi
 ; cancel tool offset
 ;G92.1                                                                      ; IS NOT WANTED HERE because this macro is used when program run or if needed better is use pause than reset
 G49
-G10 L2 P0 Z0 ; reset G54 offset for correct tool measurement                ; need to thinbk about use save restore like gotos
+G10 L2 P0 Z0 ; reset G54 offset for correct tool measurement                ; need to think about use save restore like tool lenght
 
 o<psng_start_setter_probing> call
 
@@ -73,9 +94,11 @@ o500 if [#5070 EQ 0]
 o500 return [-3] ; indicate probe contact failure to epilog
 o500 endif
 
-#<touch_result> = #5063
-G10 L1 P#<_selected_tool> Z[#<touch_result> - #<_hal[probe.setterheight]>]
-G10 L2 P0 Z#<_hal[probe.blockheight]> ; apply G54 offset again after correct tool measurement  ; need to thinbk about use save restore like gotos
+#<touch_result> = [#5063 - #<_hal[probe.setterheight]>]
+(print, probe Z=#<touch_result>)
+
+G10 L1 P#<_current_tool> Z[#<touch_result>]
+G10 L2 P0 Z#<_hal[probe.blockheight]> ; apply G54 offset again after correct tool measurement  ; need to think about use save restore like tool lenght
 
 (back to Z home position only)
 G53 G0 Z[#<_ini[AXIS_Z]MAX_LIMIT>+#<_ini[PROBE_SCREEN]Z_SAFE_TRAVEL_OFFSET>]

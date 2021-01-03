@@ -84,6 +84,8 @@ class ProbeScreenRotation(ProbeScreenBase):
 
     # Y+Y+
     def on_angle_yp_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         self.stat.poll()
         xstart = (
             self.stat.position[0]
@@ -153,9 +155,13 @@ class ProbeScreenRotation(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.rotate_coord_system(alfa)
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # Y-Y-
     def on_angle_ym_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         self.stat.poll()
         xstart = (
             self.stat.position[0]
@@ -225,9 +231,13 @@ class ProbeScreenRotation(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.rotate_coord_system(alfa)
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # X+X+
     def on_angle_xp_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         self.stat.poll()
         ystart = (
             self.stat.position[1]
@@ -296,9 +306,13 @@ class ProbeScreenRotation(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.rotate_coord_system(alfa)
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # X-X-
     def on_angle_xm_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         self.stat.poll()
         ystart = (
             self.stat.position[1]
@@ -367,6 +381,8 @@ class ProbeScreenRotation(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.rotate_coord_system(alfa)
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # --------------
     # Helper Methods

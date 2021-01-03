@@ -1,7 +1,7 @@
 o<psng_xplus> sub
-o<psng_hook> call [7]
+;o<psng_hook> call [7]
 
-;o<psng_config_check> call
+o<psng_config_check> call
 
 o300 if [#<_current_tool> LT 1]
      o<psng_hook_end> call
@@ -16,11 +16,11 @@ G38.2 X#<_hal[probe.ps_probe_max]>        F#<_hal[probe.ps_searchvel]>
 G38.4 X-#<_hal[probe.ps_probe_latch]>     F#<_hal[probe.ps_searchvel]>     ;DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
 G1    X-0.1                               F#<_hal[probe.ps_searchvel]>
 G38.2 X[#<_hal[probe.ps_probe_latch]>*2]  F#<_hal[probe.ps_probevel]>
-(print, probe X=#5061 )
+(print,probe X=#5061)
 G90
 (back to start point)
 G1 X#<x> F#<_ini[TOOLSENSOR]RAPID_SPEED>
 
-o<psng_hook_end> call                    ; particular case this is not wanted here but need to be added in python code
+;o<psng_hook_end> call                    ; particular case this is not wanted here but need to be added in python code
 o<psng_xplus> endsub
 M2

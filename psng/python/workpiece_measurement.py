@@ -47,6 +47,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
     # -------------------------------------------------
     # X+
     def on_xp_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move X - xy_clearance
         s = """G91
         G1 X-%f
@@ -87,9 +89,13 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("X")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # Y+
     def on_yp_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move Y - xy_clearance
         s = """G91
         G1 Y-%f
@@ -130,9 +136,13 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("Y")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # X-
     def on_xm_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move X + xy_clearance
         s = """G91
         G1 X%f
@@ -173,9 +183,13 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("X")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # Y-
     def on_ym_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move Y + xy_clearance
         s = """G91
         G1 Y%f
@@ -216,11 +230,15 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("Y")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # Corners
     # Move Probe manual under corner 2-3 mm
     # X+Y+
     def on_xpyp_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move X - xy_clearance Y + edge_lenght
         s = """G91
         G1 X-%f Y%f
@@ -287,9 +305,13 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # X+Y-
     def on_xpym_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move X - xy_clearance Y + edge_lenght
         s = """G91
         G1 X-%f Y-%f
@@ -355,9 +377,13 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # X-Y+
     def on_xmyp_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move X + xy_clearance Y + edge_lenght
         s = """G91
         G1 X%f Y%f
@@ -424,9 +450,13 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # X-Y-
     def on_xmym_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move X + xy_clearance Y - edge_lenght
         s = """G91
         G1 X%f Y-%f
@@ -493,9 +523,13 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # Center X+ X- Y+ Y-
     def on_xy_center_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move X - edge_lenght- xy_clearance
         tmpx = self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"]
         s = """G91
@@ -619,6 +653,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # --------------  Command buttons -----------------
     #               Measurement inside
@@ -628,6 +664,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
     # Move Probe manual under corner 2-3 mm
     # X+Y+
     def on_xpyp1_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move Y - edge_lenght X - xy_clearance
         s = """G91
         G1 X-%f Y-%f
@@ -689,9 +727,13 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # X+Y-
     def on_xpym1_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move Y + edge_lenght X - xy_clearance
         s = """G91
         G1 X-%f Y%f
@@ -753,9 +795,13 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # X-Y+
     def on_xmyp1_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move Y - edge_lenght X + xy_clearance
         s = """G91
         G1 X%f Y-%f
@@ -818,9 +864,13 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # X-Y-
     def on_xmym1_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         # move Y + edge_lenght X + xy_clearance
         s = """G91
         G1 X%f Y%f
@@ -882,9 +932,13 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.gcode(s) == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return
 
     # Hole Xin- Xin+ Yin- Yin+
     def on_xy_hole_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
         if self.z_clearance_down() == -1:
             return
         # move X - edge_lenght Y + xy_clearance
@@ -991,3 +1045,5 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.z_clearance_up() == -1:
             return
         self.set_zerro("XY")
+        if self.ocode("o<psng_hook_end> call") == -1:
+            return

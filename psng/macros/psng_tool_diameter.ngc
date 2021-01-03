@@ -1,11 +1,11 @@
 o<psng_tool_diameter> sub
-o<psng_hook> call [2]
+;o<psng_hook> call [2]
 
 o<psng_config_check> call
 
 o90 if [#<_hal[probe.setterheight]> LE 0]
      o<psng_hook_end> call
-    (ABORT,TOOLSETTER HEIGHT NOT CONFIGURED)
+    (ABORT,TOOLSETTER HEIGHT NOT PROBED/CONFIGURED)
 o90 endif
 
 o300 if [#<_current_tool> LT 1]
@@ -28,9 +28,10 @@ G91
 G1    Z[#<_hal[probe.ps_z_clearance]>*0.7] F#<_hal[probe.ps_searchvel]>     ; macro use ps_z_clearance*0.7 for allow tool to be en contact with setter pad
 G90
 
-#<touch_result> = #5063
-(DEBUG,touch #<touch_result> backoffset #<_backup_offset>)
-G10 L1 P#<_current_tool> Z[#<touch_result> - #<_hal[probe.setterheight]>]
+#<touch_result> = [#5063 - #<_hal[probe.setterheight]>]
+(print, probe Z=#<touch_result>)
+
+G10 L1 P#<_current_tool> Z[#<touch_result>]
 G10 L2 P0     Z#<_backup_offset>
 
 ; next for x+ x- y+ y- done inside python code
@@ -40,9 +41,7 @@ G10 L2 P0     Z#<_backup_offset>
       M4 S#<_ini[TOOLSENSOR]REV_ROTATION_SPEED>
  o500 endif
 
-#<_hook_flag_diameter> = 1                                                  ; set diam flag for change result in hook
-
-;o<psng_hook_end> call                                                      ; this is not really wanted here 
+;;;;;o<psng_hook_end> call                                                      ; this is not really wanted here 
 o<psng_tool_diameter> endsub
 M2
 
