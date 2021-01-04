@@ -24,6 +24,7 @@ o<psng_hook> sub
 
 
 o10 if [#<hooked_macro> GT 7]
+     o<psng_hook_end> call
     (ABORT, HOOK UNRECOGNIZED : #<hooked_macro>)
 o10 endif
 

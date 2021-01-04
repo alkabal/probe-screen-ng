@@ -1,12 +1,5 @@
 o<psng_xplus> sub
 
-o<psng_config_check> call
-
-o300 if [#<_current_tool> LT 1]
-     o<psng_hook_end> call
-     (ABORT,PROBE WITH TOOL 0 NOT ALLOWED)
-o300 endif
-
 ;ALKABAL ADD QUESTION : no need to cancel tool offset or cutercomp here if probe is used from tool table with diameter in tooltable ?
 
 #<x>=#<_x> (save start X position)

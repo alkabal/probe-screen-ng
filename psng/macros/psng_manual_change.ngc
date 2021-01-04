@@ -76,6 +76,11 @@ o200 if [#<_current_tool> NE #<_selected_tool>]
      o<clear-axis-notif> call
 o200 endif
 
+o300 if [#<_hal[motion.probe-input]> EQ 1]
+     o<psng_hook_end> call
+    (ABORT,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE AUTOLENGHT !!!)
+o300 endif
+
 M6   ; using the code being remapped here means 'use builtin behaviour' used here for M6Tx
 
 o<psng_goto_toolsensor> call                                                ; with G90 inside

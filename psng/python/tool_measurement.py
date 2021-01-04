@@ -188,29 +188,30 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         i.set_line(0)
         self.buffer.insert(i, "%s \n" % c)
 
-    # Down drill bit to tool setter for measuring it vs table probing result
-    def on_btn_tool_lenght_released(self, gtkbutton, data=None):
-        tooltable = self.inifile.find("EMCIO", "TOOL_TABLE")
-        if not tooltable:
-            self.gcode("(ABORT,**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****)")
-            print(_("**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****"))
+    # Down probe to table for measuring it and use for calculate tool setter height and can set G10 L20 Z0 if you tick auto zero
+    def on_btn_probe_table_released(self, gtkbutton, data=None):
+        if self.ocode("o<psng_hook> call [3]") == -1:
             return
-        if self.ocode("o<psng_hook> call [7]") == -1:
+        if self.ocode("o<psng_config_check> call [1]") == -1:
             return
-        # Start psng_tool_lenght.ngc
-        if self.ocode("o<psng_tool_lenght> call") == -1:
+        # Start psng_probe_table.ngc
+        if self.ocode("o<psng_probe_table> call") == -1:
             return
         a = self.stat.probed_position
-        tlres = (float(a[2]) - self.halcomp["setterheight"])
-        self.display_result_z(tlres)
-        print("tool lenght =", tlres)
-        self.add_history(gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, tlres, 0, 0)
+        ptres = float(a[2])
+        self.halcomp["probedtable"] = ptres
+        self.display_result_z(ptres)
+        print("probedtable =", ptres)
+        self.add_history(gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, ptres, 0, 0)
+        self.set_zerro("Z", 0, 0, ptres)                                                                  # Using auto zero tickbox
         if self.ocode("o<psng_hook_end> call") == -1:
             return
 
     # Down probe to tool setter for measuring it vs table probing result
     def on_btn_probe_tool_setter_released(self, gtkbutton, data=None):
         if self.ocode("o<psng_hook> call [4]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call [1]") == -1:
             return
         # Start psng_probe_tool_setter.ngc
         if self.ocode("o<psng_probe_tool_setter> call") == -1:
@@ -229,6 +230,8 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
     def on_btn_probe_workpiece_released(self, gtkbutton, data=None):
         if self.ocode("o<psng_hook> call [5]") == -1:
             return
+        if self.ocode("o<psng_config_check> call [1]") == -1:
+            return
         # Start psng_probe_workpiece.ngc
         if self.ocode("o<psng_probe_workpiece> call") == -1:
             return
@@ -242,23 +245,28 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         if self.ocode("o<psng_hook_end> call") == -1:
             return
 
-    # Down probe to table for measuring it and use for calculate tool setter height and can set G10 L20 Z0 if you tick auto zero
-    def on_btn_probe_table_released(self, gtkbutton, data=None):
-        if self.ocode("o<psng_hook> call [3]") == -1:
+    # Down drill bit to tool setter for measuring it vs table probing result
+    def on_btn_tool_lenght_released(self, gtkbutton, data=None):
+        tooltable = self.inifile.find("EMCIO", "TOOL_TABLE")
+        if not tooltable:
+            self.gcode("(ABORT,**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****)")
+            print(_("**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****"))
             return
-        # Start psng_probe_table.ngc
-        if self.ocode("o<psng_probe_table> call") == -1:
+        if self.ocode("o<psng_hook> call [6]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call [0]") == -1:
+            return
+        # Start psng_tool_lenght.ngc
+        if self.ocode("o<psng_tool_lenght> call") == -1:
             return
         a = self.stat.probed_position
-        ptres = float(a[2])
-        self.halcomp["probedtable"] = ptres
-        self.display_result_z(ptres)
-        print("probedtable =", ptres)
-        self.add_history(gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, ptres, 0, 0)
-        self.set_zerro("Z", 0, 0, ptres)                                                                  # Using auto zero tickbox
+        tlres = (float(a[2]) - self.halcomp["setterheight"])
+        self.display_result_z(tlres)
+        print("tool lenght =", tlres)
+        self.add_history(gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, tlres, 0, 0)
         if self.ocode("o<psng_hook_end> call") == -1:
             return
-
+            
     # TOOL TABLE CREATOR
     # TOOL DIA : use X only for find tool setter center and use only after that more accurate Y center value for determinig tool diameter
     # + TOOL lenght Z and the whole sequence is saved as tooltable for later use
@@ -277,6 +285,8 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         print("tooldiameter from tooltable =", tooldiameter)
             
         if self.ocode("o<psng_hook> call [2]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call [0]") == -1:
             return
         if self.ocode("o<psng_tool_diameter> call") == -1:
             return

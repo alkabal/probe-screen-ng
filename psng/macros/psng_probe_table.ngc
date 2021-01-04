@@ -1,13 +1,5 @@
 o<psng_probe_table> sub
 
-o<psng_config_check> call
-
-o300 if [#<_current_tool> NE 1]
-     o<psng_hook_end> call
-     (ABORT,PROBING TABLE IS NOT ALLOWED WITHOUT 3D PROBE AS TOOL 1)
-o300 endif
-
-
 (cancel all Z offsets)
 G92.1
 G49

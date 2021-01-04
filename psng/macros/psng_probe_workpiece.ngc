@@ -1,16 +1,9 @@
 o<psng_probe_workpiece> sub
 
-o<psng_config_check> call
-
 o90 if [#<_hal[probe.setterheight]> LE 0]
      o<psng_hook_end> call
     (ABORT,TOOLSETTER HEIGHT NOT PROBED/CONFIGURED)
 o90 endif
-
-o300 if [#<_current_tool> NE 1]
-     o<psng_hook_end> call
-     (ABORT,PROBING WORKPIECE IS NOT ALLOWED WITHOUT 3D PROBE AS TOOL 1)
-o300 endif
 
 (cancel Z offsets But use tool offset)
 G43          ; force tool offset for correct calc
