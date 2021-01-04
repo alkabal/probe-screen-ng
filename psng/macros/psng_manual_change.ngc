@@ -23,13 +23,11 @@ o<psng_goto_changepos> call
 o100 if [#<_hal[probe.use_toolmeasurement]> EQ 0 OR #<_selected_tool> EQ 0]
      o110 if [#<_current_tool> EQ #<_selected_tool>]
           (MSG,SAME TOOL AS ACTUAL ASKED AND VALIDATED AUTOMATICALLY)
-          G43
      o110 elseif [#<_hal[probe.use_toolmeasurement]> EQ 0 AND #<_selected_tool> GT 0] 
           (DEBUG,PLEASE CHANGE TO TOOL #<_selected_tool>)
           (MSG,NEED TO UNPAUSE OR ABORT)
           M0
      o<clear-axis-notif> call
-     G43
      o110 elseif [#<_selected_tool> EQ 0]
          (DEBUG,PLEASE REMOVE TOOL)
          (MSG,NEED TO UNPAUSE OR ABORT)
@@ -98,7 +96,7 @@ o500 endif
 (print, probe Z=#<touch_result>)
 
 G10 L1 P#<_current_tool> Z[#<touch_result>]
-G10 L2 P0 Z#<_hal[probe.blockheight]> ; apply G54 offset again after correct tool measurement  ; need to think about use save restore like tool lenght
+G10 L2 P0 Z#<_hal[probe.blockheight]>                                       ; apply G54 offset again after correct tool measurement  ; need to think about use save restore like tool lenght
 
 (back to Z home position only)
 G53 G0 Z[#<_ini[AXIS_Z]MAX_LIMIT>+#<_ini[PROBE_SCREEN]Z_SAFE_TRAVEL_OFFSET>]

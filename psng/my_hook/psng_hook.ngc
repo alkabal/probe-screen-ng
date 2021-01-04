@@ -92,37 +92,26 @@ o<psng_hook> sub
 
 ;Mode 1 TOOLCHANGE ONLY
    o110 elseif [#<hooked_macro> EQ 1]
-        o141 if [#<_hal[probe.use_toolmeasurement]> EQ 0]                                                                             ; no more used with updated manual_change.ngc
+        o141 if [#<_hal[probe.use_toolmeasurement]> EQ 0]
              (MSG,WHY WE GET HERE ? : NO HOOK WITHOUT TOOL MEASUREMENT)
-        o141 return ; no tool measurement                                                               ; need to found a way for wait until probe is unconnected
-        
         o141 elseif [#<_selected_tool> EQ 0]
              ;(MSG,RESET TOOL NUMBER)
-        o141 return ; no tool measurement with tool 0
-
         o141 elseif [#<_selected_tool> EQ 1 AND #<_hal[and2.combined-probe.in0]> EQ 1 AND #<_hal[and2.combined-setter.in0]> EQ 0]
-             (MSG,MOUNT AND CONNECT TOUCH PROBE FOR TOOLCHANGE 1)                                                                    ; need to found a way for wait until probe is connected
-             (MSG,NEED TO UNPAUSE OR ABORT)
-             M0
-             o<clear-axis-notif> call
-        o141 elseif [#<_selected_tool> EQ 1 AND #<_hal[and2.combined-probe.in0]> EQ 0 AND #<_hal[and2.combined-setter.in0]> EQ 0]
+             (MSG,MOUNT AND CONNECT TOUCH PROBE FOR TOOLCHANGE 1)                    ; need to found a way for wait until probe is connected
+        o141 elseif [#<_selected_tool> EQ 1 AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<_hal[and2.combined-probe.in0]> EQ 0]
              (MSG,SETTER AND TOUCH PROBE FOR TOOLCHANGE 1 SEEM TO BE READY)
         o141 elseif [#<_selected_tool> GT 1 AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<_hal[and2.combined-probe.in0]> EQ 1]
              (MSG,SETTER AND UNCONNECTED TOUCH PROBE FOR TOOLCHANGE > 2 SEEM TO BE READY)
              M64 P1  ; deactivate probe output to motion.probe-inpute
         o141 elseif [#<_selected_tool> GT 1 AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<_hal[and2.combined-probe.in0]> EQ 0]
              ;M64 P1  ; deactivate probe output to motion.probe-inpute                        
-             (MSG,REMOVE AND UNCONNECT TOUCH PROBE FOR TOOLCHANGE > 2)
-             (MSG,NEED TO UNPAUSE OR ABORT)
-             M0
-             o<clear-axis-notif> call
+             (MSG,REMOVE AND UNCONNECT TOUCH PROBE FOR TOOLCHANGE > 2)               ; need to found a way for wait until probe is unconnected
         o141 else
              #<error> = #<hooked_macro>
         o141 endif
 
    o110 else
-        ; nothing to do here
-        #<error> = 999
+        #<error> = 999                     ; anyreason to be here
    o110 endif
 
 
@@ -139,7 +128,6 @@ o<psng_hook> sub
              o201 elseif [#<_hal[and2.combined-setter.in0]> EQ 1]
                   (ABORT,TOOL SETTER MISSING)
              o201 else
-                  ; nothing to do here
                   (ABORT,PSNG HOOK FAIL tool #<_current_tool>, prep_tool #<_selected_tool>, setter_err #<_hal[and2.combined-setter.in0]>, probe_err #<_hal[and2.combined-probe.in0]>, hook #<hooked_macro>, err_flag #<error>)
              o201 endif
    o200 endif

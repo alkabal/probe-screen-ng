@@ -195,7 +195,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
             self.gcode("(ABORT,**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****)")
             print(_("**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****"))
             return
-        if self.ocode("o<psng_hook> call [10]") == -1:
+        if self.ocode("o<psng_hook> call [7]") == -1:
             return
         # Start psng_tool_lenght.ngc
         if self.ocode("o<psng_tool_lenght> call") == -1:
