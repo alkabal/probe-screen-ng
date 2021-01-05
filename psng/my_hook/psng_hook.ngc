@@ -101,11 +101,13 @@ o<psng_hook> sub
         o140 return[1]
         o140 elseif [#<_selected_tool> EQ #<probe_number> AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<_hal[and2.combined-probe.in0]> EQ 1]
              (DEBUG,MOUNT AND CONNECT TOUCH PROBE FOR TOOLCHANGE #<probe_number>)                    ; need to found a way for wait until probe is connected
-             (MSG,NEED TO UNPAUSE AFTER CONNECTING THE PROBE OR ABORT)
-             M0
-             ;o141 if [#<_hal[and2.combined-probe.in0]> EQ 1]                                        ; DON'T KNOW WHY BUT IF TRY TO DO THIS THE PAUSE IS NOT DONE
+             o141 if [#<_ini[PROBE_SCREEN]TOOLCHANGE_POPUP_STYLE> EQ 0]
+                  (MSG,NEED TO UNPAUSE AFTER CONNECTING THE PROBE OR ABORT)
+                  M0
+             o141 endif
+             ;o142 if [#<_hal[and2.combined-probe.in0]> EQ 1]                                        ; DON'T KNOW WHY BUT IF TRY TO DO THIS THE PAUSE IS NOT DONE
              ;     (ABORT,PROBE IS NOT CONNECTED)
-             ;o141 endif
+             ;o142 endif
         o140 return[2]
         o140 elseif [#<_selected_tool> EQ #<probe_number> AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<_hal[and2.combined-probe.in0]> EQ 0]
              (DEBUG,SETTER AND TOUCH PROBE FOR TOOLCHANGE #<probe_number> SEEM TO BE READY)
@@ -116,11 +118,13 @@ o<psng_hook> sub
         o140 return[4]
         o140 elseif [#<_selected_tool> NE #<probe_number> AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<_hal[and2.combined-probe.in0]> EQ 0]
              (MSG,REMOVE AND UNCONNECT TOUCH PROBE FOR REAL TOOL CHANGING)                           ; need to found a way for wait until probe is unconnected
-             (MSG,NEED TO UNPAUSE AFTER DISCONNECTING THE PROBE OR ABORT)
-             M0
-             ;o143 if [#<_hal[and2.combined-probe.in0]> EQ 0]                                        ; DON'T KNOW WHY BUT IF TRY TO DO THIS THE PAUSE IS NOT DONE
+             o143 if [#<_ini[PROBE_SCREEN]TOOLCHANGE_POPUP_STYLE> EQ 0]
+                  (MSG,NEED TO UNPAUSE AFTER DISCONNECTING THE PROBE OR ABORT)
+                  M0
+             o143 endif
+             ;o144 if [#<_hal[and2.combined-probe.in0]> EQ 0]                                        ; DON'T KNOW WHY BUT IF TRY TO DO THIS THE PAUSE IS NOT DONE
              ;     (ABORT,PROBE IS NOT REMOVED)
-             ;o143 endif
+             ;o144 endif
              M64 P1  ; deactivate probe output to motion.probe-inpute
         o140 return [5]
         o140 else

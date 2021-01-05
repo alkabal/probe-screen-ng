@@ -23,6 +23,7 @@ o<clear-axis-notif> call
 G49  ; cancel tool offset
 
 o100 if [#<_hal[probe.use_toolmeasurement]> EQ 0 OR #<_selected_tool> EQ 0]
+  o101 if [#<_ini[PROBE_SCREEN]TOOLCHANGE_POPUP_STYLE> EQ 0]
      o110 if [#<_selected_tool> EQ 0]
          (MSG,PLEASE REMOVE TOOL)
          (MSG,NEED TO UNPAUSE OR ABORT)
@@ -39,6 +40,9 @@ o100 if [#<_hal[probe.use_toolmeasurement]> EQ 0 OR #<_selected_tool> EQ 0]
           (DEBUG,UNKNOW ERROR OCCURED FOR TOOLCHANGE WITHOUT AUTOLENGHT)
      o110 return [-9]
      o110 endif
+  o101 elseif [#<_current_tool> EQ #<_selected_tool> AND #<_current_tool> GT 0]
+       (MSG,SAME TOOL AS ACTUAL ASKED AND VALIDATED AUTOMATICALLY)
+  o101 endif
      M6         ; using the code being remapped here means 'use builtin behaviour' used here for M6T0
      G43
 o100 return [3] ; indicate no tool measurement possible with tool 0 or no tool measurement configured
@@ -68,7 +72,8 @@ o100 else
           (DEBUG, PSNG hook indicated a failure: #<_value>)
      o160 return [-4]
      o160 endif
-
+     
+  o102 if [#<_ini[PROBE_SCREEN]TOOLCHANGE_POPUP_STYLE> EQ 0]
      o170 if [#<_current_tool> EQ #<_selected_tool>]
           (MSG,SAME TOOL AS ACTUAL SO MEASUREMENT START AUTOMATICALLY)
           (MSG,NEED TO UNPAUSE OR ABORT)
@@ -82,8 +87,9 @@ o100 else
           M0
           o<clear-axis-notif> call
      o200 endif
-
-
+  o102 elseif [#<_current_tool> EQ #<_selected_tool> AND #<_current_tool> GT 0]
+       (MSG,SAME TOOL AS ACTUAL ASKED AND VALIDATED AUTOMATICALLY)
+  o102 endif
 o100 endif
 
 M6   ; using the code being remapped here means 'use builtin behaviour' used here for M6Tx

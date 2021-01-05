@@ -91,6 +91,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         self.tsdiam = float(self.inifile.find("TOOLSENSOR", "TS_DIAMETER"))
         self.tsoffset = float(self.inifile.find("TOOLSENSOR", "TS_DIAM_OFFSET"))
         self.revrott = float(self.inifile.find("TOOLSENSOR", "REV_ROTATION_SPEED"))
+        self.usepopup = float(self.inifile.find("PROBE_SCREEN", "TOOLCHANGE_POPUP_STYLE"))
 
         self.spbtn_setter_height.set_value(self.prefs.getpref("setterheight", 0.0, float))
         self.halcomp["setterheight"] = self.spbtn_setter_height.get_value()
@@ -444,7 +445,8 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         print("tool-change =", change)
         print("tool-number =", toolnumber)
         print("tool_prep_number =", toolprepnumber, change)
-        result = 0
+        if self.usepopup == 0:
+                 result = 0
         if change:
             print(_("**** WHAT APPEND 2 ****"))
             # if toolprepnumber = 0 we will get an error because we will not be able to get
@@ -453,8 +455,16 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                 text = "Please remove the mounted tool and unpause or cancel"
                 print(text)
                 self.add_history("Info: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                result = 1
-                #message = _("Please remove the mounted tool and press OK when done")
+                if self.usepopup == 0:
+                      result = 1
+                elif self.usepopup == 1:
+                	    message = _("Please remove the mounted tool and press OK when done")
+                else:
+                      text = "**** CONFIG ERROR CAN'T FiND TOOLCHANGE_POPUP_STYLE ****"
+                      print(text)
+                      self.add_history("Info: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                      self.gcode("(ABORT,**** %s ****)" % text)
+                      return
             else:
                 tooltable = self.inifile.find("EMCIO", "TOOL_TABLE")
                 if not tooltable:
@@ -470,12 +480,20 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                 text = "**** Please change to tool %f %s****" % (toolprepnumber, tooldescr)
                 print(text)
                 self.add_history("Info: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                result = 1
-            #    message = _(
-            #        "Please change to tool\n\n# {0:d}     {1}\n\n then click OK."
-            #    ).format(toolprepnumber, tooldescr)
-            #if toolprepnumber >> 0:
-            #    result = self.warning_dialog(message, title=_("Manual Toolchange"))
+                if self.usepopup == 0:
+                      result = 1
+                elif self.usepopup == 1:
+                      message = _(
+                          "Please change to tool\n\n# {0:d}     {1}\n\n then click OK."
+                      ).format(toolprepnumber, tooldescr)
+                else:
+                      text = "**** CONFIG ERROR CAN'T FiND TOOLCHANGE_POPUP_STYLE ****"
+                      print(text)
+                      self.add_history("Info: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                      self.gcode("(ABORT,**** %s ****)" % text)
+                      return
+            if self.usepopup == 1:          
+                     result = self.warning_dialog(message, title=_("Manual Toolchange"))
             if result:
                 text = "TOOLCHANGED CORRECTLY"
                 print(text)
@@ -488,10 +506,18 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                 self.command.abort()
                 self.halcomp["toolchange-prep-number"] = toolnumber
                 self.halcomp["toolchange-change"] = False  # Is there any reason to do this to input pin ?
-                self.halcomp["toolchange-changed"] = True
-                #message = _("**** %s ****" % text)
-                #self.warning_dialog(message)
-                self.gcode("(ABORT,**** %s ****)" % text)
+                self.halcomp["toolchange-changed"] = True                
+                if self.usepopup == 0:
+                      self.gcode("(ABORT,**** %s ****)" % text)
+                elif self.usepopup == 1:
+                      message = _("**** %s ****" % text)
+                      self.warning_dialog(message)
+                else:
+                      text = "**** CONFIG ERROR CAN'T FiND TOOLCHANGE_POPUP_STYLE ****"
+                      print(text)
+                      self.add_history("Info: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                      self.gcode("(ABORT,**** %s ****)" % text)
+                      return
         else:
             print(_("**** WHAT APPEND 1 ****"))
             self.halcomp["toolchange-changed"] = False
