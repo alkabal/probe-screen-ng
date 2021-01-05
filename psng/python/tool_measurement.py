@@ -447,8 +447,12 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         print("tool_prep_number =", toolprepnumber, change)
         if self.usepopup == 0:
                  result = 0
+                 
+                 
+# One issue need to be corrected if you ask the same tool as actual tool probe start without any confirmation (patched in ocode with M0)
+                 
+                 
         if change:
-            print(_("**** WHAT APPEND 2 ****"))
             # if toolprepnumber = 0 we will get an error because we will not be able to get
             # any tooldescription, so we avoid that case
             if toolprepnumber == 0:
@@ -458,7 +462,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                 if self.usepopup == 0:
                       result = 1
                 elif self.usepopup == 1:
-                	    message = _("Please remove the mounted tool and press OK when done")
+                      message = _("Please remove the mounted tool and press OK when done")
                 else:
                       text = "**** CONFIG ERROR CAN'T FiND TOOLCHANGE_POPUP_STYLE ****"
                       print(text)
@@ -519,5 +523,4 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                       self.gcode("(ABORT,**** %s ****)" % text)
                       return
         else:
-            print(_("**** WHAT APPEND 1 ****"))
             self.halcomp["toolchange-changed"] = False

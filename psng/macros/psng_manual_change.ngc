@@ -5,7 +5,7 @@ o<psng_manual_change> sub
 ;(DEBUG,in change tool_in_spindle=#<tool_in_spindle> current_pocket=#<current_pocket>)
 ;(DEBUG,selected_tool=#<selected_tool> selected_pocket=#<selected_pocket>)
 
-;otherwise after the M6 this information is gone!
+;otherwise after the M6 this information is gone! but it seem to be unused
 #<tool> = #<selected_tool>
 #<pocket> = #<selected_pocket>
 
@@ -89,6 +89,8 @@ o100 else
      o200 endif
   o102 elseif [#<_current_tool> EQ #<_selected_tool> AND #<_current_tool> GT 0]
        (MSG,SAME TOOL AS ACTUAL ASKED AND VALIDATED AUTOMATICALLY)
+       (MSG,NEED TO UNPAUSE OR ABORT)
+       M0                                                                 ; prevent starting move without any popup confirmation !!!!
   o102 endif
 o100 endif
 
