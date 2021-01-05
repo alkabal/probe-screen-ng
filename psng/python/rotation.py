@@ -84,305 +84,309 @@ class ProbeScreenRotation(ProbeScreenBase):
 
     # Y+Y+
     def on_angle_yp_released(self, gtkbutton, data=None):
-        if self.ocode("o<psng_hook> call [7]") == -1:
-            return
-        self.stat.poll()
-        xstart = (
-            self.stat.position[0]
-            - self.stat.g5x_offset[0]
-            - self.stat.g92_offset[0]
-            - self.stat.tool_offset[0]
-        )
-        # move Y - xy_clearance
-        s = """G91
-        G1 Y-%f
-        G90""" % (
-            self.halcomp["ps_xy_clearance"].get_value()
-        )
-        if self.gcode(s) == -1:
-            return
-        if self.z_clearance_down() == -1:
-            return
-        # Start psng_yplus.ngc
-        if self.ocode("o<psng_yplus> call") == -1:
-            return
-        # show Y result
-        a = self.probed_position_with_offsets()
-        ycres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
-        self.display_result_yc(ycres)
-        # move Z to start point
-        if self.z_clearance_up() == -1:
-            return
-        # move X + edge_lenght
-        s = """G91
-        G1 X%f
-        G90""" % (
-            self.halcomp["ps_edge_lenght"]
-        )
-        if self.gcode(s) == -1:
-            return
-        if self.z_clearance_down() == -1:
-            return
-        # Start psng_yplus.ngc
-        if self.ocode("o<psng_yplus> call") == -1:
-            return
-        # show Y result
-        a = self.probed_position_with_offsets()
-        ypres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
-        self.display_result_yp(ypres)
-        alfa = math.degrees(math.atan2(ypres - ycres, self.halcomp["ps_edge_lenght"]))
-        self.add_history(
-            gtkbutton.get_tooltip_text(),
-            "YcYpA",
-            0,
-            0,
-            0,
-            0,
-            0,
-            ycres,
-            ypres,
-            0,
-            0,
-            0,
-            alfa,
-        )
+        if self.error_poll() == 0:
+             if self.ocode("o<psng_hook> call [7]") == -1:
+                 return
+             self.stat.poll()
+             xstart = (
+                 self.stat.position[0]
+                 - self.stat.g5x_offset[0]
+                 - self.stat.g92_offset[0]
+                 - self.stat.tool_offset[0]
+             )
+             # move Y - xy_clearance
+             s = """G91
+             G1 Y-%f
+             G90""" % (
+                 self.halcomp["ps_xy_clearance"].get_value()
+             )
+             if self.gcode(s) == -1:
+                 return
+             if self.z_clearance_down() == -1:
+                 return
+             # Start psng_yplus.ngc
+             if self.ocode("o<psng_yplus> call") == -1:
+                 return
+             # show Y result
+             a = self.probed_position_with_offsets()
+             ycres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
+             self.display_result_yc(ycres)
+             # move Z to start point
+             if self.z_clearance_up() == -1:
+                 return
+             # move X + edge_lenght
+             s = """G91
+             G1 X%f
+             G90""" % (
+                 self.halcomp["ps_edge_lenght"]
+             )
+             if self.gcode(s) == -1:
+                 return
+             if self.z_clearance_down() == -1:
+                 return
+             # Start psng_yplus.ngc
+             if self.ocode("o<psng_yplus> call") == -1:
+                 return
+             # show Y result
+             a = self.probed_position_with_offsets()
+             ypres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
+             self.display_result_yp(ypres)
+             alfa = math.degrees(math.atan2(ypres - ycres, self.halcomp["ps_edge_lenght"]))
+             self.add_history(
+                 gtkbutton.get_tooltip_text(),
+                 "YcYpA",
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 ycres,
+                 ypres,
+                 0,
+                 0,
+                 0,
+                 alfa,
+             )
 
-        # move Z to start point
-        if self.z_clearance_up() == -1:
-            return
-        # move XY to adj start point
-        s = "G1 X%f Y%f" % (xstart, ycres)
-        if self.gcode(s) == -1:
-            return
-        self.rotate_coord_system(alfa)
-        if self.ocode("o<psng_hook_end> call") == -1:
-            return
+             # move Z to start point
+             if self.z_clearance_up() == -1:
+                 return
+             # move XY to adj start point
+             s = "G1 X%f Y%f" % (xstart, ycres)
+             if self.gcode(s) == -1:
+                 return
+             self.rotate_coord_system(alfa)
+             if self.ocode("o<psng_hook_end> call") == -1:
+                 return
 
     # Y-Y-
     def on_angle_ym_released(self, gtkbutton, data=None):
-        if self.ocode("o<psng_hook> call [7]") == -1:
-            return
-        self.stat.poll()
-        xstart = (
-            self.stat.position[0]
-            - self.stat.g5x_offset[0]
-            - self.stat.g92_offset[0]
-            - self.stat.tool_offset[0]
-        )
-        # move Y + xy_clearance
-        s = """G91
-        G1 Y%f
-        G90""" % (
-            self.halcomp["ps_xy_clearance"].get_value()
-        )
-        if self.gcode(s) == -1:
-            return
-        if self.z_clearance_down() == -1:
-            return
-        # Start psng_yminus.ngc
-        if self.ocode("o<psng_yminus> call") == -1:
-            return
-        # show Y result
-        a = self.probed_position_with_offsets()
-        ycres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
-        self.display_result_yc(ycres)
+        if self.error_poll() == 0:
+             if self.ocode("o<psng_hook> call [7]") == -1:
+                 return
+             self.stat.poll()
+             xstart = (
+                 self.stat.position[0]
+                 - self.stat.g5x_offset[0]
+                 - self.stat.g92_offset[0]
+                 - self.stat.tool_offset[0]
+             )
+             # move Y + xy_clearance
+             s = """G91
+             G1 Y%f
+             G90""" % (
+                 self.halcomp["ps_xy_clearance"].get_value()
+             )
+             if self.gcode(s) == -1:
+                 return
+             if self.z_clearance_down() == -1:
+                 return
+             # Start psng_yminus.ngc
+             if self.ocode("o<psng_yminus> call") == -1:
+                 return
+             # show Y result
+             a = self.probed_position_with_offsets()
+             ycres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
+             self.display_result_yc(ycres)
 
-        # move Z to start point
-        if self.z_clearance_up() == -1:
-            return
-        # move X - edge_lenght
-        s = """G91
-        G1 X-%f
-        G90""" % (
-            self.halcomp["ps_edge_lenght"]
-        )
-        if self.gcode(s) == -1:
-            return
-        if self.z_clearance_down() == -1:
-            return
-        # Start psng_yminus.ngc
-        if self.ocode("o<psng_yminus> call") == -1:
-            return
-        # show Y result
-        a = self.probed_position_with_offsets()
-        ymres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
-        self.display_result_ym(ymres)
-        alfa = math.degrees(math.atan2(ycres - ymres, self.halcomp["ps_edge_lenght"]))
-        self.add_history(
-            gtkbutton.get_tooltip_text(),
-            "YmYcA",
-            0,
-            0,
-            0,
-            0,
-            ymres,
-            ycres,
-            0,
-            0,
-            0,
-            0,
-            alfa,
-        )
-        # move Z to start point
-        if self.z_clearance_up() == -1:
-            return
-        # move XY to adj start point
-        s = "G1 X%f Y%f" % (xstart, ycres)
-        if self.gcode(s) == -1:
-            return
-        self.rotate_coord_system(alfa)
-        if self.ocode("o<psng_hook_end> call") == -1:
-            return
+             # move Z to start point
+             if self.z_clearance_up() == -1:
+                 return
+             # move X - edge_lenght
+             s = """G91
+             G1 X-%f
+             G90""" % (
+                 self.halcomp["ps_edge_lenght"]
+             )
+             if self.gcode(s) == -1:
+                 return
+             if self.z_clearance_down() == -1:
+                 return
+             # Start psng_yminus.ngc
+             if self.ocode("o<psng_yminus> call") == -1:
+                 return
+             # show Y result
+             a = self.probed_position_with_offsets()
+             ymres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
+             self.display_result_ym(ymres)
+             alfa = math.degrees(math.atan2(ycres - ymres, self.halcomp["ps_edge_lenght"]))
+             self.add_history(
+                 gtkbutton.get_tooltip_text(),
+                 "YmYcA",
+                 0,
+                 0,
+                 0,
+                 0,
+                 ymres,
+                 ycres,
+                 0,
+                 0,
+                 0,
+                 0,
+                 alfa,
+             )
+             # move Z to start point
+             if self.z_clearance_up() == -1:
+                 return
+             # move XY to adj start point
+             s = "G1 X%f Y%f" % (xstart, ycres)
+             if self.gcode(s) == -1:
+                 return
+             self.rotate_coord_system(alfa)
+             if self.ocode("o<psng_hook_end> call") == -1:
+                 return
 
     # X+X+
     def on_angle_xp_released(self, gtkbutton, data=None):
-        if self.ocode("o<psng_hook> call [7]") == -1:
-            return
-        self.stat.poll()
-        ystart = (
-            self.stat.position[1]
-            - self.stat.g5x_offset[1]
-            - self.stat.g92_offset[1]
-            - self.stat.tool_offset[1]
-        )
-        # move X - xy_clearance
-        s = """G91
-        G1 X-%f
-        G90""" % (
-            self.halcomp["ps_xy_clearance"].get_value()
-        )
-        if self.gcode(s) == -1:
-            return
-        if self.z_clearance_down() == -1:
-            return
-        # Start psng_xplus.ngc
-        if self.ocode("o<psng_xplus> call") == -1:
-            return
-        # show X result
-        a = self.probed_position_with_offsets()
-        xcres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
-        self.display_result_xc(xcres)
-        # move Z to start point
-        if self.z_clearance_up() == -1:
-            return
-        # move Y - edge_lenght
-        s = """G91
-        G1 Y-%f
-        G90""" % (
-            self.halcomp["ps_edge_lenght"]
-        )
-        if self.gcode(s) == -1:
-            return
-        if self.z_clearance_down() == -1:
-            return
-        # Start psng_xplus.ngc
-        if self.ocode("o<psng_xplus> call") == -1:
-            return
-        # show X result
-        a = self.probed_position_with_offsets()
-        xpres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
-        self.display_result_xp(xpres)
-        alfa = math.degrees(math.atan2(xcres - xpres, self.halcomp["ps_edge_lenght"]))
-        self.add_history(
-            gtkbutton.get_tooltip_text(),
-            "XcXpA",
-            0,
-            xcres,
-            xpres,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            alfa,
-        )
-        # move Z to start point
-        if self.z_clearance_up() == -1:
-            return
-        # move XY to adj start point
-        s = "G1 X%f Y%f" % (xcres, ystart)
-        if self.gcode(s) == -1:
-            return
-        self.rotate_coord_system(alfa)
-        if self.ocode("o<psng_hook_end> call") == -1:
-            return
+        if self.error_poll() == 0:
+             if self.ocode("o<psng_hook> call [7]") == -1:
+                 return
+             self.stat.poll()
+             ystart = (
+                 self.stat.position[1]
+                 - self.stat.g5x_offset[1]
+                 - self.stat.g92_offset[1]
+                 - self.stat.tool_offset[1]
+             )
+             # move X - xy_clearance
+             s = """G91
+             G1 X-%f
+             G90""" % (
+                 self.halcomp["ps_xy_clearance"].get_value()
+             )
+             if self.gcode(s) == -1:
+                 return
+             if self.z_clearance_down() == -1:
+                 return
+             # Start psng_xplus.ngc
+             if self.ocode("o<psng_xplus> call") == -1:
+                 return
+             # show X result
+             a = self.probed_position_with_offsets()
+             xcres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
+             self.display_result_xc(xcres)
+             # move Z to start point
+             if self.z_clearance_up() == -1:
+                 return
+             # move Y - edge_lenght
+             s = """G91
+             G1 Y-%f
+             G90""" % (
+                 self.halcomp["ps_edge_lenght"]
+             )
+             if self.gcode(s) == -1:
+                 return
+             if self.z_clearance_down() == -1:
+                 return
+             # Start psng_xplus.ngc
+             if self.ocode("o<psng_xplus> call") == -1:
+                 return
+             # show X result
+             a = self.probed_position_with_offsets()
+             xpres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
+             self.display_result_xp(xpres)
+             alfa = math.degrees(math.atan2(xcres - xpres, self.halcomp["ps_edge_lenght"]))
+             self.add_history(
+                 gtkbutton.get_tooltip_text(),
+                 "XcXpA",
+                 0,
+                 xcres,
+                 xpres,
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 alfa,
+             )
+             # move Z to start point
+             if self.z_clearance_up() == -1:
+                 return
+             # move XY to adj start point
+             s = "G1 X%f Y%f" % (xcres, ystart)
+             if self.gcode(s) == -1:
+                 return
+             self.rotate_coord_system(alfa)
+             if self.ocode("o<psng_hook_end> call") == -1:
+                 return
 
     # X-X-
     def on_angle_xm_released(self, gtkbutton, data=None):
-        if self.ocode("o<psng_hook> call [7]") == -1:
-            return
-        self.stat.poll()
-        ystart = (
-            self.stat.position[1]
-            - self.stat.g5x_offset[1]
-            - self.stat.g92_offset[1]
-            - self.stat.tool_offset[1]
-        )
-        # move X + xy_clearance
-        s = """G91
-        G1 X%f
-        G90""" % (
-            self.halcomp["ps_xy_clearance"].get_value()
-        )
-        if self.gcode(s) == -1:
-            return
-        if self.z_clearance_down() == -1:
-            return
-        # Start psng_xminus.ngc
-        if self.ocode("o<psng_xminus> call") == -1:
-            return
-        # show X result
-        a = self.probed_position_with_offsets()
-        xcres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
-        self.display_result_xc(xcres)
-        # move Z to start point
-        if self.z_clearance_up() == -1:
-            return
-        # move Y + edge_lenght
-        s = """G91
-        G1 Y%f
-        G90""" % (
-            self.halcomp["ps_edge_lenght"]
-        )
-        if self.gcode(s) == -1:
-            return
-        if self.z_clearance_down() == -1:
-            return
-        # Start psng_xminus.ngc
-        if self.ocode("o<psng_xminus> call") == -1:
-            return
-        # show X result
-        a = self.probed_position_with_offsets()
-        xmres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
-        self.display_result_xm(xmres)
-        alfa = math.degrees(math.atan2(xcres - xmres, self.halcomp["ps_edge_lenght"]))
-        self.add_history(
-            gtkbutton.get_tooltip_text(),
-            "XmXcA",
-            xmres,
-            xcres,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            alfa,
-        )
-        # move Z to start point
-        if self.z_clearance_up() == -1:
-            return
-        # move XY to adj start point
-        s = "G1 X%f Y%f" % (xcres, ystart)
-        if self.gcode(s) == -1:
-            return
-        self.rotate_coord_system(alfa)
-        if self.ocode("o<psng_hook_end> call") == -1:
-            return
+        if self.error_poll() == 0:
+             if self.ocode("o<psng_hook> call [7]") == -1:
+                 return
+             self.stat.poll()
+             ystart = (
+                 self.stat.position[1]
+                 - self.stat.g5x_offset[1]
+                 - self.stat.g92_offset[1]
+                 - self.stat.tool_offset[1]
+             )
+             # move X + xy_clearance
+             s = """G91
+             G1 X%f
+             G90""" % (
+                 self.halcomp["ps_xy_clearance"].get_value()
+             )
+             if self.gcode(s) == -1:
+                 return
+             if self.z_clearance_down() == -1:
+                 return
+             # Start psng_xminus.ngc
+             if self.ocode("o<psng_xminus> call") == -1:
+                 return
+             # show X result
+             a = self.probed_position_with_offsets()
+             xcres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
+             self.display_result_xc(xcres)
+             # move Z to start point
+             if self.z_clearance_up() == -1:
+                 return
+             # move Y + edge_lenght
+             s = """G91
+             G1 Y%f
+             G90""" % (
+                 self.halcomp["ps_edge_lenght"]
+             )
+             if self.gcode(s) == -1:
+                 return
+             if self.z_clearance_down() == -1:
+                 return
+             # Start psng_xminus.ngc
+             if self.ocode("o<psng_xminus> call") == -1:
+                 return
+             # show X result
+             a = self.probed_position_with_offsets()
+             xmres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
+             self.display_result_xm(xmres)
+             alfa = math.degrees(math.atan2(xcres - xmres, self.halcomp["ps_edge_lenght"]))
+             self.add_history(
+                 gtkbutton.get_tooltip_text(),
+                 "XmXcA",
+                 xmres,
+                 xcres,
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 0,
+                 alfa,
+             )
+             # move Z to start point
+             if self.z_clearance_up() == -1:
+                 return
+             # move XY to adj start point
+             s = "G1 X%f Y%f" % (xcres, ystart)
+             if self.gcode(s) == -1:
+                 return
+             self.rotate_coord_system(alfa)
+             if self.ocode("o<psng_hook_end> call") == -1:
+                 return
 
     # --------------
     # Helper Methods

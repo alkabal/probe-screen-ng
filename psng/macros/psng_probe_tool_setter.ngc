@@ -2,7 +2,7 @@ o<psng_probe_tool_setter> sub
 
 o90 if [#<_hal[probe.probedtable]> EQ 0]
      o<psng_hook_end> call
-    (ABORT,BEFORE MEASURE TOOL SETTER HEIGH YOU NEED TO PROBE TABLE OR SET IT MANUALLY!)
+    (ABORT,BEFORE MEASURE TOOL SETTER HEIGHT YOU NEED TO PROBE TABLE OR SET IT MANUALLY!)
 o90 endif
 
 o<psng_goto_toolsensor> call

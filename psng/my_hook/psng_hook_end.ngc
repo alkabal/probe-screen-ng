@@ -9,7 +9,9 @@ o<psng_hook_end> sub
 
              M65 P1  ; activate probe output to motion.probe-inpute (logic inverted)
              M65 P2  ; activate setter output to motion.probe-inpute (logic inverted)
+             G4P0.1
              o<clear-axis-notif> call
+             G4P0.1
 
 
 o<psng_hook_end> endsub

@@ -15,8 +15,9 @@ o<psng_hook> sub
 
 #<hooked_macro> = #1
 #<error> = 0
+#<probe_number> = #<_ini[PROBE_SCREEN]PROBE_NUMBER>
 
-   M5 M9   ; stop spindle, mist+flood off useless but paranoid mode      
+   M5 M9   ; stop spindle, mist+flood off useless but paranoid mode
    M65 P1  ; activate probe output to motion.probe-inpute
    M65 P2  ; activate setter output to motion.probe-inpute
    o<clear-axis-notif> call
@@ -26,60 +27,60 @@ o<psng_hook> sub
 
 ;Mode 3 & 5 & 7 PROBE IS ALLWAYS NEEDED AND SETTER NEVER NEEDED
    o110 elseif [#<hooked_macro> EQ 3 OR #<hooked_macro> EQ 5 OR #<hooked_macro> EQ 7]
-        o111 if [#<_current_tool> EQ #<_ini[PROBE_SCREEN]PROBE_TOOL_NUMBER> AND #<_hal[and2.combined-probe.in0]> EQ 0]
+        o111 if [#<_current_tool> EQ #<probe_number> AND #<_hal[and2.combined-probe.in0]> EQ 0]
              o112 if [#<_hal[and2.combined-setter.in0]> EQ 1]
-                  (MSG,!!! INHIBIT UNUSED BUT MISSING SETTER)
                   M64 P2  ; deactivate setter output to motion.probe-inpute
+                  (MSG,!!! INHIBIT UNUSED BUT MISSING SETTER)
              o112 endif
-             (DEBUG,PROBE AS TOOL #<_ini[PROBE_SCREEN]PROBE_TOOL_NUMBER> SEEM TO BE READY)
+             (DEBUG,PROBE AS TOOL #<probe_number> SEEM TO BE READY)
              (MSG,NEED TO UNPAUSE OR ABORT)
              M0
              o<clear-axis-notif> call
-        o111 elseif [#<_current_tool> NE #<_ini[PROBE_SCREEN]PROBE_TOOL_NUMBER> AND #<_hal[and2.combined-probe.in0]> EQ 0]
-             (ABORT,PLEASE REMOVE TOUCH PROBE AND TRY AGAIN)
+        o111 elseif [#<_current_tool> NE #<probe_number> AND #<_current_tool> GT 0 AND #<_hal[and2.combined-probe.in0]> EQ 0]
+             (ABORT,PLEASE CHANGE TO TOOL #<probe_number> BEFORE PROBING AND TRY AGAIN)
         o111 else
              #<error> = #<hooked_macro>
         o111 endif
 
 ;Mode 2 & 4 & 6 PROBE IS NOT ALLWAYS NEEDED BUT SETTER IS ALLWAYS NEEDED TOOL ALREADY IN SPINDLE
    o110 elseif [#<hooked_macro> EQ 2 OR #<hooked_macro> EQ 4 OR #<hooked_macro> EQ 6]
-        o131 if [#<_current_tool> EQ #<_ini[PROBE_SCREEN]PROBE_TOOL_NUMBER> AND #<_hal[and2.combined-probe.in0]> EQ 0 AND #<_hal[and2.combined-setter.in0]> EQ 0]
+        o131 if [#<_current_tool> EQ #<probe_number> AND #<_hal[and2.combined-probe.in0]> EQ 0 AND #<_hal[and2.combined-setter.in0]> EQ 0]
              o132 if [#<hooked_macro> EQ 4]
-                  (DEEBUG,SETTER AND PROBE AS TOOL #<_ini[PROBE_SCREEN]PROBE_TOOL_NUMBER> SEEM TO BE READY FOR PROBING TOOLSETTER HEIGHT)
+                  (DEBUG,SETTER AND PROBE AS TOOL #<probe_number> SEEM TO BE READY FOR PROBING TOOLSETTER HEIGHT)
                   (MSG,NEED TO UNPAUSE OR ABORT)
                   M0
                   o<clear-axis-notif> call
              o132 elseif [#<hooked_macro> EQ 2]
-                  (DEBUG,SETTER AND PROBE AS TOOL #<_ini[PROBE_SCREEN]PROBE_TOOL_NUMBER> SEEM TO BE READY FOR PROBE AUTODIAMETER)
+                  (DEBUG,SETTER AND PROBE AS TOOL #<probe_number> SEEM TO BE READY FOR PROBE AUTODIAMETER)
                   (MSG,!!! BE CAREFULL TOOLTABLE NEED TO HAVE A CORRECT VALUE FOR THIS TOOL !!!)
                   (MSG,NEED TO UNPAUSE OR ABORT)
                   M0
                   o<clear-axis-notif> call
              o132 elseif [#<hooked_macro> EQ 6]
-                  (DEBUG,SETTER AND PROBE AS TOOL #<_ini[PROBE_SCREEN]PROBE_TOOL_NUMBER> SEEM TO BE READY FOR PROBE LENGHT)
+                  (DEBUG,SETTER AND PROBE AS TOOL #<probe_number> SEEM TO BE READY FOR PROBE AUTOLENGHT)
                   (MSG,NEED TO UNPAUSE OR ABORT)
                   M0
                   o<clear-axis-notif> call
              o132 else
                   #<error> = 777
              o132 endif
-        o131 elseif [#<_current_tool> NE #<_ini[PROBE_SCREEN]PROBE_TOOL_NUMBER> AND #<_hal[and2.combined-setter.in0]> EQ 0]
+        o131 elseif [#<_current_tool> NE #<probe_number> AND #<_current_tool> GT 0 AND #<_hal[and2.combined-setter.in0]> EQ 0]
              o133 if [#<_hal[and2.combined-probe.in0]> EQ 0]
-                  (ABORT,PLEASE REMOVE TOUCH PROBE AND TRY AGAIN)
+                  (ABORT,PLEASE REMOVE TOUCH PROBE OR CHANGE TO TOOL #<probe_number> BEFORE PROBING AND TRY AGAIN)
              o133 else
                   o134 if [#<hooked_macro> EQ 4]
-                       (ABORT,PROBING TOOLSETTER HEIGHT WITHOUT TOOL #<_ini[PROBE_SCREEN]PROBE_TOOL_NUMBER> AS PROBE NOT ALLOWED)
+                       (ABORT,PROBING TOOLSETTER HEIGHT WITHOUT TOOL #<probe_number> AS PROBE NOT ALLOWED)
                   o134 elseif [#<hooked_macro> EQ 2]
-                       (MSG,SETTER SEEM TO BE READY FOR REAL TOOL AUTODIAMETER)
-                       (MSG,!!! BE CAREFULL TOOLTABLE NEED TO HAVE A CORRECT DIAMETER VALUE FOR THIS TOOL !!!)
-                       (MSG,NEED TO UNPAUSE OR ABORT)
                        M64 P1  ; deactivate probe output to motion.probe-inpute
+                       (DEBUG,SETTER SEEM TO BE READY FOR TOOL #<_current_tool> AUTODIAMETER)
+                       (MSG,!!! BE CAREFULL TOOLTABLE NEED TO HAVE A CORRECT DIAMETER VALUE !!!)
+                       (MSG,NEED TO UNPAUSE OR ABORT)
                        M0
                        o<clear-axis-notif> call
                   o134 elseif [#<hooked_macro> EQ 6]
-                       (MSG,SETTER SEEM TO BE READY FOR REAL TOOL AUTOLENGHT)
-                       (MSG,NEED TO UNPAUSE OR ABORT)
                        M64 P1  ; deactivate probe output to motion.probe-inpute
+                       (DEBUG,SETTER SEEM TO BE READY FOR TOOL #<_current_tool> AUTOLENGHT)
+                       (MSG,NEED TO UNPAUSE OR ABORT)
                        M0
                        o<clear-axis-notif> call
                   o134 else
@@ -92,49 +93,75 @@ o<psng_hook> sub
 
 ;Mode 1 TOOLCHANGE ONLY
    o110 elseif [#<hooked_macro> EQ 1]
-        o141 if [#<_hal[probe.use_toolmeasurement]> EQ 0]
+        o140 if [#<_hal[probe.use_toolmeasurement]> EQ 0]
              (MSG,WHY WE GET HERE ? : NO HOOK WITHOUT TOOL MEASUREMENT)
-        o141 elseif [#<_selected_tool> EQ 0]
-             ;(MSG,RESET TOOL NUMBER)
-        o141 elseif [#<_selected_tool> EQ 1 AND #<_hal[and2.combined-probe.in0]> EQ 1 AND #<_hal[and2.combined-setter.in0]> EQ 0]
-             (MSG,MOUNT AND CONNECT TOUCH PROBE FOR TOOLCHANGE #<_ini[PROBE_SCREEN]PROBE_TOOL_NUMBER>)                    ; need to found a way for wait until probe is connected
-        o141 elseif [#<_selected_tool> EQ 1 AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<_hal[and2.combined-probe.in0]> EQ 0]
-             (MSG,SETTER AND TOUCH PROBE FOR TOOLCHANGE #<_ini[PROBE_SCREEN]PROBE_TOOL_NUMBER> SEEM TO BE READY)
-        o141 elseif [#<_selected_tool> GT 1 AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<_hal[and2.combined-probe.in0]> EQ 1]
-             (MSG,SETTER AND UNCONNECTED TOUCH PROBE FOR REAL TOOL CHANGING SEEM TO BE READY)
+        o140 return[0]
+        o140 elseif [#<_selected_tool> EQ 0]
+             (MSG,RESET TOOL NUMBER)
+        o140 return[1]
+        o140 elseif [#<_selected_tool> EQ #<probe_number> AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<_hal[and2.combined-probe.in0]> EQ 1]
+             (DEBUG,MOUNT AND CONNECT TOUCH PROBE FOR TOOLCHANGE #<probe_number>)                    ; need to found a way for wait until probe is connected
+             (MSG,NEED TO UNPAUSE AFTER CONNECTING THE PROBE OR ABORT)
+             M0
+             ;o141 if [#<_hal[and2.combined-probe.in0]> EQ 1]                                        ; DON'T KNOW WHY BUT IF TRY TO DO THIS THE PAUSE IS NOT DONE
+             ;     (ABORT,PROBE IS NOT CONNECTED)
+             ;o141 endif
+        o140 return[2]
+        o140 elseif [#<_selected_tool> EQ #<probe_number> AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<_hal[and2.combined-probe.in0]> EQ 0]
+             (DEBUG,SETTER AND TOUCH PROBE FOR TOOLCHANGE #<probe_number> SEEM TO BE READY)
+        o140 return[3]
+        o140 elseif [#<_selected_tool> NE #<probe_number> AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<_hal[and2.combined-probe.in0]> EQ 1]
+             (MSG,SETTER AND UNCONNECTED TOUCH PROBE FOR REAL TOOL SEEM TO BE READY)
              M64 P1  ; deactivate probe output to motion.probe-inpute
-        o141 elseif [#<_selected_tool> GT 1 AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<_hal[and2.combined-probe.in0]> EQ 0]
-             ;M64 P1  ; deactivate probe output to motion.probe-inpute                        
-             (MSG,REMOVE AND UNCONNECT TOUCH PROBE FOR REAL TOOL CHANGING)               ; need to found a way for wait until probe is unconnected
-        o141 else
+        o140 return[4]
+        o140 elseif [#<_selected_tool> NE #<probe_number> AND #<_hal[and2.combined-setter.in0]> EQ 0 AND #<_hal[and2.combined-probe.in0]> EQ 0]
+             (MSG,REMOVE AND UNCONNECT TOUCH PROBE FOR REAL TOOL CHANGING)                           ; need to found a way for wait until probe is unconnected
+             (MSG,NEED TO UNPAUSE AFTER DISCONNECTING THE PROBE OR ABORT)
+             M0
+             ;o143 if [#<_hal[and2.combined-probe.in0]> EQ 0]                                        ; DON'T KNOW WHY BUT IF TRY TO DO THIS THE PAUSE IS NOT DONE
+             ;     (ABORT,PROBE IS NOT REMOVED)
+             ;o143 endif
+             M64 P1  ; deactivate probe output to motion.probe-inpute
+        o140 return [5]
+        o140 else
              #<error> = #<hooked_macro>
-        o141 endif
+        o140 endif
 
    o110 else
         #<error> = 999                     ; anyreason to be here
    o110 endif
 
 
-;ERROR CHECKING AND ABORT         no need to add psng_hook_end in this because if we go to error the motion pin was already both activated and we do not want to clear message
+;ERROR CHECKING AND ABORT no need to add psng_hook_end in this because if we go to error the motion pin was already both activated and we do not want to clear message
    o200 if [#<error> GT 0]
+             o<clear-axis-notif> call
              o201 if [#<error> EQ 666 OR #<error> EQ 777 OR #<error> EQ 888 OR #<error> EQ 999]
                   (ABORT,PSNG HOOK NUMBER FAIL -- hook : #<hooked_macro> -- err_flag : #<error>)
              o201 elseif [#<_current_tool> EQ 0]
                   (ABORT,PROBE WITH TOOL 0 NOT ALLOWED)
+             o201 elseif [#<_current_tool> NE #<probe_number> AND #<_hal[and2.combined-probe.in0]> EQ 1]
+                  (ABORT,PROBE MISSING TOOL #<probe_number> AS PROBE IS NEEDED)
+             o201 elseif [#<_current_tool> NE #<probe_number>]
+                  (ABORT,PROBE WITHOUT TOOL #<probe_number> AS PROBE IS NOT ALLOWED)
              o201 elseif [#<_hal[and2.combined-probe.in0]> EQ 1 AND #<_hal[and2.combined-setter.in0]> EQ 1]
                   (ABORT,PROBE AND TOOL SETTER MISSING)
              o201 elseif [#<_hal[and2.combined-probe.in0]> EQ 1]
-                  (ABORT,PROBE MISSING OR TOOL SELECTED IS NOT 1)
+                  (ABORT,PROBE MISSING)
              o201 elseif [#<_hal[and2.combined-setter.in0]> EQ 1]
                   (ABORT,TOOL SETTER MISSING)
              o201 else
                   (ABORT,PSNG HOOK FAIL tool #<_current_tool>, prep_tool #<_selected_tool>, setter_err #<_hal[and2.combined-setter.in0]>, probe_err #<_hal[and2.combined-probe.in0]>, hook #<hooked_macro>, err_flag #<error>)
              o201 endif
+   o200 return [-1]
    o200 endif
 
-   o300 if [#<_hal[motion.probe-input]> EQ 1]
-       (ABORT,PROBE OR SETTER ALREADY TRIGGERED OR REMOVED BEFORE START)
-   o300 endif
+;o1000 sub
+;o300 if [#<_hal[motion.probe-input]> EQ 1]
+;     o<psng_hook_end> call
+;    (ABORT,PROBE OR SETTER ALREADY TRIGGERED BEFORE START)
+;o300 endif
+;o1000 endsub
+
 
 o<psng_hook> endsub
 M2

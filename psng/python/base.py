@@ -167,24 +167,19 @@ class ProbeScreenBase(object):
         else:
             print("Unable to poll %s GUI for errors" % self.display)
             return -1
-
-        #print("check_abort_axisrc %s" % abort_axisrc)
-        #print("check_abort_halui %s" % abort_halui)
-        #print("check_stop_halui %s" % stop_halui)
-        #print("check_abort_axisui %s" % abort_axisui)
-
-
+            
         if "TRUE" in error_pin:
             text = "See notification popup"
-            self.add_history("Error: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
             print("error", text)
+            self.add_history("Error: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
             self.command.mode(linuxcnc.MODE_MANUAL)
             self.command.wait_complete()
             return -1
         elif "TRUE" in abort_axisui or "TRUE" in abort_halui or "TRUE" in stop_halui:
-            text = "Program stopped by user"
-            self.add_history("Info: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+            self.gcode("(DEBUG,**** OPERATION STOPPED BY USER ****)")
+            text = "OPERATION STOPPED BY USER"
             print("Info", text)
+            self.add_history("Info: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
             self.command.mode(linuxcnc.MODE_MANUAL)
             self.command.wait_complete()
             return -1
