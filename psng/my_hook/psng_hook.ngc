@@ -1,6 +1,6 @@
 ; End users can copy this file to their macros folder and edit as necessary.
 
-; Alkabal 12/2020 exemple script for PSNG probe screen used with Linuxcnc 2.8/2.9
+; Alkabal 01/2021 exemple script for PSNG probe screen used with Linuxcnc 2.8/2.9
 ; This macro check multiple probe status and inhibit one or other if missing and not used for actual job
 
 o<psng_hook> sub

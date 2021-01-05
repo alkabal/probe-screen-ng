@@ -2,6 +2,7 @@
 #
 # Copyright (c) 2015 Serguei Glavatski ( verser  from cnc-club.ru )
 # Copyright (c) 2020 Probe Screen NG Developers
+# Copyright (c) 2021 Alkabal free fr with different approach
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -87,6 +88,8 @@ class ProbeScreenRotation(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              self.stat.poll()
              xstart = (
                  self.stat.position[0]
@@ -163,6 +166,8 @@ class ProbeScreenRotation(ProbeScreenBase):
     def on_angle_ym_released(self, gtkbutton, data=None):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
+                 return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
                  return
              self.stat.poll()
              xstart = (
@@ -241,6 +246,8 @@ class ProbeScreenRotation(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              self.stat.poll()
              ystart = (
                  self.stat.position[1]
@@ -316,6 +323,8 @@ class ProbeScreenRotation(ProbeScreenBase):
     def on_angle_xm_released(self, gtkbutton, data=None):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
+                 return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
                  return
              self.stat.poll()
              ystart = (

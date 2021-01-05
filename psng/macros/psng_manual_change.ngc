@@ -63,19 +63,19 @@ o100 else
      o150 endif
 
      o<psng_hook> call [1]                                   ; User macro like pre safe test or probe and setter management etc
-      
+
      o160 if [#<_value> LT 0]
           (DEBUG, PSNG hook indicated a failure: #<_value>)
-     o160 return [-4]   
-     o160 endif    
-     
+     o160 return [-4]
+     o160 endif
+
      o170 if [#<_current_tool> EQ #<_selected_tool>]
           (MSG,SAME TOOL AS ACTUAL SO MEASUREMENT START AUTOMATICALLY)
           (MSG,NEED TO UNPAUSE OR ABORT)
           M0
           o<clear-axis-notif> call
      o170 endif
-     
+
      o200 if [#<_current_tool> NE #<_selected_tool>]
           (DEBUG,PLEASE CHANGE TO TOOL #<_selected_tool>)
           (MSG,NEED TO UNPAUSE OR ABORT)

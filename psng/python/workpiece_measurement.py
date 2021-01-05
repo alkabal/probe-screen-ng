@@ -2,6 +2,7 @@
 #
 # Copyright (c) 2015 Serguei Glavatski ( verser  from cnc-club.ru )
 # Copyright (c) 2020 Probe Screen NG Developers
+# Copyright (c) 2021 Alkabal free fr with different approach
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -50,6 +51,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              # move X - xy_clearance
              s = """G91
              G1 X-%f
@@ -92,11 +95,13 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              self.set_zerro("X")
              if self.ocode("o<psng_hook_end> call") == -1:
                  return
-             
+
     # Y+
     def on_yp_released(self, gtkbutton, data=None):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
+                 return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
                  return
              # move Y - xy_clearance
              s = """G91
@@ -146,6 +151,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              # move X + xy_clearance
              s = """G91
              G1 X%f
@@ -193,6 +200,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
     def on_ym_released(self, gtkbutton, data=None):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
+                 return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
                  return
              # move Y + xy_clearance
              s = """G91
@@ -244,6 +253,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              # move X - xy_clearance Y + edge_lenght
              s = """G91
              G1 X-%f Y%f
@@ -266,7 +277,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              # move Z to start point up
              if self.z_clearance_up() == -1:
                  return
-             
+
              # move X + edge_lenght +xy_clearance,  Y - edge_lenght - xy_clearance
              tmpxy = self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"]
              s = """G91
@@ -318,6 +329,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              # move X - xy_clearance Y + edge_lenght
              s = """G91
              G1 X-%f Y-%f
@@ -340,7 +353,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              # move Z to start point up
              if self.z_clearance_up() == -1:
                  return
-             
+
              # move X + edge_lenght +xy_clearance,  Y + edge_lenght + xy_clearance
              tmpxy = self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"]
              s = """G91
@@ -391,6 +404,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              # move X + xy_clearance Y + edge_lenght
              s = """G91
              G1 X%f Y%f
@@ -413,7 +428,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              # move Z to start point up
              if self.z_clearance_up() == -1:
                  return
-             
+
              # move X - edge_lenght - xy_clearance,  Y - edge_lenght - xy_clearance
              tmpxy = self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"]
              s = """G91
@@ -465,6 +480,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              # move X + xy_clearance Y - edge_lenght
              s = """G91
              G1 X%f Y-%f
@@ -487,7 +504,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              # move Z to start point up
              if self.z_clearance_up() == -1:
                  return
-             
+
              # move X - edge_lenght - xy_clearance,  Y + edge_lenght + xy_clearance
              tmpxy = self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"]
              s = """G91
@@ -539,6 +556,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              # move X - edge_lenght- xy_clearance
              tmpx = self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"]
              s = """G91
@@ -560,7 +579,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              # move Z to start point up
              if self.z_clearance_up() == -1:
                  return
-             
+
              # move X + 2 edge_lenght + 2 xy_clearance
              tmpx = 2 * (self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"])
              s = """G91
@@ -573,7 +592,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              if self.z_clearance_down() == -1:
                  return
              # Start psng_xminus.ngc
-             
+
              if self.ocode("o<psng_xminus> call") == -1:
                  return
              # show X result
@@ -592,7 +611,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              s = "G1 X%f" % (xcres)
              if self.gcode(s) == -1:
                  return
-             
+
              # move Y - edge_lenght- xy_clearance
              tmpy = self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"]
              s = """G91
@@ -614,7 +633,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              # move Z to start point up
              if self.z_clearance_up() == -1:
                  return
-             
+
              # move Y + 2 edge_lenght + 2 xy_clearance
              tmpy = 2 * (self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"])
              s = """G91
@@ -676,6 +695,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              # move Y - edge_lenght X - xy_clearance
              s = """G91
              G1 X-%f Y-%f
@@ -695,7 +716,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              xres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_xp(xres)
              self.lenght_x()
-             
+
              # move X - edge_lenght Y - xy_clearance
              tmpxy = self.halcomp["ps_edge_lenght"] - self.halcomp["ps_xy_clearance"]
              s = """G91
@@ -745,6 +766,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              # move Y + edge_lenght X - xy_clearance
              s = """G91
              G1 X-%f Y%f
@@ -764,7 +787,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              xres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_xp(xres)
              self.lenght_x()
-             
+
              # move X - edge_lenght Y + xy_clearance
              tmpxy = self.halcomp["ps_edge_lenght"] - self.halcomp["ps_xy_clearance"]
              s = """G91
@@ -814,6 +837,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              # move Y - edge_lenght X + xy_clearance
              s = """G91
              G1 X%f Y-%f
@@ -833,7 +858,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              xres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_xm(xres)
              self.lenght_x()
-             
+
              # move X + edge_lenght Y - xy_clearance
              tmpxy = self.halcomp["ps_edge_lenght"] - self.halcomp["ps_xy_clearance"]
              s = """G91
@@ -847,7 +872,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              # Start psng_yplus.ngc
              if self.ocode("o<psng_yplus> call") == -1:
                  return
-             
+
              # show Y result
              a = self.probed_position_with_offsets()
              yres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
@@ -884,6 +909,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              # move Y + edge_lenght X + xy_clearance
              s = """G91
              G1 X%f Y%f
@@ -903,7 +930,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              xres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_xm(xres)
              self.lenght_x()
-             
+
              # move X + edge_lenght Y - xy_clearance
              tmpxy = self.halcomp["ps_edge_lenght"] - self.halcomp["ps_xy_clearance"]
              s = """G91
@@ -953,6 +980,8 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
         if self.error_poll() == 0:
              if self.ocode("o<psng_hook> call [7]") == -1:
                  return
+             if self.ocode("o<psng_config_check> call [1]") == -1:
+                 return
              if self.z_clearance_down() == -1:
                  return
              # move X - edge_lenght Y + xy_clearance
@@ -971,7 +1000,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              a = self.probed_position_with_offsets()
              xmres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_xm(xmres)
-             
+
              # move X +2 edge_lenght - 2 xy_clearance
              tmpx = 2 * (self.halcomp["ps_edge_lenght"] - self.halcomp["ps_xy_clearance"])
              s = """G91
@@ -991,12 +1020,12 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              self.lenght_x()
              xcres = 0.5 * (xmres + xpres)
              self.display_result_xc(xcres)
-             
+
              # move X to new center
              s = """G1 X%f""" % (xcres)
              if self.gcode(s) == -1:
                  return
-             
+
              # move Y - edge_lenght + xy_clearance
              tmpy = self.halcomp["ps_edge_lenght"] - self.halcomp["ps_xy_clearance"]
              s = """G91
@@ -1013,7 +1042,7 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
              a = self.probed_position_with_offsets()
              ymres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_ym(ymres)
-             
+
              # move Y +2 edge_lenght - 2 xy_clearance
              tmpy = 2 * (self.halcomp["ps_edge_lenght"] - self.halcomp["ps_xy_clearance"])
              s = """G91
