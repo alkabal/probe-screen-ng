@@ -141,18 +141,18 @@ class ProbeScreenBase(object):
         if "axis" in self.display:
             # AXIS polls for errors every 0.2 seconds, so we wait slightly longer to make sure it's happened.
             time.sleep(0.25)
-            error_pin = Popen(
-                "halcmd getp axisui.error ", shell=True, stdout=PIPE
-            ).stdout.read()
-            abort_axisui = Popen(
-                "halcmd getp axisui.abort ", shell=True, stdout=PIPE
-            ).stdout.read()
             #error_pin = Popen(
-            #    "halcmd getp axisui.user.error ", shell=True, stdout=PIPE
+            #    "halcmd getp axisui.error ", shell=True, stdout=PIPE
             #).stdout.read()
             #abort_axisui = Popen(
-            #    "halcmd getp axisui.user.abort ", shell=True, stdout=PIPE
+            #    "halcmd getp axisui.abort ", shell=True, stdout=PIPE
             #).stdout.read()
+            error_pin = Popen(
+                "halcmd getp axisui.user.error ", shell=True, stdout=PIPE
+            ).stdout.read()
+            abort_axisui = Popen(
+                "halcmd getp axisui.user.abort ", shell=True, stdout=PIPE
+            ).stdout.read()
 
         elif "gmoccapy" in self.display:
             # gmoccapy polls for errors every 0.25 seconds, OR whatever value is in the [DISPLAY]CYCLE_TIME ini
