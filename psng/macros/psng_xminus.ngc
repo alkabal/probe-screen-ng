@@ -6,7 +6,7 @@ o<psng_xminus> sub
 G91
 G38.2 X-#<_hal[probe.ps_probe_max]>       F#<_hal[probe.ps_searchvel]>
 G38.4 X#<_hal[probe.ps_probe_latch]>      F#<_hal[probe.ps_searchvel]>     ;DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
-G1    X0.1                                F#<_hal[probe.ps_searchvel]>
+G1    X#<_hal[probe.ps_probe_latch]>      F#<_hal[probe.ps_searchvel]>
 G38.2 X-[#<_hal[probe.ps_probe_latch]>*2] F#<_hal[probe.ps_probevel]>
 (print,probe X=#5061)
 G90
