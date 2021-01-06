@@ -45,8 +45,8 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
                  return
              if self.ocode("o<psng_config_check> call [1]") == -1:
                  return
-             # move X - edge_lenght- xy_clearance
-             tmpx = self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"]
+             # move X - edge_length- xy_clearance
+             tmpx = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
              s = """G91
              G1 X-%f
              G90""" % (
@@ -71,8 +71,8 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
              if self.gcode(s) == -1:
                  return
 
-             # move X + 2 edge_lenght +  xy_clearance
-             tmpx = 2 * self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"]
+             # move X + 2 edge_length +  xy_clearance
+             tmpx = 2 * self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
              s = """G91
              G1 X%f
              G90""" % (
@@ -89,7 +89,7 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
              a = self.probed_position_with_offsets()
              xmres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_xm(xmres)
-             self.lenght_x()
+             self.length_x()
              xcres = 0.5 * (xpres + xmres)
              self.display_result_xc(xcres)
              self.add_history(
@@ -98,7 +98,7 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
                  xmres,
                  xcres,
                  xpres,
-                 self.lenght_x(),
+                 self.length_x(),
                  0,
                  0,
                  0,
@@ -125,8 +125,8 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
                  return
              if self.ocode("o<psng_config_check> call [1]") == -1:
                  return
-             # move Y - edge_lenght- xy_clearance
-             tmpy = self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"]
+             # move Y - edge_length- xy_clearance
+             tmpy = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
              s = """G91
              G1 Y-%f
              G90""" % (
@@ -151,8 +151,8 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
              if self.gcode(s) == -1:
                  return
 
-             # move Y + 2 edge_lenght +  xy_clearance
-             tmpy = 2 * self.halcomp["ps_edge_lenght"] + self.halcomp["ps_xy_clearance"]
+             # move Y + 2 edge_length +  xy_clearance
+             tmpy = 2 * self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
              s = """G91
              G1 Y%f
              G90""" % (
@@ -169,7 +169,7 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
              a = self.probed_position_with_offsets()
              ymres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_ym(ymres)
-             self.lenght_y()
+             self.length_y()
              # find, show and move to finded  point
              ycres = 0.5 * (ypres + ymres)
              self.display_result_yc(ycres)
@@ -183,7 +183,7 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
                  ymres,
                  ycres,
                  ypres,
-                 self.lenght_y(),
+                 self.length_y(),
                  0,
                  0,
                  0,
@@ -208,8 +208,8 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
                  return
              if self.z_clearance_down() == -1:
                  return
-             # move X - edge_lenght Y + xy_clearance
-             tmpx = self.halcomp["ps_edge_lenght"] - self.halcomp["ps_xy_clearance"]
+             # move X - edge_length Y + xy_clearance
+             tmpx = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
              s = """G91
              G1 X-%f
              G90""" % (
@@ -225,8 +225,8 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
              xmres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_xm(xmres)
 
-             # move X +2 edge_lenght - 2 xy_clearance
-             tmpx = 2 * (self.halcomp["ps_edge_lenght"] - self.halcomp["ps_xy_clearance"])
+             # move X +2 edge_length - 2 xy_clearance
+             tmpx = 2 * (self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"])
              s = """G91
              G1 X%f
              G90""" % (
@@ -241,7 +241,7 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
              a = self.probed_position_with_offsets()
              xpres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_xp(xpres)
-             self.lenght_x()
+             self.length_x()
              xcres = 0.5 * (xmres + xpres)
              self.display_result_xc(xcres)
              self.add_history(
@@ -250,7 +250,7 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
                  xmres,
                  xcres,
                  xpres,
-                 self.lenght_x(),
+                 self.length_x(),
                  0,
                  0,
                  0,
@@ -279,8 +279,8 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
                  return
              if self.z_clearance_down() == -1:
                  return
-             # move Y - edge_lenght + xy_clearance
-             tmpy = self.halcomp["ps_edge_lenght"] - self.halcomp["ps_xy_clearance"]
+             # move Y - edge_length + xy_clearance
+             tmpy = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
              s = """G91
              G1 Y-%f
              G90""" % (
@@ -296,8 +296,8 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
              ymres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_ym(ymres)
 
-             # move Y +2 edge_lenght - 2 xy_clearance
-             tmpy = 2 * (self.halcomp["ps_edge_lenght"] - self.halcomp["ps_xy_clearance"])
+             # move Y +2 edge_length - 2 xy_clearance
+             tmpy = 2 * (self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"])
              s = """G91
              G1 Y%f
              G90""" % (
@@ -312,7 +312,7 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
              a = self.probed_position_with_offsets()
              ypres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_yp(ypres)
-             self.lenght_y()
+             self.length_y()
              # find, show and move to finded  point
              ycres = 0.5 * (ymres + ypres)
              self.display_result_yc(ycres)
@@ -326,7 +326,7 @@ class ProbeScreenLengthMeasurement(ProbeScreenBase):
                  ymres,
                  ycres,
                  ypres,
-                 self.lenght_y(),
+                 self.length_y(),
                  0,
                  0,
                  0,

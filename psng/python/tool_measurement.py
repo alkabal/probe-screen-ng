@@ -46,7 +46,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         self.chk_use_tool_measurement = self.builder.get_object(
             "chk_use_tool_measurement"
         )
-        self.tool_dia = self.builder.get_object("tool_dia")
+        self.tool_dia = self.builder.get_object("tool_dia")                                               # It is something outdated ?
         self.down = self.builder.get_object("down")                                                       # It is something outdated ?
 
         self.chk_use_tool_measurement.set_active(
@@ -107,12 +107,15 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
             or not self.tsdiam
             or not self.tsoffset
             or not self.revrott
+            or not self.usepopup
         ):
             self.chk_use_tool_measurement.set_active(False)
             self.tool_dia.set_sensitive(False)
             print(_("**** PROBE SCREEN INFO ****"))
             print(_("**** no valid probe config in INI File ****"))
             print(_("**** disabled auto tool measurement ****"))
+            text = "no valid probe config in INI File disabled auto tool measurement"
+            self.add_history(gtkbutton.get_tooltip_text(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         else:
             # to set the hal pin with correct values we emit a toogled
             if self.chk_use_tool_measurement.get_active():
@@ -251,7 +254,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                  return
 
     # Down drill bit to tool setter for measuring it vs table probing result
-    def on_btn_tool_lenght_released(self, gtkbutton, data=None):
+    def on_btn_tool_length_released(self, gtkbutton, data=None):
         if self.error_poll() == 0:
              tooltable = self.inifile.find("EMCIO", "TOOL_TABLE")
              if not tooltable:
@@ -262,20 +265,20 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                  return
              if self.ocode("o<psng_config_check> call [0]") == -1:
                  return
-             # Start psng_tool_lenght.ngc
-             if self.ocode("o<psng_tool_lenght> call") == -1:
+             # Start psng_tool_length.ngc
+             if self.ocode("o<psng_tool_length> call") == -1:
                  return
              a = self.stat.probed_position
              tlres = (float(a[2]) - self.halcomp["setterheight"])
              self.display_result_z(tlres)
-             print("tool lenght =", tlres)
+             print("tool length =", tlres)
              self.add_history(gtkbutton.get_tooltip_text(), "Z", 0, 0, 0, 0, 0, 0, 0, 0, tlres, 0, 0)
              if self.ocode("o<psng_hook_end> call") == -1:
                  return
 
     # TOOL TABLE CREATOR
     # TOOL DIA : use X only for find tool setter center and use only after that more accurate Y center value for determinig tool diameter
-    # + TOOL lenght Z and the whole sequence is saved as tooltable for later use
+    # + TOOL length Z and the whole sequence is saved as tooltable for later use
     # IMH this sequence need to be first with probe : first execute psng_down for determinate the table height with toolsetter and think about updating tool setter diameter or probe diameter at same time
     # IMH this sequence need to be done secondly with other tool using button Dia only off course
     # ALL OF THIS NEED TO EDIT TOOL TABLE MANUALLY FOR ADD NEW TOOL AND KNOW DIAMETER
@@ -348,7 +351,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
              a = self.probed_position_with_offsets()
              xmres = float(a[0]) - 0.5 * self.tsdiam
              #    print("xmres = ",xmres)
-             self.lenght_x()
+             self.length_x()
              xcres = 0.5 * (xpres + xmres)
              #    print("xcres = ",xcres)
              self.display_result_xc(xcres)
@@ -400,7 +403,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
              a = self.probed_position_with_offsets()
              ymres = float(a[1]) - 0.5 * self.tsdiam
              #    print("ymres = ",ymres)
-             self.lenght_y()
+             self.length_y()
              ycres = 0.5 * (ypres + ymres)
              #    print("ycres = ",ycres)
              self.display_result_yc(ycres)
@@ -467,7 +470,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                       text = "**** CONFIG ERROR CAN'T FiND TOOLCHANGE_POPUP_STYLE ****"
                       print(text)
                       self.add_history("Info: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                      self.gcode("(ABORT,**** %s ****)" % text)
+                      self.gcode("(ABORT,**** %s ****)" % text)                                               # Need investigation with self.command.abort()
                       return
             else:
                 tooltable = self.inifile.find("EMCIO", "TOOL_TABLE")
@@ -475,7 +478,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                     text = "**** Did not find a toolfile file in [EMCIO] TOOL_TABLE ****"
                     print(text)
                     self.add_history("Error: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                    self.gcode("(ABORT,**** %s ****)" % text)
+                    self.gcode("(ABORT,**** %s ****)" % text)                                                  # Need investigation with self.command.abort()
                     return
                 CONFIGPATH = os.environ["CONFIG_DIR"]
                 toolfile = os.path.join(CONFIGPATH, tooltable)
@@ -494,7 +497,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                       text = "**** CONFIG ERROR CAN'T FiND TOOLCHANGE_POPUP_STYLE ****"
                       print(text)
                       self.add_history("Info: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                      self.gcode("(ABORT,**** %s ****)" % text)
+                      self.gcode("(ABORT,**** %s ****)" % text)                                                  # Need investigation with self.command.abort()
                       return
             if self.usepopup == 1:          
                      result = self.warning_dialog(message, title=_("Manual Toolchange"))
@@ -507,7 +510,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                 text = "TOOLCHANGE ABORTED %f %f" % (toolnumber,self.halcomp["toolchange-prep-number"])
                 print(text)
                 self.add_history("Error: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                self.command.abort()
+                self.command.abort()                                                                               # Need investigation with self.command.abort()
                 self.halcomp["toolchange-prep-number"] = toolnumber
                 self.halcomp["toolchange-change"] = False  # Is there any reason to do this to input pin ?
                 self.halcomp["toolchange-changed"] = True                

@@ -37,7 +37,7 @@ o100 if [#<_hal[probe.use_toolmeasurement]> EQ 0 OR #<_selected_tool> EQ 0]
           M0
           o<clear-axis-notif> call
      o110 else
-          (DEBUG,UNKNOW ERROR OCCURED FOR TOOLCHANGE WITHOUT AUTOLENGHT)
+          (DEBUG,UNKNOW ERROR OCCURED FOR TOOLCHANGE WITHOUT AUTOlength)
      o110 return [-9]
      o110 endif
   o101 elseif [#<_current_tool> EQ #<_selected_tool> AND #<_current_tool> GT 0]
@@ -98,14 +98,15 @@ M6   ; using the code being remapped here means 'use builtin behaviour' used her
 
 o300 if [#<_hal[motion.probe-input]> EQ 1]                                ; DON'T KNOW WHY BUT IF TRY TO DO THIS BEFORE IN THIS CODE THE M64P1 Seem to be ignored and also pause in hook is ignored
      o<psng_hook_end> call
-    (MSG,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE STARTING AUTOLENGHT !!!)
+    (MSG,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE STARTING AUTOlength !!!)
 o300 return [-5]
 o300 endif
 
 o<psng_goto_toolsensor> call                                                ; with G90 inside
 
 ; cancel G5x offset
-G10 L2 P0 Z0 ; reset G54 offset for correct tool measurement                ; need to think about use save restore like tool lenght
+o<psng_backup_offset> call
+G10 L2 P0 Z0                                                                ; reset G54 offset for correct tool measurement
 
 o<psng_start_setter_probing> call
 
@@ -118,10 +119,11 @@ o500 endif
 (print, probe Z=#<touch_result>)
 
 G10 L1 P#<_current_tool> Z[#<touch_result>]
-G10 L2 P0 Z#<_hal[probe.blockheight]>                                       ; apply G54 offset again after correct tool measurement  ; need to think about use save restore like tool lenght
+G10 L2 P0     Z#<_backup_offset>
+;G10 L2 P0 Z#<_hal[probe.blockheight]>                                       ; apply G54 offset again after correct tool measurement  ; need to think about use save restore like tool length
 
 (back to Z max position only)
-G53 G0 Z[#<_ini[AXIS_Z]MAX_LIMIT>+#<_ini[PROBE_SCREEN]Z_SAFE_TRAVEL_OFFSET>]
+G53 G0 Z[#<_ini[AXIS_Z]MAX_LIMIT>+#<_ini[CHANGE_POSITION]Z_SAFE_TRAVEL_OFFSET>]
 G43
 
 ;(DEBUG,Zvalue:#<touch_result> Setter;#<_hal[probe.setterheight]>, Block:#<_hal[probe.blockheight]>)

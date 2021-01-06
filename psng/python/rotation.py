@@ -117,11 +117,11 @@ class ProbeScreenRotation(ProbeScreenBase):
              # move Z to start point
              if self.z_clearance_up() == -1:
                  return
-             # move X + edge_lenght
+             # move X + edge_length
              s = """G91
              G1 X%f
              G90""" % (
-                 self.halcomp["ps_edge_lenght"]
+                 self.halcomp["ps_edge_length"]
              )
              if self.gcode(s) == -1:
                  return
@@ -134,7 +134,7 @@ class ProbeScreenRotation(ProbeScreenBase):
              a = self.probed_position_with_offsets()
              ypres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_yp(ypres)
-             alfa = math.degrees(math.atan2(ypres - ycres, self.halcomp["ps_edge_lenght"]))
+             alfa = math.degrees(math.atan2(ypres - ycres, self.halcomp["ps_edge_length"]))
              self.add_history(
                  gtkbutton.get_tooltip_text(),
                  "YcYpA",
@@ -197,11 +197,11 @@ class ProbeScreenRotation(ProbeScreenBase):
              # move Z to start point
              if self.z_clearance_up() == -1:
                  return
-             # move X - edge_lenght
+             # move X - edge_length
              s = """G91
              G1 X-%f
              G90""" % (
-                 self.halcomp["ps_edge_lenght"]
+                 self.halcomp["ps_edge_length"]
              )
              if self.gcode(s) == -1:
                  return
@@ -214,7 +214,7 @@ class ProbeScreenRotation(ProbeScreenBase):
              a = self.probed_position_with_offsets()
              ymres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_ym(ymres)
-             alfa = math.degrees(math.atan2(ycres - ymres, self.halcomp["ps_edge_lenght"]))
+             alfa = math.degrees(math.atan2(ycres - ymres, self.halcomp["ps_edge_length"]))
              self.add_history(
                  gtkbutton.get_tooltip_text(),
                  "YmYcA",
@@ -275,11 +275,11 @@ class ProbeScreenRotation(ProbeScreenBase):
              # move Z to start point
              if self.z_clearance_up() == -1:
                  return
-             # move Y - edge_lenght
+             # move Y - edge_length
              s = """G91
              G1 Y-%f
              G90""" % (
-                 self.halcomp["ps_edge_lenght"]
+                 self.halcomp["ps_edge_length"]
              )
              if self.gcode(s) == -1:
                  return
@@ -292,7 +292,7 @@ class ProbeScreenRotation(ProbeScreenBase):
              a = self.probed_position_with_offsets()
              xpres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_xp(xpres)
-             alfa = math.degrees(math.atan2(xcres - xpres, self.halcomp["ps_edge_lenght"]))
+             alfa = math.degrees(math.atan2(xcres - xpres, self.halcomp["ps_edge_length"]))
              self.add_history(
                  gtkbutton.get_tooltip_text(),
                  "XcXpA",
@@ -353,11 +353,11 @@ class ProbeScreenRotation(ProbeScreenBase):
              # move Z to start point
              if self.z_clearance_up() == -1:
                  return
-             # move Y + edge_lenght
+             # move Y + edge_length
              s = """G91
              G1 Y%f
              G90""" % (
-                 self.halcomp["ps_edge_lenght"]
+                 self.halcomp["ps_edge_length"]
              )
              if self.gcode(s) == -1:
                  return
@@ -370,7 +370,7 @@ class ProbeScreenRotation(ProbeScreenBase):
              a = self.probed_position_with_offsets()
              xmres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
              self.display_result_xm(xmres)
-             alfa = math.degrees(math.atan2(xcres - xmres, self.halcomp["ps_edge_lenght"]))
+             alfa = math.degrees(math.atan2(xcres - xmres, self.halcomp["ps_edge_length"]))
              self.add_history(
                  gtkbutton.get_tooltip_text(),
                  "XmXcA",

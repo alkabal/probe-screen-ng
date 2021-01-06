@@ -35,9 +35,9 @@ o70 if [#<_hal[probe.ps_xy_clearance]> LE 0]
     (ABORT,PROBE XY CLEARANCE NOT CONFIGURED)
 o70 endif
 
-o80 if [#<_hal[probe.ps_edge_lenght]> LE 0]
+o80 if [#<_hal[probe.ps_edge_length]> LE 0]
      o<psng_hook_end> call
-    (ABORT,PROBE EDGE LENGHT NOT CONFIGURED)
+    (ABORT,PROBE EDGE length NOT CONFIGURED)
 o80 endif
 
 
@@ -55,7 +55,7 @@ o100 if [#1 EQ 1]                                                               
 o100 else
      o120 if [#<_current_tool> LT 1]
           o<psng_hook_end> call
-          (ABORT,!!! TOOLLENGHT OR DIAMETER IS NOT ALLOWED WITH TOOL 0 !!!)
+          (ABORT,!!! TOOLlength OR DIAMETER IS NOT ALLOWED WITH TOOL 0 !!!)
      o120 endif
 o100 endif
 

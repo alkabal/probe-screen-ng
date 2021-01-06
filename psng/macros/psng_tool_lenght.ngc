@@ -1,4 +1,4 @@
-o<psng_tool_lenght> sub
+o<psng_tool_length> sub
 
 o90 if [#<_hal[probe.setterheight]> LE 0]
      o<psng_hook_end> call
@@ -25,5 +25,5 @@ G10 L2 P0     Z#<_backup_offset>
 G43
 
 o<psng_goto_changepos> call
-o<psng_tool_lenght> endsub
+o<psng_tool_length> endsub
 M2
