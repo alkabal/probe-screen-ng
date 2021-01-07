@@ -12,6 +12,10 @@ G10 L2 P0 Z0 ; reset G54 offset for correct pieces measurement
 #<z>=#<_z> (save current Z position)
 
 o<psng_start_touch_probing> call
+o500 if [#5070 EQ 0]
+     o<psng_hook_end> call
+    (ABORT,FAILURE : PROBE FOR WORKPIECE HEIGHT DOES NOT FOUND THE CONTACT POINT)
+o500 endif
 
 #<touch_result> = #5063
 (print, probe Z=#<touch_result>)

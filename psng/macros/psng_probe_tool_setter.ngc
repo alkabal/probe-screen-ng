@@ -1,9 +1,14 @@
 o<psng_probe_tool_setter> sub
 
-o90 if [#<_hal[probe.probedtable]> EQ 0]
+o10 if [#<_hal[probe.probedtable]> EQ 0]
      o<psng_hook_end> call
     (ABORT,BEFORE MEASURE TOOL SETTER HEIGHT YOU NEED TO PROBE TABLE OR SET IT MANUALLY!)
-o90 endif
+o10 endif
+
+o20 if [#<_hal[motion.probe-input]> EQ 1]
+     o<psng_hook_end> call
+    (ABORT,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE STARTING AUTOLENGTH !!!)
+o20 endif
 
 o<psng_goto_toolsensor> call
 
@@ -12,6 +17,10 @@ G92.1
 G49
 
 o<psng_start_setter_probing> call
+o500 if [#5070 EQ 0]
+     o<psng_hook_end> call
+     (ABORT,FAILURE : PROBE TOOL SETTER FOR HEIGTH DOES NOT FOUND THE CONTACT POINT)
+o500 endif
 
 #<touch_result> = #5063
 (print, probe Z=#<touch_result>)

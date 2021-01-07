@@ -14,7 +14,7 @@
     <property name="step_increment">0.5</property>
     <property name="page_increment">5</property>
   </object>
-  <object class="GtkAdjustment" id="adj_edge_lenght">
+  <object class="GtkAdjustment" id="adj_edge_length">
     <property name="upper">1000</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
@@ -618,7 +618,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton" id="spbtn1_edge_lenght">
+                              <object class="GtkSpinButton" id="spbtn1_edge_length">
                                 <property name="width_request">105</property>
                                 <property name="height_request">32</property>
                                 <property name="visible">True</property>
@@ -630,11 +630,11 @@
                                 <property name="secondary_icon_activatable">False</property>
                                 <property name="primary_icon_sensitive">True</property>
                                 <property name="secondary_icon_sensitive">True</property>
-                                <property name="adjustment">adj_edge_lenght</property>
+                                <property name="adjustment">adj_edge_length</property>
                                 <property name="digits">3</property>
                                 <property name="numeric">True</property>
-                                <signal name="key-press-event" handler="on_spbtn1_edge_lenght_key_press_event" swapped="no"/>
-                                <signal name="value-changed" handler="on_spbtn1_edge_lenght_value_changed" swapped="no"/>
+                                <signal name="key-press-event" handler="on_spbtn1_edge_length_key_press_event" swapped="no"/>
+                                <signal name="value-changed" handler="on_spbtn1_edge_length_value_changed" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -2364,19 +2364,19 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkButton" id="tool_lenght">
+                                      <object class="GtkButton" id="tool_length">
                                         <property name="width_request">90</property>
                                         <property name="height_request">65</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
-                                        <property name="tooltip_text" translatable="yes">Tool lenght</property>
-                                        <signal name="released" handler="on_btn_tool_lenght_released" swapped="no"/>
+                                        <property name="tooltip_text" translatable="yes">Tool length</property>
+                                        <signal name="released" handler="on_btn_tool_length_released" swapped="no"/>
                                         <child>
                                           <object class="GtkImage" id="image52">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="pixbuf">icons/tool_lenght.png</property>
+                                            <property name="pixbuf">icons/tool_length.png</property>
                                           </object>
                                         </child>
                                       </object>

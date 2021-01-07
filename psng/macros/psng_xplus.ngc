@@ -1,17 +1,31 @@
 o<psng_xplus> sub
 
-;ALKABAL ADD QUESTION : no need to cancel tool offset or cutercomp here if probe is used from tool table with diameter in tooltable ?
+o10 if [#<_hal[motion.probe-input]> EQ 1]
+     o<psng_hook_end> call
+    (ABORT,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE STARTING AUTOLENGTH !!!)
+o10 endif
 
 #<x>=#<_x> (save start X position)
 G91
-G38.2 X#<_hal[probe.ps_probe_max]>        F#<_hal[probe.ps_searchvel]>
-G38.4 X-#<_hal[probe.ps_probe_latch]>     F#<_hal[probe.ps_searchvel]>     ;DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE AND SETTER
+G38.3 X#<_hal[probe.ps_probe_max]>        F#<_hal[probe.ps_searchvel]>
+o500 call
+G38.5 X-#<_hal[probe.ps_probe_latch]>     F#<_hal[probe.ps_searchvel]>     ;DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE
+o500 call
 G1    X-#<_hal[probe.ps_probe_latch]>     F#<_hal[probe.ps_searchvel]>
-G38.2 X[#<_hal[probe.ps_probe_latch]>*2]  F#<_hal[probe.ps_probevel]>
+G38.3 X[#<_hal[probe.ps_probe_latch]>*2]  F#<_hal[probe.ps_probevel]>
+o500 call
 (print,probe X=#5061)
 G90
 (back to start point)
 G1 X#<x> F#<_ini[TOOLSENSOR]RAPID_SPEED>
+
+o500 sub
+     o510 if [#5070 EQ 0]
+          o<psng_hook_end> call
+          (ABORT,FAILURE : PROBE X+ DOES NOT FOUND THE CONTACT POINT)
+     o510 endif
+o500 endsub
+
 
 o<psng_xplus> endsub
 M2

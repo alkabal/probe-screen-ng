@@ -50,7 +50,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         self.down = self.builder.get_object("down")                                                       # It is something outdated ?
 
         self.chk_use_tool_measurement.set_active(
-            self.prefs.getpref("use_toolmeasurement", False, bool)
+            self.prefs.getpref("use_tool_measurement", False, bool)
         )
 
         self.chk_use_rotate_spindle = self.builder.get_object(
@@ -58,7 +58,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         )
 
         # make the pins for tool measurement
-        self.halcomp.newpin("use_toolmeasurement", hal.HAL_BIT, hal.HAL_OUT)
+        self.halcomp.newpin("use_tool_measurement", hal.HAL_BIT, hal.HAL_OUT)
         self.halcomp.newpin("probedtable", hal.HAL_FLOAT, hal.HAL_OUT)
         self.halcomp.newpin("setterheight", hal.HAL_FLOAT, hal.HAL_OUT)
         self.halcomp.newpin("blockheight", hal.HAL_FLOAT, hal.HAL_OUT)
@@ -70,7 +70,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         hal_glib.GPin(pin).connect("value_changed", self.on_tool_change)
 
         if self.chk_use_tool_measurement.get_active():
-            self.halcomp["use_toolmeasurement"] = True
+            self.halcomp["use_tool_measurement"] = True
             self.hal_led_set_m6.hal_pin.set(1)
 
         self.halcomp.newpin("toolchange-diameter", hal.HAL_FLOAT, hal.HAL_IN)
@@ -120,7 +120,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
             # to set the hal pin with correct values we emit a toogled
             if self.chk_use_tool_measurement.get_active():
                 self.frm_probe_pos.set_sensitive(False)
-                self.halcomp["use_toolmeasurement"] = True
+                self.halcomp["use_tool_measurement"] = True
             else:
                 self.frm_probe_pos.set_sensitive(True)
                 self.chk_use_tool_measurement.set_sensitive(True)
@@ -133,11 +133,11 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
     def on_chk_use_tool_measurement_toggled(self, gtkcheckbutton, data=None):
         if gtkcheckbutton.get_active():
             self.frm_probe_pos.set_sensitive(False)
-            self.halcomp["use_toolmeasurement"] = True
+            self.halcomp["use_tool_measurement"] = True
         else:
             self.frm_probe_pos.set_sensitive(True)
-            self.halcomp["use_toolmeasurement"] = False
-        self.prefs.putpref("use_toolmeasurement", gtkcheckbutton.get_active(), bool)
+            self.halcomp["use_tool_measurement"] = False
+        self.prefs.putpref("use_tool_measurement", gtkcheckbutton.get_active(), bool)
         self.hal_led_set_m6.hal_pin.set(gtkcheckbutton.get_active())
 
     # Set rotating spindle check (without saving pref)
