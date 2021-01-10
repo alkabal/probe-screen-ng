@@ -42,12 +42,11 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         self.spbtn_block_height = self.builder.get_object("spbtn_block_height")
         self.btn_probe_tool_setter = self.builder.get_object("btn_probe_tool_setter")
         self.btn_probe_workpiece = self.builder.get_object("btn_probe_workpiece")
+        self.btn_tool_dia = self.builder.get_object("btn_tool_dia")
+        self.btn_tool_length = self.builder.get_object("btn_tool_length")
+        self.btn_probe_tool_setter = self.builder.get_object("btn_probe_tool_setter")
         self.tooledit1 = self.builder.get_object("tooledit1")
-        self.chk_use_tool_measurement = self.builder.get_object(
-            "chk_use_tool_measurement"
-        )
-        self.tool_dia = self.builder.get_object("tool_dia")                                               # It is something outdated ?
-        self.down = self.builder.get_object("down")                                                       # It is something outdated ?
+        self.chk_use_tool_measurement = self.builder.get_object("chk_use_tool_measurement")
 
         self.chk_use_tool_measurement.set_active(
             self.prefs.getpref("use_tool_measurement", False, bool)
@@ -107,10 +106,12 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
             or not self.tsdiam
             or not self.tsoffset
             or not self.revrott
-            or not self.usepopup
+            #or not self.usepopup              # Do not check this one because if you set 0 is see as not and the config fail
         ):
             self.chk_use_tool_measurement.set_active(False)
-            self.tool_dia.set_sensitive(False)
+            self.btn_tool_dia.set_sensitive(False)
+            self.btn_tool_length.set_sensitive(False)
+            self.btn_probe_tool_setter.set_sensitive(False)
             print(_("**** PROBE SCREEN INFO ****"))
             print(_("**** no valid probe config in INI File ****"))
             print(_("**** disabled auto tool measurement ****"))
@@ -220,8 +221,8 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                  return
              if self.ocode("o<psng_config_check> call [1]") == -1:
                  return
-             # Start psng_probe_tool_setter.ngc
-             if self.ocode("o<psng_probe_tool_setter> call") == -1:
+             # Start psng_probe_setter.ngc
+             if self.ocode("o<psng_probe_setter> call") == -1:
                  return
              a = self.stat.probed_position
              tsres = (float(a[2]) - self.halcomp["probedtable"])
@@ -445,16 +446,15 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         change = self.halcomp["toolchange-change"]
         toolnumber = self.halcomp["toolchange-number"]
         toolprepnumber = self.halcomp["toolchange-prep-number"]
-        print("tool-change =", change)
         print("tool-number =", toolnumber)
         print("tool_prep_number =", toolprepnumber, change)
         if self.usepopup == 0:
                  result = 0
-                 
-                 
+
+
 # One issue need to be corrected if you ask the same tool as actual tool probe start without any confirmation (patched in ocode with M0)
-                 
-                 
+
+
         if change:
             # if toolprepnumber = 0 we will get an error because we will not be able to get
             # any tooldescription, so we avoid that case
@@ -499,7 +499,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                       self.add_history("Info: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
                       self.gcode("(ABORT,**** %s ****)" % text)                                                  # Need investigation with self.command.abort()
                       return
-            if self.usepopup == 1:          
+            if self.usepopup == 1:
                      result = self.warning_dialog(message, title=_("Manual Toolchange"))
             if result:
                 text = "TOOLCHANGED CORRECTLY"
@@ -513,7 +513,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                 self.command.abort()                                                                               # Need investigation with self.command.abort()
                 self.halcomp["toolchange-prep-number"] = toolnumber
                 self.halcomp["toolchange-change"] = False  # Is there any reason to do this to input pin ?
-                self.halcomp["toolchange-changed"] = True                
+                self.halcomp["toolchange-changed"] = True
                 if self.usepopup == 0:
                       self.gcode("(ABORT,**** %s ****)" % text)
                 elif self.usepopup == 1:

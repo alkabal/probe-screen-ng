@@ -7,7 +7,7 @@ o90 endif
 
 (cancel Z offsets But use tool offset)
 G43          ; force tool offset for correct calc
-G10 L2 P0 Z0 ; reset G54 offset for correct pieces measurement
+G10 L2 P0 Z0 ; reset G54 offset for correct pieces measurement and replace by new value
 
 #<z>=#<_z> (save current Z position)
 

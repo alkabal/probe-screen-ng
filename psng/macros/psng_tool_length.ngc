@@ -1,0 +1,34 @@
+o<psng_tool_length> sub
+
+o10 if [#<_hal[probe.setterheight]> LE 0]
+     o<psng_hook_end> call
+    (ABORT,TOOLSETTER HEIGHT NOT PROBED/CONFIGURED)
+o10 endif
+
+o<psng_goto_toolsensor> call                                               ; with G90 inside
+
+(cancel all Z offsets)
+G92.1                                                                      ; use pause can be better than reset ???
+G49
+
+o<psng_backup_offset> call
+G10 L2 P0 Z0                                                               ; reset G54 offset for correct tool measurement
+
+o<psng_start_setter_probing> call
+o500 if [#5070 EQ 0]
+     G10 L2 P0     Z#<_backup_offset>
+     o<psng_hook_end> call
+    (ABORT,FAILURE : TOOL SETTER FOR TOOL LENGHT DOES NOT FOUND THE CONTACT POINT)
+o500 endif
+
+#<touch_result> = [#5063 - #<_hal[probe.setterheight]>]
+(print, probe Z=#<touch_result>)
+
+G10 L1 P#<_current_tool> Z[#<touch_result>]
+G10 L2 P0     Z#<_backup_offset>
+
+G43
+
+o<psng_goto_changepos> call
+o<psng_tool_length> endsub
+M2

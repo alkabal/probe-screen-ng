@@ -2,7 +2,7 @@ o<psng_yplus> sub
 
 o10 if [#<_hal[motion.probe-input]> EQ 1]
      o<psng_hook_end> call
-    (ABORT,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE STARTING AUTOLENGTH !!!)
+    (ABORT,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE PROBE Y+ !!!)
 o10 endif
 
 #<y>=#<_y> (save start Y position)
@@ -25,7 +25,6 @@ o500 sub
           (ABORT,FAILURE : PROBE Y+ DOES NOT FOUND THE CONTACT POINT)
      o510 endif
 o500 endsub
-
 
 o<psng_yplus> endsub
 M2

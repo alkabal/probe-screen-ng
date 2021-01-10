@@ -11,9 +11,9 @@
 ; 1 = psng_manual_change
 ; 2 = psng_tool_diameter
 ; 3 = psng_probe_table
-; 4 = psng_probe_tool_setter
+; 4 = psng_probe_setter
 ; 5 = psng_probe_workpiece
-; 6 = psng_psng_tool_length
+; 6 = psng_tool_length
 ; 7 = psng_xyplusminus
 
 o<psng_hook> sub

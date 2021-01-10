@@ -228,19 +228,18 @@ class ProbeScreenBase(object):
         self,
         tool_tip_text,
         s="",
-        xm=0.0,
-        xc=0.0,
-        xp=0.0,
-        lx=0.0,
-        ym=0.0,
-        yc=0.0,
-        yp=0.0,
-        ly=0.0,
-        z=0.0,
-        d=0.0,
-        a=0.0,
+        xm=None,
+        xc=None,
+        xp=None,
+        lx=None,
+        ym=None,
+        yc=None,
+        yp=None,
+        ly=None,
+        z=None,
+        d=None,
+        a=None,
     ):
-        #        c = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         c = datetime.now().strftime("%H:%M:%S  ") + "{0: <10}".format(tool_tip_text)
         if "Xm" in s:
             c += "X-=%.4f " % xm

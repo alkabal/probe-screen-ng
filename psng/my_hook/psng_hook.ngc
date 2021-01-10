@@ -148,17 +148,19 @@ o<psng_hook> sub
              o201 elseif [#<_current_tool> NE #<probe_number>]
                   (ABORT,PROBE WITHOUT TOOL #<probe_number> AS PROBE IS NOT ALLOWED)
              o201 elseif [#<_hal[and2.combined-probe.in0]> EQ 1 AND #<_hal[and2.combined-setter.in0]> EQ 1]
-                  (ABORT,PROBE AND TOOL SETTER MISSING)
+                  (ABORT,PROBE AND TOOL SETTER MISSING OR ALREADY TRIGGERED)
              o201 elseif [#<_hal[and2.combined-probe.in0]> EQ 1]
-                  (ABORT,PROBE MISSING)
+                  (ABORT,PROBE MISSING OR ALREADY TRIGGERED)
              o201 elseif [#<_hal[and2.combined-setter.in0]> EQ 1]
-                  (ABORT,TOOL SETTER MISSING)
+                  (ABORT,TOOL SETTER MISSING OR ALREADY TRIGGERED)
              o201 else
                   (ABORT,PSNG HOOK FAIL tool #<_current_tool>, prep_tool #<_selected_tool>, setter_err #<_hal[and2.combined-setter.in0]>, probe_err #<_hal[and2.combined-probe.in0]>, hook #<hooked_macro>, err_flag #<error>)
              o201 endif
    o200 return [-1]
    o200 endif
 
+
+; Check if mixed input is ready : DO NOT WORK FINE
 ;o1000 sub
 ;o300 if [#<_hal[motion.probe-input]> EQ 1]
 ;     o<psng_hook_end> call

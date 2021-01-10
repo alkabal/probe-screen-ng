@@ -1,14 +1,9 @@
-o<psng_probe_tool_setter> sub
+o<psng_probe_setter> sub
 
 o10 if [#<_hal[probe.probedtable]> EQ 0]
      o<psng_hook_end> call
     (ABORT,BEFORE MEASURE TOOL SETTER HEIGHT YOU NEED TO PROBE TABLE OR SET IT MANUALLY!)
 o10 endif
-
-o20 if [#<_hal[motion.probe-input]> EQ 1]
-     o<psng_hook_end> call
-    (ABORT,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE STARTING AUTOLENGTH !!!)
-o20 endif
 
 o<psng_goto_toolsensor> call
 
@@ -29,5 +24,5 @@ o500 endif
 G43
 
 o<psng_goto_changepos> call
-o<psng_probe_tool_setter> endsub
+o<psng_probe_setter> endsub
 M2

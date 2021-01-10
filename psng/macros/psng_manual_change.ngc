@@ -33,16 +33,21 @@ o20 else
 o20 endif
 
 
-;o30 if [#<_metric> NE #<metric_based>]
-;    (print,not right Units: #<_metric>)
-;     o31 if [#<metric_based> EQ 1]
-;         (print,switched Units to metric)
-;         G21
-;     o31 else
-;         (print,switched Units to imperial)
-;         G21
-;     o31 endif
-;o30 endif
+o30 if [#<_metric> NE #<metric_based>]
+    (print,not right Units: #<_metric>)
+     o31 if [#<metric_based> EQ 1]
+         (print,switched Units to metric)
+         G21
+     o31 else
+         (print,switched Units to imperial)
+         G21
+     o31 endif
+o30 endif
+
+o10 if [#<_hal[motion.probe-input]> EQ 1]
+     o<psng_hook_end> call
+    (ABORT,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE GOTO CHANGEPOS FOR AUTOLENGHT !!!)
+o10 endif
 
 o<psng_goto_changepos> call
 o<clear-axis-notif> call
@@ -122,12 +127,6 @@ o100 endif
 
 M6   ; using the code being remapped here means 'use builtin behaviour' used here for M6Tx
 
-o300 if [#<_hal[motion.probe-input]> EQ 1]                                ; DON'T KNOW WHY BUT IF TRY TO DO THIS BEFORE IN THIS CODE THE M64P1 Seem to be ignored and also pause in hook is ignored
-     o<psng_hook_end> call
-    (MSG,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE STARTING AUTOLENGTH !!!)
-o300 return [-5]
-o300 endif
-
 o<psng_goto_toolsensor> call                                                ; with G90 inside
 
 ; cancel G5x offset
@@ -148,7 +147,9 @@ G10 L1 P#<_current_tool> Z[#<touch_result>]
 G10 L2 P0     Z#<_backup_offset>
 
 (back to Z max position only)
-G53 G0 Z[#<_ini[AXIS_Z]MAX_LIMIT>+#<_ini[CHANGE_POSITION]Z_SAFE_TRAVEL_OFFSET>]
+o600 if [#<_ini[EMCIO]TOOL_CHANGE_QUILL_UP> EQ 1]
+    G53 G0 Z0                                     ; Respecting the traditional linuxcnc behavior
+o600 endif
 G43
 
 ;(DEBUG,Zvalue:#<touch_result> Setter;#<_hal[probe.setterheight]>, Block:#<_hal[probe.blockheight]>)

@@ -5,11 +5,6 @@ o10 if [#<_hal[probe.setterheight]> LE 0]
     (ABORT,TOOLSETTER HEIGHT NOT PROBED/CONFIGURED)
 o10 endif
 
-o20 if [#<_hal[motion.probe-input]> EQ 1]
-     o<psng_hook_end> call
-    (ABORT,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE STARTING AUTOLENGTH !!!)
-o20 endif
-
 o<psng_goto_toolsensor> call
 
 (cancel all Z offsets)(+ cutter compensation for diameter measurement)

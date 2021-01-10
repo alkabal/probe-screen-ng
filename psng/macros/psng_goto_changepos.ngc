@@ -1,15 +1,18 @@
 o<psng_goto_changepos> sub
 
-o10 if [#<_hal[motion.probe-input]> EQ 1]
-     o<psng_hook_end> call
-    (ABORT,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE STARTING AUTOLENGTH !!!)
-o10 endif
+(DEBUG, EMCIO QUILL_UP #<_ini[EMCIO]TOOL_CHANGE_QUILL_UP>)
+(DEBUG, EMCIO POSITION #<_ini[EMCIO]TOOL_CHANGE_POSITION#1>)
 
 ;first go up
 G90
-G53 G0 Z[#<_ini[AXIS_Z]MAX_LIMIT>+#<_ini[CHANGE_POSITION]Z_SAFE_TRAVEL_OFFSET>]
+o20 if [#<_ini[EMCIO]TOOL_CHANGE_QUILL_UP> EQ 1]
+    G53 G0 Z0                                     ; Respecting the traditional linuxcnc behavior
+o20 endif
+
 G53 G0 X[#<_ini[CHANGE_POSITION]X>] Y[#<_ini[CHANGE_POSITION]Y>]
 G53 G0 Z[#<_ini[CHANGE_POSITION]Z>]
+
+
 
 o<psng_goto_changepos> endsub
 M2
