@@ -8,13 +8,23 @@ o10 endif
 G91
 G38.3 Z-#<_hal[probe.ps_probe_max]>        F#<_hal[probe.ps_searchvel]>
 o500 call
-G38.5 Z#<_hal[probe.ps_probe_latch]>       F[#<_hal[probe.ps_searchvel]>*0.5]     ; DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE
+
+G38.5 Z#<_hal[probe.ps_probe_latch]>       F[#<_hal[probe.ps_searchvel]>*0.5]
 o500 call
+
+; Move away
 G1    Z#<_hal[probe.ps_probe_latch]>       F[#<_hal[probe.ps_searchvel]>*0.5]
+
 G38.3 Z-[#<_hal[probe.ps_probe_latch]>*2]  F#<_hal[probe.ps_probevel]>
+o500 call
+#<_touch_result> = #5063
+
+G38.5 Z#<_hal[probe.ps_probe_latch]>       F[#<_hal[probe.ps_searchvel]>*0.5]
+o500 call
+
 ; Move away and allow a half second for the probe to clear
 ; the last #5070 check is done in the parent macro
-G1    Z#<_hal[probe.ps_probe_latch]>       F[#<_hal[probe.ps_searchvel]>]
+G1    Z#<_hal[probe.ps_probe_latch]>       F#<_hal[probe.ps_searchvel]>
 G4 P0.5
 G90
 

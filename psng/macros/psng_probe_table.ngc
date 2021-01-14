@@ -4,6 +4,7 @@ o<psng_probe_table> sub
 G92.1
 G49
 G10 L20 P0 Z[#<_hal[axis.z.pos-cmd]>]
+;G10 L2 P0 Z0 ; reset G54 offset for correct pieces measurement and replace by new value TODO TEST
 #<z>=#<_z> (save current Z position)
 
 o<psng_start_touch_probing> call
@@ -12,11 +13,10 @@ o500 if [#5070 EQ 0]
     (ABORT,FAILURE : PROBE FOR TABLE DISTANCE DOES NOT FOUND THE CONTACT POINT)
 o500 endif
 
-#<touch_result> = #5063
-(print, probe Z=#<touch_result>)
+(print, probe Z=#<_touch_result>)
 
 (back to start point)
-G1 Z#<z> F#<_ini[TOOLSENSOR]RAPID_SPEED>
+G1 Z#<z> F#<_ini[PROBE_SCREEN]RAPID_SPEED>
 G43
 
 o<psng_probe_table> endsub

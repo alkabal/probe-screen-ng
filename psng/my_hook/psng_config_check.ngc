@@ -1,0 +1,69 @@
+o<psng_config_check> sub
+
+o10 if [#<_hal[probe.ps_searchvel]> LE 0]
+     o<psng_hook_end> call
+    (ABORT,PROBE SEARCH VELOCITY NOT CONFIGURED)
+o10 endif
+
+o20 if [#<_hal[probe.ps_probevel]> LE 0]
+     o<psng_hook_end> call
+    (ABORT,PROBE VELOCITY NOT CONFIGURED)
+o20 endif
+
+o30 if [#<_hal[probe.ps_z_clearance]> LE 0]
+     o<psng_hook_end> call
+    (ABORT,PROBE Z CLEARANCE NOT CONFIGURED)
+o30 endif
+
+o40 if [#<_hal[probe.ps_probe_max]> LE 0]
+     o<psng_hook_end> call
+    (ABORT,PROBE MAX NOT CONFIGURED)
+o40 endif
+
+o50 if [#<_hal[probe.ps_probe_latch]> LE 0]
+     o<psng_hook_end> call
+    (ABORT,PROBE LATCH NOT CONFIGURED)
+o50 endif
+
+o60 if [#<_hal[probe.ps_probe_diam]> LE 0]
+     o<psng_hook_end> call
+    (ABORT,PROBE DIAMETER NOT CONFIGURED)
+o60 endif
+
+o70 if [#<_hal[probe.ps_xy_clearance]> LE 0]
+     o<psng_hook_end> call
+    (ABORT,PROBE XY CLEARANCE NOT CONFIGURED)
+o70 endif
+
+o80 if [#<_hal[probe.ps_edge_length]> LE 0]
+     o<psng_hook_end> call
+    (ABORT,PROBE EDGE length NOT CONFIGURED)
+o80 endif
+
+
+#<probe_number> = #<_ini[PROBE_SCREEN]PROBE_NUMBER>
+
+; If you use my exemple hook this test never fail because they are already checked in hook, it's only if you do not use my custom hook
+o100 if [#1 EQ 1]                                                                       ; 1 or 0 call from python
+     o110 if [#<_current_tool> NE #<probe_number>]
+          o<psng_hook_end> call
+          (ABORT,!!! PROBING IS NOT ALLOWED WITHOUT 3D PROBE AS TOOL #<probe_number> !!!)
+     o110 elseif [#<_current_tool> EQ 0]
+          o<psng_hook_end> call
+          (ABORT,!!! PROBING IS NOT ALLOWED WITH TOOL 0 !!!)
+     o110 endif
+o100 else
+     o120 if [#<_current_tool> LT 1]
+          o<psng_hook_end> call
+          (ABORT,!!! TOOLlength OR DIAMETER IS NOT ALLOWED WITH TOOL 0 !!!)
+     o120 endif
+o100 endif
+
+
+o300 if [#<_hal[motion.probe-input]> EQ 1]
+     o<psng_hook_end> call
+    (ABORT,!!! PROBE ALREADY TRIGGERED OR REMOVED AFTER CONFIG CHECK !!!)
+o300 endif
+
+o<psng_config_check> endsub
+M2

@@ -1,14 +1,13 @@
 o<psng_probe_workpiece> sub
 
-o90 if [#<_hal[probe.setterheight]> LE 0]
+o90 if [#<_hal[probe.blockheight]> LE 0]
      o<psng_hook_end> call
-    (ABORT,TOOLSETTER HEIGHT NOT PROBED/CONFIGURED)
+    (ABORT,BLOCK HEIGHT NOT PROBED/CONFIGURED)
 o90 endif
 
 (cancel Z offsets But use tool offset)
 G43          ; force tool offset for correct calc
 G10 L2 P0 Z0 ; reset G54 offset for correct pieces measurement and replace by new value
-
 #<z>=#<_z> (save current Z position)
 
 o<psng_start_touch_probing> call
@@ -17,13 +16,12 @@ o500 if [#5070 EQ 0]
     (ABORT,FAILURE : PROBE FOR WORKPIECE HEIGHT DOES NOT FOUND THE CONTACT POINT)
 o500 endif
 
-#<touch_result> = #5063
-(print, probe Z=#<touch_result>)
+(print, probe Z=#<_touch_result>)
 
 ; "G10 L2 P0 Z%s" % blockheight is done inside python code due to multiple possibility for set workpieces height
 
 (back to start point)
-G1 Z#<z> F#<_ini[TOOLSENSOR]RAPID_SPEED>   
+G1 Z#<z> F#<_ini[PROBE_SCREEN]RAPID_SPEED>
 
 o<psng_probe_workpiece> endsub
 M2

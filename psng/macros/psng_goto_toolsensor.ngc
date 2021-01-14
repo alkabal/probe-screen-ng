@@ -10,6 +10,7 @@ G90
 o20 if [#<_ini[EMCIO]TOOL_CHANGE_QUILL_UP> EQ 1]
     G53 G0 Z0                                     ; Respecting the traditional linuxcnc behavior
 o20 endif
+
 G53 G0 X[#<_ini[TOOLSENSOR]X>] Y[#<_ini[TOOLSENSOR]Y>]
 G53 G0 Z[#<_ini[TOOLSENSOR]Z>]
 

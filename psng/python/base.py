@@ -97,7 +97,7 @@ class ProbeScreenBase(object):
         for l in s.split("\n"):
             # Search for G1 followed by a space, otherwise we'll catch G10 too.
             if "G1 " in l:
-                l += " F#<_ini[TOOLSENSOR]RAPID_SPEED>"
+                l += " F#<_ini[PROBE_SCREEN]RAPID_SPEED>"
             self.command.mdi(l)
             self.command.wait_complete()
             if self.error_poll() == -1:
@@ -168,7 +168,7 @@ class ProbeScreenBase(object):
         else:
             print("Unable to poll %s GUI for errors" % self.display)
             return -1
-            
+
         if "TRUE" in error_pin:
             text = "See notification popup"
             print("error", text)

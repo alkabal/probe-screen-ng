@@ -1,0 +1,24 @@
+o<psng_coord_offset_backup> sub
+
+ o400  if [#<_coord_system> EQ 540]
+       #<_coord_offset_backup> = #5223
+ o400  elseif [#<_coord_system> EQ 550]
+       #<_coord_offset_backup> = #5243
+ o400  elseif [#<_coord_system> EQ 560]
+       #<_coord_offset_backup> = #5263
+ o400  elseif [#<_coord_system> EQ 570]
+       #<_coord_offset_backup> = #5283
+ o400  elseif [#<_coord_system> EQ 580]
+       #<_coord_offset_backup> = #5303
+ o400  elseif [#<_coord_system> EQ 590]
+       #<_coord_offset_backup> = #5323
+ o400  elseif [#<_coord_system> EQ 591]
+       #<_coord_offset_backup> = #5343
+ o400  elseif [#<_coord_system> EQ 592]
+       #<_coord_offset_backup> = #5363
+ o400  elseif [#<_coord_system> EQ 593]
+       #<_coord_offset_backup> = #5383
+ o400 endif
+
+o<psng_coord_offset_backup> endsub
+M2

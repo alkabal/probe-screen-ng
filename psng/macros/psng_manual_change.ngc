@@ -79,19 +79,7 @@ o100 if [#<_hal[probe.use_tool_measurement]> EQ 0 OR #<_selected_tool> EQ 0]
 o100 return [3] ; indicate no tool measurement possible with tool 0 or no tool measurement configured
 
 o100 else
-     o130 if [#<_hal[probe.ps_searchvel]> LE 0]
-          (MSG,SEARCH VELOCITY NOT CONFIGURED)
-          (MSG,TOOLCHANGE CANCELED)
-     o130 return [-1] ; indicate searchvel <= 0
-     o130 endif
-
-     o140 if [#<_hal[probe.ps_probevel]> LE 0]
-          (MSG,PROBE VELOCITY NOT CONFIGURED)
-          (MSG,TOOLCHANGE CANCELED)
-     o140 return [-2] ; indicate probevel <= 0
-     o140 endif
-
-     o150 if [#<_hal[probe.setterheight]> LE 0]
+     o150 if [#<_hal[probe.setterheight]> LE 0]   ; AT THE END NEED TO CHOOSE #<_hal[probe.setterheight or #<_ini[TOOLSENSOR]TS_HEIGHT>
           (MSG,TOOLSETTER HEIGHT NOT CONFIGURED)
           (MSG,TOOLCHANGE CANCELED)
      o150 return [-3]
@@ -103,7 +91,7 @@ o100 else
           (DEBUG, PSNG hook indicated a failure: #<_value>)
      o160 return [-4]
      o160 endif
-     
+
   o102 if [#<_ini[PROBE_SCREEN]TOOLCHANGE_POPUP_STYLE> EQ 0]
      o170 if [#<_current_tool> EQ #<_selected_tool>]
           (MSG,SAME TOOL AS ACTUAL SO MEASUREMENT START AUTOMATICALLY)
@@ -130,29 +118,29 @@ M6   ; using the code being remapped here means 'use builtin behaviour' used her
 o<psng_goto_toolsensor> call                                                ; with G90 inside
 
 ; cancel G5x offset
-o<psng_backup_offset> call
-G10 L2 P0 Z0                                                                ; reset G54 offset for correct tool measurement
+o<psng_coord_offset_backup> call
 
 o<psng_start_setter_probing> call
 o500 if [#5070 EQ 0]
-     G10 L2 P0     Z#<_backup_offset>
      o<psng_hook_end> call
 o500 return [-6] ; indicate probe contact failure to epilog
 o500 endif
 
-#<touch_result> = [#5063 - #<_hal[probe.setterheight]>]
-(print, probe Z=#<touch_result>)
+;#<_touch_result> = [#5063 - #<_hal[probe.setterheight]> + #<_coord_offset_backup>]   ; AT THE END NEED TO CHOOSE #<_hal[probe.setterheight or #<_ini[TOOLSENSOR]TS_HEIGHT>
+(print, probe Z=#<_touch_result>)
 
-G10 L1 P#<_current_tool> Z[#<touch_result>]
-G10 L2 P0     Z#<_backup_offset>
+G10 L1 P#<_current_tool> Z[#<_touch_result>]
+
+G43
 
 (back to Z max position only)
 o600 if [#<_ini[EMCIO]TOOL_CHANGE_QUILL_UP> EQ 1]
     G53 G0 Z0                                     ; Respecting the traditional linuxcnc behavior
 o600 endif
-G43
 
-;(DEBUG,Zvalue:#<touch_result> Setter;#<_hal[probe.setterheight]>, Block:#<_hal[probe.blockheight]>)
+    G53 G0 X#<intialX> Y#<intialX>
+
+
 (MSG,TODO what about G43 G41 G42 can be saved at macro start and restored at end : see "lathemacro")
 
 o<psng_hook_end> call

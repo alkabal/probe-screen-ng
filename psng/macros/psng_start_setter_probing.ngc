@@ -8,16 +8,27 @@ o10 endif
 G91
 G38.3 Z#<_ini[TOOLSENSOR]MAXPROBE>             F#<_ini[TOOLSENSOR]SEARCH_VEL>
 o500 call
-  o100 if [#<_ini[TOOLSENSOR]SETTER_WITH_SPRING> EQ 1]
-       G38.5 Z#<_ini[TOOLSENSOR]REVERSE_LATCH> F[#<_ini[TOOLSENSOR]SEARCH_VEL>*0.5]     ; DO NOT WORK FINE WITHOUT SPRING MOUNTED SETTER
+
+  o100 if [#<_ini[TOOLSENSOR]TS_REVERSE_LATCH> GT 0]
+       G38.5 Z#<_ini[TOOLSENSOR]TS_REVERSE_LATCH> F[#<_ini[TOOLSENSOR]SEARCH_VEL>*0.5]     ; DO NOT WORK FINE WITHOUT SPRING MOUNTED SETTER
        o500 call
   o100 endif
-G1    Z#<_ini[TOOLSENSOR]TS_LATCH>             F[#<_ini[TOOLSENSOR]SEARCH_VEL>*0.5] 
+
+G1    Z#<_ini[TOOLSENSOR]TS_LATCH>             F[#<_ini[TOOLSENSOR]SEARCH_VEL>*0.5]
+
 G38.3 Z-[#<_ini[TOOLSENSOR]TS_LATCH>*2]        F#<_ini[TOOLSENSOR]PROBE_VEL>
-; the last #5070 check is done in the parent macro
-; Move away and allow a half second for the probe to clear
-G1    Z[#<_ini[TOOLSENSOR]TS_LATCH>*2]             F[#<_ini[TOOLSENSOR]SEARCH_VEL>] 
-G4 P0.5
+o500 call
+#<_touch_result> = [#5063 - #<_hal[probe.setterheight]> + #<_coord_offset_backup>]   ; AT THE END NEED TO CHOOSE #<_hal[probe.setterheight or #<_ini[TOOLSENSOR]TS_HEIGHT>
+
+  o200 if [#<_ini[TOOLSENSOR]TS_REVERSE_LATCH> GT 0]
+       G38.5 Z#<_ini[TOOLSENSOR]TS_REVERSE_LATCH> F[#<_ini[TOOLSENSOR]SEARCH_VEL>*0.5]     ; DO NOT WORK FINE WITHOUT SPRING MOUNTED SETTER
+       o500 call
+  o200 endif
+
+       ; Move away and allow a half second for the probe to clear
+       G1    Z[#<_ini[TOOLSENSOR]TS_LATCH>]             F[#<_ini[TOOLSENSOR]SEARCH_VEL>]
+       G4 P0.5
+
 G90
 
 o500 sub

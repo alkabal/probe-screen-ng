@@ -1,11 +1,19 @@
 o<psng_goto_changepos> sub
 
-(DEBUG, EMCIO QUILL_UP #<_ini[EMCIO]TOOL_CHANGE_QUILL_UP>)
-(DEBUG, EMCIO POSITION #<_ini[EMCIO]TOOL_CHANGE_POSITION#1>)
+;(DEBUG, EMCIO POSITION #<_ini[EMCIO]TOOL_CHANGE_POSITION>)
+
+
+; to test again this is new here
+o10 if [#<_hal[motion.probe-input]> EQ 1]
+     o<psng_hook_end> call
+    (ABORT,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE GOTO CHANGE POSITION !!!)
+o10 endif
+
 
 ;first go up
 G90
 o20 if [#<_ini[EMCIO]TOOL_CHANGE_QUILL_UP> EQ 1]
+(DEBUG, EMCIO QUILL_UP #<_ini[EMCIO]TOOL_CHANGE_QUILL_UP>)
     G53 G0 Z0                                     ; Respecting the traditional linuxcnc behavior
 o20 endif
 

@@ -17,8 +17,8 @@ o500 if [#5070 EQ 0]
      (ABORT,FAILURE : PROBE TOOL SETTER FOR HEIGTH DOES NOT FOUND THE CONTACT POINT)
 o500 endif
 
-#<touch_result> = #5063
-(print, probe Z=#<touch_result>)
+;#<_touch_result> = #5063
+(print, probe Z=#<_touch_result>)
 
 ; only internal setterheight value are changed inside python code
 G43

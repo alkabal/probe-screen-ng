@@ -7,17 +7,25 @@ o10 endif
 
 #<y>=#<_y> (save start Y position)
 G91
-G38.3 Y#<_hal[probe.ps_probe_max]>        F#<_hal[probe.ps_searchvel]>
+
+G38.3 Y#<_hal[probe.ps_probe_max]>          F#<_hal[probe.ps_searchvel]>
 o500 call
-G38.5 Y-#<_hal[probe.ps_probe_latch]>     F#<_hal[probe.ps_searchvel]>     ;DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE
+
+  o100 if [#<_ini[PROBE_SCREEN]PROBE_REVERSE_LATCH> GT 0]
+       G38.5 Y-#<_ini[PROBE_SCREEN]PROBE_REVERSE_LATCH>       F#<_hal[probe.ps_searchvel]>     ;DO NOT WORK FINE WITHOUT SPRING MOUNTED PROBE
+       o500 call
+       G1    Y-[#<_ini[PROBE_SCREEN]PROBE_LATCH>] F#<_hal[probe.ps_searchvel]>
+  o100 else
+       G1    Y-[#<_hal[probe.ps_probe_latch]>] F#<_hal[probe.ps_searchvel]>
+  o100 endif
+
+G38.3 Y[#<_hal[probe.ps_probe_latch]>*1.2]    F#<_hal[probe.ps_probevel]>
 o500 call
-G1    Y-#<_hal[probe.ps_probe_latch]>     F#<_hal[probe.ps_searchvel]>
-G38.3 Y[#<_hal[probe.ps_probe_latch]>*2]  F#<_hal[probe.ps_probevel]>
-o500 call
+
 (print,probe Y=#5062)
 G90
 (back to start point)
-G1 Y#<y> F#<_ini[TOOLSENSOR]RAPID_SPEED>
+G1 Y#<y> F#<_ini[PROBE_SCREEN]RAPID_SPEED>
 
 o500 sub
      o510 if [#5070 EQ 0]

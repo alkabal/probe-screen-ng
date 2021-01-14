@@ -109,9 +109,10 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
             #or not self.usepopup              # Do not check this one because if you set 0 is see as not and the config fail
         ):
             self.chk_use_tool_measurement.set_active(False)
-            self.btn_tool_dia.set_sensitive(False)
-            self.btn_tool_length.set_sensitive(False)
-            self.btn_probe_tool_setter.set_sensitive(False)
+            self.frm_probe_pos.set_sensitive(False)
+#            self.btn_tool_dia.set_sensitive(False)
+#            self.btn_tool_length.set_sensitive(False)
+#            self.btn_probe_tool_setter.set_sensitive(False)
             print(_("**** PROBE SCREEN INFO ****"))
             print(_("**** no valid probe config in INI File ****"))
             print(_("**** disabled auto tool measurement ****"))
@@ -451,9 +452,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
         if self.usepopup == 0:
                  result = 0
 
-
 # One issue need to be corrected if you ask the same tool as actual tool probe start without any confirmation (patched in ocode with M0)
-
 
         if change:
             # if toolprepnumber = 0 we will get an error because we will not be able to get
@@ -499,6 +498,7 @@ class ProbeScreenToolMeasurement(ProbeScreenBase):
                       self.add_history("Info: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
                       self.gcode("(ABORT,**** %s ****)" % text)                                                  # Need investigation with self.command.abort()
                       return
+
             if self.usepopup == 1:
                      result = self.warning_dialog(message, title=_("Manual Toolchange"))
             if result:
