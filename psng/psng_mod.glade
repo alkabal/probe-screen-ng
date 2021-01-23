@@ -20,8 +20,8 @@
     <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="adj_offs_angle">
-    <property name="lower">-359.99990000000003</property>
-    <property name="upper">359.99990000000003</property>
+    <property name="lower">-359.9999</property>
+    <property name="upper">359.9999</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
@@ -2201,25 +2201,6 @@
                                         <property name="y_options">GTK_SHRINK</property>
                                       </packing>
                                     </child>
-                                    <child>
-                                      <object class="GtkImage" id="image44">
-                                        <property name="width_request">150</property>
-                                        <property name="height_request">28</property>
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="xalign">1</property>
-                                        <property name="yalign">1</property>
-                                        <property name="pixbuf">icons/logo_micro_vers_gray.png</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">5</property>
-                                        <property name="right_attach">6</property>
-                                        <property name="top_attach">3</property>
-                                        <property name="bottom_attach">4</property>
-                                        <property name="x_options">GTK_SHRINK</property>
-                                        <property name="y_options">GTK_SHRINK</property>
-                                      </packing>
-                                    </child>
                                   </object>
                                 </child>
                               </object>
@@ -2354,7 +2335,7 @@
                                           <object class="GtkImage" id="image12">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="pixbuf">icons/probe_table.png</property>
+                                            <property name="pixbuf">icons/down.png</property>
                                           </object>
                                         </child>
                                       </object>
@@ -2396,12 +2377,12 @@
                                         <property name="receives_default">True</property>
                                         <property name="tooltip_text" translatable="yes">Probe setter</property>
                                         <property name="use_underline">True</property>
-                                        <signal name="released" handler="btn_probe_tool_setter_released" swapped="no"/>
+                                        <signal name="released" handler="on_btn_probe_tool_setter_released" swapped="no"/>
                                         <child>
                                           <object class="GtkImage" id="image45">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="pixbuf">icons/probe_setter.png</property>
+                                            <property name="pixbuf">icons/ts_height.png</property>
                                           </object>
                                         </child>
                                       </object>
@@ -2683,7 +2664,7 @@
                                 <property name="can_focus">True</property>
                                 <property name="wrap_mode">word</property>
                                 <property name="cursor_visible">False</property>
-                                <property name="accepts_tab">False</property>
+                                <property name="acceptab">False</property>
                               </object>
                             </child>
                           </object>

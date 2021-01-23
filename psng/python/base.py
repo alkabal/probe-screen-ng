@@ -22,6 +22,7 @@ import os
 import sys
 import time
 from datetime import datetime
+from functools import wraps
 from subprocess import PIPE, Popen
 
 import gtk
@@ -47,8 +48,9 @@ class ProbeScreenBase(object):
         # Load the machines INI file
         self.inifile = linuxcnc.ini(os.environ["INI_FILE_NAME"])
         if not self.inifile:
-            print("**** PROBE SCREEN GET INI INFO **** \n Error, no INI File given !!")
-            sys.exit()
+            message   = _("Error, no INI File given")
+            self.error_dialog(message)
+            sys.exit(1)
 
         # Load Probe Screen Preferences
         self.prefs = ProbeScreenConfigParser(self.get_preference_file_path())
@@ -97,7 +99,7 @@ class ProbeScreenBase(object):
         for l in s.split("\n"):
             # Search for G1 followed by a space, otherwise we'll catch G10 too.
             if "G1 " in l:
-                l += " F#<_ini[TOOLSENSOR]RAPID_SPEED>"
+                l += " F#<_ini[PROBE_SCREEN]RAPID_SPEED>"
             self.command.mdi(l)
             self.command.wait_complete()
             if self.error_poll() == -1:
@@ -113,19 +115,19 @@ class ProbeScreenBase(object):
         self.stat.poll()
         while self.stat.interp_state != linuxcnc.INTERP_IDLE:
             if self.error_poll() == -1:
-            #    print("interp_err_status = %s" % self.stat.interp_state)
-            #    print("interp_err_queue = %s" % self.stat.queue)
-            #    print("interp_err_operator = %s" % linuxcnc.OPERATOR_ERROR)
-            #    print("interp_err_nml = %s" % linuxcnc.NML_ERROR)
+            #    print("interp_err_status = %s" % (self.stat.interp_state))
+            #    print("interp_err_queue = %s" % (self.stat.queue))
+            #    print("interp_err_operator = %s" % (linuxcnc.OPERATOR_ERROR))
+            #    print("interp_err_nml = %s" % (linuxcnc.NML_ERROR))
                 return -1
             self.command.wait_complete()
             self.stat.poll()
         self.command.wait_complete()
         if self.error_poll() == -1:
-        #    print("interp_err2_status = %s" % self.stat.interp_state)
-        #    print("interp_err2_queue = %s" % self.stat.queue)
-        #    print("interp_err2_operator = %s" % linuxcnc.OPERATOR_ERROR)
-        #    print("interp_err2_nml = %s" % linuxcnc.NML_ERROR)
+        #    print("interp_err2_status = %s" % (self.stat.interp_state))
+        #    print("interp_err2_queue = %s" % (self.stat.queue))
+        #    print("interp_err2_operator = %s" % (linuxcnc.OPERATOR_ERROR))
+        #    print("interp_err2_nml = %s" % (linuxcnc.NML_ERROR))
             return -1
         return 0
 
@@ -153,37 +155,36 @@ class ProbeScreenBase(object):
             abort_axisui = Popen(
                 "halcmd getp axisui.user.abort ", shell=True, stdout=PIPE
             ).stdout.read()
-
         elif "gmoccapy" in self.display:
             # gmoccapy polls for errors every 0.25 seconds, OR whatever value is in the [DISPLAY]CYCLE_TIME ini
             # setting, so we wait slightly longer to make sure it's happened.
             ms = int(self.inifile.find("DISPLAY", "CYCLE_TIME") or 250) + 50
             time.sleep(ms / 100)
+
             error_pin = Popen(
                 "halcmd getp gmoccapy.error ", shell=True, stdout=PIPE
             ).stdout.read()
 
             # Something need to be done for add to gmoccapy a hal pin gmoccapy.abort
-
         else:
-            print("Unable to poll %s GUI for errors" % self.display)
+            self.add_history_text("WARNING : Unable to poll %s GUI for errors" % (self.display))
             return -1
-            
+
+
+        #print("abort_halui", abort_halui, "stop_halui", stop_halui, "abort_axisui", abort_axisui, "error_pin", error_pin)
+
+
         if "TRUE" in error_pin:
-            text = "See notification popup"
-            print("error", text)
-            self.add_history("Error: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+            self.add_history_text("ERROR: See notification popup")
             self.command.mode(linuxcnc.MODE_MANUAL)
             self.command.wait_complete()
             return -1
         elif "TRUE" in abort_axisui or "TRUE" in abort_halui or "TRUE" in stop_halui:
-            self.gcode("(DEBUG,**** OPERATION STOPPED BY USER ****)")
-            text = "OPERATION STOPPED BY USER"
-            print("Info", text)
-            self.add_history("Info: %s" % text, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+            self.add_history_text("WARNING: OPERATION STOPPED BY USER")
             self.command.mode(linuxcnc.MODE_MANUAL)
             self.command.wait_complete()
             return -1
+
         return 0
 
     # --------------------------
@@ -197,7 +198,7 @@ class ProbeScreenBase(object):
         if not temp:
             print(
                 "****  PROBE SCREEN GET INI INFO **** \n Error recognition of display type : %s"
-                % temp
+                % (temp)
             )
         return temp
 
@@ -211,8 +212,8 @@ class ProbeScreenBase(object):
                 temp = os.path.join(CONFIGPATH1, "probe_screen.pref")
             else:
                 machinename = machinename.replace(" ", "_")
-                temp = os.path.join(CONFIGPATH1, "%s.pref" % machinename)
-        print("****  probe_screen GETINIINFO **** \n Preference file path: %s" % temp)
+                temp = os.path.join(CONFIGPATH1, "%s.pref" % (machinename))
+        print("****  probe_screen GETINIINFO **** \n Preference file path: %s" % (temp))
         return temp
 
     def vcp_reload(self):
@@ -240,43 +241,65 @@ class ProbeScreenBase(object):
         d=None,
         a=None,
     ):
-        c = datetime.now().strftime("%H:%M:%S  ") + "{0: <10}".format(tool_tip_text)
+        c = "{0: <10}".format(tool_tip_text)
         if "Xm" in s:
-            c += "X-=%.4f " % xm
+            c += "X-=%.4f " % (xm)
+            self._lb_probe_xm.set_text("%.4f" % (xm))
         if "Xc" in s:
-            c += "Xc=%.4f " % xc
+            c += "Xc=%.4f " % (xc)
+            self._lb_probe_xc.set_text("%.4f" % (xc))
         if "Xp" in s:
-            c += "X+=%.4f " % xp
+            c += "X+=%.4f " % (xp)
+            self._lb_probe_xp.set_text("%.4f" % (xp))
         if "Lx" in s:
-            c += "Lx=%.4f " % lx
+            c += "Lx=%.4f " % (lx)
+            self._lb_probe_lx.set_text("%.4f" % (lx))
         if "Ym" in s:
-            c += "Y-=%.4f " % ym
+            c += "Y-=%.4f " % (ym)
+            self._lb_probe_ym.set_text("%.4f" % (ym))
         if "Yc" in s:
-            c += "Yc=%.4f " % yc
+            c += "Yc=%.4f " % (yc)
+            self._lb_probe_yc.set_text("%.4f" % (yc))
         if "Yp" in s:
-            c += "Y+=%.4f " % yp
+            c += "Y+=%.4f " % (yp)
+            self._lb_probe_yp.set_text("%.4f" % (yp))
         if "Ly" in s:
-            c += "Ly=%.4f " % ly
+            c += "Ly=%.4f " % (ly)
+            self._lb_probe_ly.set_text("%.4f" % (ly))
         if "Z" in s:
-            c += "Z=%.4f " % z
+            c += "Z=%.4f " % (z)
+            self._lb_probe_z.set_text("%.4f" % (z))
         if "D" in s:
-            c += "D=%.4f" % d
+            c += "D=%.4f" % (d)
+            self._lb_probe_d.set_text("%.4f" % (d))
         if "A" in s:
-            c += "Angle=%.3f" % a
+            c += "Angle=%.3f" % (a)
+            self._lb_probe_a.set_text("%.3f" % (a))
+
+        self.add_history_text(c)
+
+    def add_history_text(self, text):
+        # Prepend a timestamp to all History lines
+        text = datetime.now().strftime("%H:%M:%S  ") + text
+
+        # Remove the oldest history entries when we have a large
+        # number of entries.
         i = self.buffer.get_end_iter()
         if i.get_line() > 1000:
             i.backward_line()
             self.buffer.delete(i, self.buffer.get_end_iter())
-        i.set_line(0)
-        self.buffer.insert(i, "%s \n" % c)
 
-    def warning_dialog(self, message, secondary=None, title=_("Operator Message")):
-        """ displays a warning dialog """
+        # Add the line of text to the top of the history
+        i.set_line(0)
+        self.buffer.insert(i, "%s \n" % (text))
+
+    def _dialog(self, gtk_type, gtk_buttons, message, secondary=None, title=_("Probe Screen NG")):
+        """ displays a dialog """
         dialog = gtk.MessageDialog(
             self.window,
             gtk.DIALOG_DESTROY_WITH_PARENT,
-            gtk.MESSAGE_INFO,
-            gtk.BUTTONS_OK,
+            gtk_type,
+            gtk_buttons,
             message,
         )
         # if there is a secondary message then the first message text is bold
@@ -285,41 +308,43 @@ class ProbeScreenBase(object):
         dialog.show_all()
         dialog.set_title(title)
         responce = dialog.run()
+        dialog.set_keep_above(True)
         dialog.destroy()
         return responce == gtk.RESPONSE_OK
 
-    def display_result_xp(self, value):
-        self._lb_probe_xp.set_text("%.4f" % value)
+    def warning_dialog(self, message, secondary=None, title=_("Probe Screen NG")):
+        """ displays a warning dialog """
+        if self.usepopup == 1:
+            return self._dialog(gtk.MESSAGE_WARNING, gtk.BUTTONS_OK, message, secondary, title)
+        else:
+            if self.ocode("o<clear-axis-notif> call") == -1:
+                return
+            if secondary:
+                self.add_history_text("WARNING: %s" % (message))
+                self.add_history_text("WARNING: %s" % (secondary))
+                self.gcode("(DEBUG,**** %s ****)" % (message))
+                self.gcode("(DEBUG,**** %s ****)" % (secondary))
+            else:
+                self.add_history_text("WARNING: %s" % (message))
+                self.gcode("(DEBUG,**** %s ****)" % (message))
 
-    def display_result_yp(self, value):
-        self._lb_probe_yp.set_text("%.4f" % value)
 
-    def display_result_xm(self, value):
-        self._lb_probe_xm.set_text("%.4f" % value)
+    def error_dialog(self, message, secondary=None, title=_("Probe Screen NG")):
+        """ displays a warning dialog and exits after if necessary"""
+        if self.usepopup == 1:
+            self._dialog(gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, message, secondary, title)
+        else:
+            if self.ocode("o<clear-axis-notif> call") == -1:
+                return
+            if secondary:
+                self.add_history_text("DEBUG: %s" % (message))
+                self.add_history_text("ABORT: %s" % (secondary))
+                self.gcode("(DEBUG,**** %s ****)" % (message))
+                self.gcode("(ABORT,**** %s ****)" % (secondary))
+            else:
+                self.add_history_text("ABORT: %s" % (message))
+                self.gcode("(ABORT,**** %s ****)" % (message))
 
-    def display_result_ym(self, value):
-        self._lb_probe_ym.set_text("%.4f" % value)
-
-    def display_result_lx(self, value):
-        self._lb_probe_lx.set_text("%.4f" % value)
-
-    def display_result_ly(self, value):
-        self._lb_probe_ly.set_text("%.4f" % value)
-
-    def display_result_z(self, value):
-        self._lb_probe_z.set_text("%.4f" % value)
-
-    def display_result_d(self, value):
-        self._lb_probe_d.set_text("%.4f" % value)
-
-    def display_result_xc(self, value):
-        self._lb_probe_xc.set_text("%.4f" % value)
-
-    def display_result_yc(self, value):
-        self._lb_probe_yc.set_text("%.4f" % value)
-
-    def display_result_a(self, value):
-        self._lb_probe_a.set_text("%.3f" % value)
 
     # --------------------------
     #
@@ -330,9 +355,7 @@ class ProbeScreenBase(object):
         # move Z - z_clearance
         s = """G91
         G1 Z-%f
-        G90""" % (
-            self.halcomp["ps_z_clearance"]
-        )
+        G90""" % (self.halcomp["ps_z_clearance"])
         if self.gcode(s) == -1:
             return -1
         return 0
@@ -341,9 +364,7 @@ class ProbeScreenBase(object):
         # move Z + z_clearance
         s = """G91
         G1 Z%f
-        G90""" % (
-            self.halcomp["ps_z_clearance"]
-        )
+        G90""" % (self.halcomp["ps_z_clearance"])
         if self.gcode(s) == -1:
             return -1
         return 0
@@ -367,13 +388,13 @@ class ProbeScreenBase(object):
             s = s.upper()
             if "X" in s:
                 x += self.halcomp["ps_offs_x"]
-                c += " X%s" % x
+                c += " X%s" % (x)
             if "Y" in s:
                 y += self.halcomp["ps_offs_y"]
-                c += " Y%s" % y
+                c += " Y%s" % (y)
             if "Z" in s:
                 tmpz = tmpz - z + self.halcomp["ps_offs_z"]
-                c += " Z%s" % tmpz
+                c += " Z%s" % (tmpz)
             if self.gcode(c) == -1:                                                                                 # Need your review choosing this or only self.gcode(c) timesleep
                return
 
@@ -411,30 +432,68 @@ class ProbeScreenBase(object):
             coord[1] = x1 * math.sin(t) + y1 * math.cos(t)
         return coord
 
-    def length_x(self):
+    def length_x(self, xm=None, xp=None):
+        """ Calculates a length in the X direction """
+        # Use previous value for xm if not supplied
+        if xm is None:
+            xm = self._lb_probe_xm.get_text()
+            # Use None if no previous value exists
+            if xm == "":
+                xm = None
+            else:
+                xm = float(xm)
+
+        # Use previous value for xp if not supplied
+        if xp is None:
+            xp = self._lb_probe_xp.get_text()
+            # Use None if no previous value exists
+            if xp == "":
+                xp = None
+            else:
+                xp = float(xp)
+
         res = 0
-        if self._lb_probe_xm.get_text() == "" or self._lb_probe_xp.get_text() == "":
+
+        if xm is None or xp is None:
             return res
-        xm = float(self._lb_probe_xm.get_text())
-        xp = float(self._lb_probe_xp.get_text())
+
         if xm < xp:
             res = xp - xm
         else:
             res = xm - xp
-        self.display_result_lx(res)
+
         return res
 
-    def length_y(self):
+    def length_y(self, ym=None, yp=None):
+        """ Calculates a length in the Y direction """
+        # Use previous value for ym if not supplied
+        if ym is None:
+            ym = self._lb_probe_ym.get_text()
+            # Use None if no previous value exists
+            if ym == "":
+                ym = None
+            else:
+                ym = float(ym)
+
+        # Use previous value for yp if not supplied
+        if yp is None:
+            yp = self._lb_probe_yp.get_text()
+            # Use None if no previous value exists
+            if yp == "":
+                yp = None
+            else:
+                yp = float(yp)
+
         res = 0
-        if self._lb_probe_ym.get_text() == "" or self._lb_probe_yp.get_text() == "":
+
+        if ym is None or yp is None:
             return res
-        ym = float(self._lb_probe_ym.get_text())
-        yp = float(self._lb_probe_yp.get_text())
+
         if ym < yp:
             res = yp - ym
         else:
             res = ym - yp
-        self.display_result_ly(res)
+
         return res
 
     # --------------------------
@@ -468,3 +527,25 @@ class ProbeScreenBase(object):
 
         # Update the preferences
         self.prefs.putpref(pin_name, gtkspinbutton.get_value(), _type)
+
+    # --------------------------
+    #
+    #  Generic Method Wrappers
+    #
+    # --------------------------
+    @classmethod
+    def ensure_errors_dismissed(cls, f):
+        """ Ensures all errors have been dismissed, otherwise, shows a warning dialog """
+
+        @wraps(f)
+        def wrapper(self, *args, **kwargs):
+            if self.error_poll() == -1:
+                message   = _("Please dismiss & act upon all errors")
+                secondary = _("You can retry once done")
+                self.warning_dialog(message, secondary=secondary)
+                return -1
+
+            # Execute wrapped function
+            return f(self, *args, **kwargs)
+
+        return wrapper

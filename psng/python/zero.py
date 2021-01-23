@@ -70,7 +70,7 @@ class ProbeScreenZero(ProbeScreenBase):
 
     def on_btn_set_x_released(self, gtkbutton, data=None):
         self.prefs.putpref("ps_offs_x", self.spbtn_offs_x.get_value(), float)
-        self.gcode("G10 L20 P0 X%f" % self.spbtn_offs_x.get_value())
+        self.gcode("G10 L20 P0 X%f" % (self.spbtn_offs_x.get_value()))
         self.vcp_reload()
 
     def on_spbtn_offs_y_key_press_event(self, gtkspinbutton, data=None):
@@ -81,7 +81,7 @@ class ProbeScreenZero(ProbeScreenBase):
 
     def on_btn_set_y_released(self, gtkbutton, data=None):
         self.prefs.putpref("ps_offs_y", self.spbtn_offs_y.get_value(), float)
-        self.gcode("G10 L20 P0 Y%f" % self.spbtn_offs_y.get_value())
+        self.gcode("G10 L20 P0 Y%f" % (self.spbtn_offs_y.get_value()))
         self.vcp_reload()
 
     def on_spbtn_offs_z_key_press_event(self, gtkspinbutton, data=None):
@@ -92,5 +92,5 @@ class ProbeScreenZero(ProbeScreenBase):
 
     def on_btn_set_z_released(self, gtkbutton, data=None):
         self.prefs.putpref("ps_offs_z", self.spbtn_offs_z.get_value(), float)
-        self.gcode("G10 L20 P0 Z%f" % self.spbtn_offs_z.get_value())
+        self.gcode("G10 L20 P0 Z%f" % (self.spbtn_offs_z.get_value()))
         self.vcp_reload()

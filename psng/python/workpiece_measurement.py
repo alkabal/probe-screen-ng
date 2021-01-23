@@ -2,7 +2,6 @@
 #
 # Copyright (c) 2015 Serguei Glavatski ( verser  from cnc-club.ru )
 # Copyright (c) 2020 Probe Screen NG Developers
-# Copyright (c) 2021 Alkabal free fr with different approach
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -47,642 +46,578 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
     #               Measurement outside
     # -------------------------------------------------
     # X+
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_xp_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             # move X - xy_clearance
-             s = """G91
-             G1 X-%f
-             G90""" % (
-                 self.halcomp["ps_xy_clearance"]
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_xplus.ngc
-             if self.ocode("o<psng_xplus> call") == -1:
-                 return
-             a = self.probed_position_with_offsets()
-             xres = float(a[0] + 0.5 * self.halcomp["ps_probe_diam"])
-             self.display_result_xp(xres)
-             self.length_x()
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "XpLx",
-                 0,
-                 0,
-                 xres,
-                 self.length_x(),
-                 0,
-                 0,
-                 0,
-                 0,
-                 0,
-                 0,
-                 0,
-             )
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
-             # move to finded  point
-             s = "G1 X%f" % (xres)
-             if self.gcode(s) == -1:
-                 return
-             self.set_zerro("X")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        # move X - xy_clearance
+        s = """G91
+        G1 X-%f
+        G90""" % (
+            self.halcomp["ps_xy_clearance"]
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_xplus.ngc
+        if self.ocode("o<psng_xplus> call") == -1:
+            return
+        a = self.probed_position_with_offsets()
+        xres = float(a[0] + 0.5 * self.halcomp["ps_probe_diam"])
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "XpLx",
+            xp=xres,
+            lx=self.length_x(xp=xres),
+        )
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+        # move to finded  point
+        s = "G1 X%f" % (xres)
+        if self.gcode(s) == -1:
+            return
+        self.set_zerro("X")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return
 
     # Y+
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_yp_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             # move Y - xy_clearance
-             s = """G91
-             G1 Y-%f
-             G90""" % (
-                 self.halcomp["ps_xy_clearance"]
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_yplus.ngc
-             if self.ocode("o<psng_yplus> call") == -1:
-                 return
-             a = self.probed_position_with_offsets()
-             yres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_yp(yres)
-             self.length_y()
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "YpLy",
-                 0,
-                 0,
-                 0,
-                 0,
-                 0,
-                 0,
-                 yres,
-                 self.length_y(),
-                 0,
-                 0,
-                 0,
-             )
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
-             # move to finded  point
-             s = "G1 Y%f" % (yres)
-             if self.gcode(s) == -1:
-                 return
-             self.set_zerro("Y")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        # move Y - xy_clearance
+        s = """G91
+        G1 Y-%f
+        G90""" % (
+            self.halcomp["ps_xy_clearance"]
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_yplus.ngc
+        if self.ocode("o<psng_yplus> call") == -1:
+            return
+        a = self.probed_position_with_offsets()
+        yres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "YpLy",
+            yp=yres,
+            ly=self.length_y(yp=yres),
+        )
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+        # move to finded  point
+        s = "G1 Y%f" % (yres)
+        if self.gcode(s) == -1:
+            return
+        self.set_zerro("Y")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return
 
     # X-
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_xm_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             # move X + xy_clearance
-             s = """G91
-             G1 X%f
-             G90""" % (
-                 self.halcomp["ps_xy_clearance"]
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_xminus.ngc
-             if self.ocode("o<psng_xminus> call") == -1:
-                 return
-             a = self.probed_position_with_offsets()
-             xres = float(a[0] - 0.5 * self.halcomp["ps_probe_diam"])
-             self.display_result_xm(xres)
-             self.length_x()
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "XmLx",
-                 xres,
-                 0,
-                 0,
-                 self.length_x(),
-                 0,
-                 0,
-                 0,
-                 0,
-                 0,
-                 0,
-                 0,
-             )
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
-             # move to finded  point
-             s = "G1 X%f" % (xres)
-             if self.gcode(s) == -1:
-                 return
-             self.set_zerro("X")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        # move X + xy_clearance
+        s = """G91
+        G1 X%f
+        G90""" % (
+            self.halcomp["ps_xy_clearance"]
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_xminus.ngc
+        if self.ocode("o<psng_xminus> call") == -1:
+            return
+        a = self.probed_position_with_offsets()
+        xres = float(a[0] - 0.5 * self.halcomp["ps_probe_diam"])
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "XmLx",
+            xm=xres,
+            lx=self.length_x(xm=xres),
+        )
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+        # move to finded  point
+        s = "G1 X%f" % (xres)
+        if self.gcode(s) == -1:
+            return
+        self.set_zerro("X")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return
 
     # Y-
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_ym_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             # move Y + xy_clearance
-             s = """G91
-             G1 Y%f
-             G90""" % (
-                 self.halcomp["ps_xy_clearance"]
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_yminus.ngc
-             if self.ocode("o<psng_yminus> call") == -1:
-                 return
-             a = self.probed_position_with_offsets()
-             yres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_ym(yres)
-             self.length_y()
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "YmLy",
-                 0,
-                 0,
-                 0,
-                 0,
-                 yres,
-                 0,
-                 0,
-                 self.length_y(),
-                 0,
-                 0,
-                 0,
-             )
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
-             # move to finded  point
-             s = "G1 Y%f" % (yres)
-             if self.gcode(s) == -1:
-                 return
-             self.set_zerro("Y")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        # move Y + xy_clearance
+        s = """G91
+        G1 Y%f
+        G90""" % (
+            self.halcomp["ps_xy_clearance"]
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_yminus.ngc
+        if self.ocode("o<psng_yminus> call") == -1:
+            return
+        a = self.probed_position_with_offsets()
+        yres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "YmLy",
+            ym=yres,
+            ly=self.length_y(ym=yres),
+        )
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+        # move to finded  point
+        s = "G1 Y%f" % (yres)
+        if self.gcode(s) == -1:
+            return
+        self.set_zerro("Y")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return
 
     # Corners
     # Move Probe manual under corner 2-3 mm
     # X+Y+
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_xpyp_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             # move X - xy_clearance Y + edge_length
-             s = """G91
-             G1 X-%f Y%f
-             G90""" % (
-                 self.halcomp["ps_xy_clearance"],
-                 self.halcomp["ps_edge_length"],
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_xplus.ngc
-             if self.ocode("o<psng_xplus> call") == -1:
-                 return
-             # show X result
-             a = self.probed_position_with_offsets()
-             xres = float(a[0] + 0.5 * self.halcomp["ps_probe_diam"])
-             self.display_result_xp(xres)
-             self.length_x()
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        # move X - xy_clearance Y + edge_length
+        s = """G91
+        G1 X-%f Y%f
+        G90""" % (
+            self.halcomp["ps_xy_clearance"],
+            self.halcomp["ps_edge_length"],
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_xplus.ngc
+        if self.ocode("o<psng_xplus> call") == -1:
+            return
+        # show X result
+        a = self.probed_position_with_offsets()
+        xres = float(a[0] + 0.5 * self.halcomp["ps_probe_diam"])
 
-             # move X + edge_length +xy_clearance,  Y - edge_length - xy_clearance
-             tmpxy = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
-             s = """G91
-             G1 X%f Y-%f
-             G90""" % (
-                 tmpxy,
-                 tmpxy,
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_yplus.ngc
-             if self.ocode("o<psng_yplus> call") == -1:
-                 return
-             # show Y result
-             a = self.probed_position_with_offsets()
-             yres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_yp(yres)
-             self.length_y()
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "XpLxYpLy",
-                 0,
-                 0,
-                 xres,
-                 self.length_x(),
-                 0,
-                 0,
-                 yres,
-                 self.length_y(),
-                 0,
-                 0,
-                 0,
-             )
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
-             # move to finded  point
-             s = "G1 X%f Y%f" % (xres, yres)
-             if self.gcode(s) == -1:
-                 return
-             self.set_zerro("XY")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+
+        # move X + edge_length +xy_clearance,  Y - edge_length - xy_clearance
+        tmpxy = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
+        s = """G91
+        G1 X%f Y-%f
+        G90""" % (
+            tmpxy,
+            tmpxy,
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_yplus.ngc
+        if self.ocode("o<psng_yplus> call") == -1:
+            return
+        # show Y result
+        a = self.probed_position_with_offsets()
+        yres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
+
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "XpLxYpLy",
+            xp=xres,
+            lx=self.length_x(xp=xres),
+            yp=yres,
+            ly=self.length_y(yp=yres),
+        )
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+        # move to finded  point
+        s = "G1 X%f Y%f" % (xres, yres)
+        if self.gcode(s) == -1:
+            return
+        self.set_zerro("XY")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return
 
     # X+Y-
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_xpym_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             # move X - xy_clearance Y + edge_length
-             s = """G91
-             G1 X-%f Y-%f
-             G90""" % (
-                 self.halcomp["ps_xy_clearance"],
-                 self.halcomp["ps_edge_length"],
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_xplus.ngc
-             if self.ocode("o<psng_xplus> call") == -1:
-                 return
-             # show X result
-             a = self.probed_position_with_offsets()
-             xres = float(a[0] + 0.5 * self.halcomp["ps_probe_diam"])
-             self.display_result_xp(xres)
-             self.length_x()
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        # move X - xy_clearance Y + edge_length
+        s = """G91
+        G1 X-%f Y-%f
+        G90""" % (
+            self.halcomp["ps_xy_clearance"],
+            self.halcomp["ps_edge_length"],
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_xplus.ngc
+        if self.ocode("o<psng_xplus> call") == -1:
+            return
+        # show X result
+        a = self.probed_position_with_offsets()
+        xres = float(a[0] + 0.5 * self.halcomp["ps_probe_diam"])
 
-             # move X + edge_length +xy_clearance,  Y + edge_length + xy_clearance
-             tmpxy = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
-             s = """G91
-             G1 X%f Y%f
-             G90""" % (
-                 tmpxy,
-                 tmpxy,
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_yminus.ngc
-             if self.ocode("o<psng_yminus> call") == -1:
-                 return
-             # show Y result
-             a = self.probed_position_with_offsets()
-             yres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_ym(yres)
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "XpLxYmLy",
-                 0,
-                 0,
-                 xres,
-                 self.length_x(),
-                 yres,
-                 0,
-                 0,
-                 self.length_y(),
-                 0,
-                 0,
-                 0,
-             )
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
-             # move to finded  point
-             s = "G1 X%f Y%f" % (xres, yres)
-             if self.gcode(s) == -1:
-                 return
-             self.set_zerro("XY")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+
+        # move X + edge_length +xy_clearance,  Y + edge_length + xy_clearance
+        tmpxy = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
+        s = """G91
+        G1 X%f Y%f
+        G90""" % (
+            tmpxy,
+            tmpxy,
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_yminus.ngc
+        if self.ocode("o<psng_yminus> call") == -1:
+            return
+        # show Y result
+        a = self.probed_position_with_offsets()
+        yres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
+
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "XpLxYmLy",
+            xp=xres,
+            lx=self.length_x(xp=xres),
+            ym=yres,
+            ly=self.length_y(ym=yres),
+        )
+
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+        # move to finded  point
+        s = "G1 X%f Y%f" % (xres, yres)
+        if self.gcode(s) == -1:
+            return
+        self.set_zerro("XY")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return
 
     # X-Y+
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_xmyp_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             # move X + xy_clearance Y + edge_length
-             s = """G91
-             G1 X%f Y%f
-             G90""" % (
-                 self.halcomp["ps_xy_clearance"],
-                 self.halcomp["ps_edge_length"],
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_xminus.ngc
-             if self.ocode("o<psng_xminus> call") == -1:
-                 return
-             # show X result
-             a = self.probed_position_with_offsets()
-             xres = float(a[0] - 0.5 * self.halcomp["ps_probe_diam"])
-             self.display_result_xm(xres)
-             self.length_x()
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        # move X + xy_clearance Y + edge_length
+        s = """G91
+        G1 X%f Y%f
+        G90""" % (
+            self.halcomp["ps_xy_clearance"],
+            self.halcomp["ps_edge_length"],
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_xminus.ngc
+        if self.ocode("o<psng_xminus> call") == -1:
+            return
+        # show X result
+        a = self.probed_position_with_offsets()
+        xres = float(a[0] - 0.5 * self.halcomp["ps_probe_diam"])
 
-             # move X - edge_length - xy_clearance,  Y - edge_length - xy_clearance
-             tmpxy = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
-             s = """G91
-             G1 X-%f Y-%f
-             G90""" % (
-                 tmpxy,
-                 tmpxy,
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_yplus.ngc
-             if self.ocode("o<psng_yplus> call") == -1:
-                 return
-             # show Y result
-             a = self.probed_position_with_offsets()
-             yres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_yp(yres)
-             self.length_y()
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "XmLxYpLy",
-                 xres,
-                 0,
-                 0,
-                 self.length_x(),
-                 0,
-                 0,
-                 yres,
-                 self.length_y(),
-                 0,
-                 0,
-                 0,
-             )
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
-             # move to finded  point
-             s = "G1 X%f Y%f" % (xres, yres)
-             if self.gcode(s) == -1:
-                 return
-             self.set_zerro("XY")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+
+        # move X - edge_length - xy_clearance,  Y - edge_length - xy_clearance
+        tmpxy = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
+        s = """G91
+        G1 X-%f Y-%f
+        G90""" % (
+            tmpxy,
+            tmpxy,
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_yplus.ngc
+        if self.ocode("o<psng_yplus> call") == -1:
+            return
+        # show Y result
+        a = self.probed_position_with_offsets()
+        yres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "XmLxYpLy",
+            xm=xres,
+            lx=self.length_x(xm=xres),
+            yp=yres,
+            ly=self.length_y(yp=yres),
+        )
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+        # move to finded  point
+        s = "G1 X%f Y%f" % (xres, yres)
+        if self.gcode(s) == -1:
+            return
+        self.set_zerro("XY")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return
 
     # X-Y-
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_xmym_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             # move X + xy_clearance Y - edge_length
-             s = """G91
-             G1 X%f Y-%f
-             G90""" % (
-                 self.halcomp["ps_xy_clearance"],
-                 self.halcomp["ps_edge_length"],
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_xminus.ngc
-             if self.ocode("o<psng_xminus> call") == -1:
-                 return
-             # show X result
-             a = self.probed_position_with_offsets()
-             xres = float(a[0] - 0.5 * self.halcomp["ps_probe_diam"])
-             self.display_result_xm(xres)
-             self.length_x()
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        # move X + xy_clearance Y - edge_length
+        s = """G91
+        G1 X%f Y-%f
+        G90""" % (
+            self.halcomp["ps_xy_clearance"],
+            self.halcomp["ps_edge_length"],
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_xminus.ngc
+        if self.ocode("o<psng_xminus> call") == -1:
+            return
 
-             # move X - edge_length - xy_clearance,  Y + edge_length + xy_clearance
-             tmpxy = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
-             s = """G91
-             G1 X-%f Y%f
-             G90""" % (
-                 tmpxy,
-                 tmpxy,
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_yminus.ngc
-             if self.ocode("o<psng_yminus> call") == -1:
-                 return
-             # show Y result
-             a = self.probed_position_with_offsets()
-             yres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_ym(yres)
-             self.length_y()
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "XmLxYmLy",
-                 xres,
-                 0,
-                 0,
-                 self.length_x(),
-                 yres,
-                 0,
-                 0,
-                 self.length_y(),
-                 0,
-                 0,
-                 0,
-             )
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
-             # move to finded  point
-             s = "G1 X%f Y%f" % (xres, yres)
-             if self.gcode(s) == -1:
-                 return
-             self.set_zerro("XY")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        # Calculate X result
+        a = self.probed_position_with_offsets()
+        xres = float(a[0] - 0.5 * self.halcomp["ps_probe_diam"])
+
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+
+        # move X - edge_length - xy_clearance,  Y + edge_length + xy_clearance
+        tmpxy = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
+        s = """G91
+        G1 X-%f Y%f
+        G90""" % (
+            tmpxy,
+            tmpxy,
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_yminus.ngc
+        if self.ocode("o<psng_yminus> call") == -1:
+            return
+        # Calculate Y result
+        a = self.probed_position_with_offsets()
+        yres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "XmLxYmLy",
+            xm=xres,
+            lx=self.length_x(xm=xres),
+            ym=yres,
+            ly=self.length_y(ym=yres),
+        )
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+        # move to finded  point
+        s = "G1 X%f Y%f" % (xres, yres)
+        if self.gcode(s) == -1:
+            return
+        self.set_zerro("XY")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return
 
     # Center X+ X- Y+ Y-
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_xy_center_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             # move X - edge_length- xy_clearance
-             tmpx = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
-             s = """G91
-             G1 X-%f
-             G90""" % (
-                 tmpx
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_xplus.ngc
-             if self.ocode("o<psng_xplus> call") == -1:
-                 return
-             # show X result
-             a = self.probed_position_with_offsets()
-             xpres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_xp(xpres)
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        # move X - edge_length- xy_clearance
+        tmpx = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
+        s = """G91
+        G1 X-%f
+        G90""" % (
+            tmpx
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_xplus.ngc
+        if self.ocode("o<psng_xplus> call") == -1:
+            return
+        # Calculate X result
+        a = self.probed_position_with_offsets()
+        xpres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
 
-             # move X + 2 edge_length + 2 xy_clearance
-             tmpx = 2 * (self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"])
-             s = """G91
-             G1 X%f
-             G90""" % (
-                 tmpx
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_xminus.ngc
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
 
-             if self.ocode("o<psng_xminus> call") == -1:
-                 return
-             # show X result
-             a = self.probed_position_with_offsets()
-             xmres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_xm(xmres)
-             self.length_x()
-             xcres = 0.5 * (xpres + xmres)
-             self.display_result_xc(xcres)
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
-             # distance to the new center of X from current position
-             #        self.stat.poll()
-             #        to_new_xc=self.stat.position[0]-self.stat.g5x_offset[0] - self.stat.g92_offset[0] - self.stat.tool_offset[0] - xcres
-             s = "G1 X%f" % (xcres)
-             if self.gcode(s) == -1:
-                 return
+        # move X + 2 edge_length + 2 xy_clearance
+        tmpx = 2 * (self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"])
+        s = """G91
+        G1 X%f
+        G90""" % (
+            tmpx
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_xminus.ngc
 
-             # move Y - edge_length- xy_clearance
-             tmpy = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
-             s = """G91
-             G1 Y-%f
-             G90""" % (
-                 tmpy
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_yplus.ngc
-             if self.ocode("o<psng_yplus> call") == -1:
-                 return
-             # show Y result
-             a = self.probed_position_with_offsets()
-             ypres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_yp(ypres)
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
+        if self.ocode("o<psng_xminus> call") == -1:
+            return
+        # Calculate X result
+        a = self.probed_position_with_offsets()
+        xmres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
+        xcres = 0.5 * (xpres + xmres)
 
-             # move Y + 2 edge_length + 2 xy_clearance
-             tmpy = 2 * (self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"])
-             s = """G91
-             G1 Y%f
-             G90""" % (
-                 tmpy
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_yminus.ngc
-             if self.ocode("o<psng_yminus> call") == -1:
-                 return
-             # show Y result
-             a = self.probed_position_with_offsets()
-             ymres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_ym(ymres)
-             self.length_y()
-             # find, show and move to finded  point
-             ycres = 0.5 * (ypres + ymres)
-             self.display_result_yc(ycres)
-             diam = ymres - ypres
-             self.display_result_d(diam)
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "XmXcXpLxYmYcYpLyD",
-                 xmres,
-                 xcres,
-                 xpres,
-                 self.length_x(),
-                 ymres,
-                 ycres,
-                 ypres,
-                 self.length_y(),
-                 0,
-                 diam,
-                 0,
-             )
-             # move Z to start point up
-             if self.z_clearance_up() == -1:
-                 return
-             # move to finded  point
-             s = "G1 Y%f" % (ycres)
-             if self.gcode(s) == -1:
-                 return
-             self.set_zerro("XY")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+        # distance to the new center of X from current position
+        #        self.stat.poll()
+        #        to_new_xc=self.stat.position[0]-self.stat.g5x_offset[0] - self.stat.g92_offset[0] - self.stat.tool_offset[0] - xcres
+        s = "G1 X%f" % (xcres)
+        if self.gcode(s) == -1:
+            return
+
+        # move Y - edge_length- xy_clearance
+        tmpy = self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"]
+        s = """G91
+        G1 Y-%f
+        G90""" % (
+            tmpy
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_yplus.ngc
+        if self.ocode("o<psng_yplus> call") == -1:
+            return
+
+        # Calculate Y result
+        a = self.probed_position_with_offsets()
+        ypres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
+
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+
+        # move Y + 2 edge_length + 2 xy_clearance
+        tmpy = 2 * (self.halcomp["ps_edge_length"] + self.halcomp["ps_xy_clearance"])
+        s = """G91
+        G1 Y%f
+        G90""" % (
+            tmpy
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+
+        # Start psng_yminus.ngc
+        if self.ocode("o<psng_yminus> call") == -1:
+            return
+
+        # Calculate Y result
+        a = self.probed_position_with_offsets()
+        ymres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
+
+        # find, show and move to finded  point
+        ycres = 0.5 * (ypres + ymres)
+        diam = ymres - ypres
+
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "XmXcXpLxYmYcYpLyD",
+            xm=xmres,
+            xc=xcres,
+            xp=xpres,
+            lx=self.length_x(xm=xmres, xp=xpres),
+            ym=ymres,
+            yc=ycres,
+            yp=ypres,
+            ly=self.length_y(ym=ymres, yp=ypres),
+            d=diam,
+        )
+        # move Z to start point up
+        if self.z_clearance_up() == -1:
+            return
+        # move to finded  point
+        s = "G1 Y%f" % (ycres)
+        if self.gcode(s) == -1:
+            return
+        self.set_zerro("XY")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return
 
     # --------------  Command buttons -----------------
     #               Measurement inside
@@ -691,402 +626,376 @@ class ProbeScreenWorkpieceMeasurement(ProbeScreenBase):
     # Corners
     # Move Probe manual under corner 2-3 mm
     # X+Y+
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_xpyp1_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             # move Y - edge_length X - xy_clearance
-             s = """G91
-             G1 X-%f Y-%f
-             G90""" % (
-                 self.halcomp["ps_xy_clearance"],
-                 self.halcomp["ps_edge_length"],
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_xplus.ngc
-             if self.ocode("o<psng_xplus> call") == -1:
-                 return
-             # show X result
-             a = self.probed_position_with_offsets()
-             xres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_xp(xres)
-             self.length_x()
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        # move Y - edge_length X - xy_clearance
+        s = """G91
+        G1 X-%f Y-%f
+        G90""" % (
+            self.halcomp["ps_xy_clearance"],
+            self.halcomp["ps_edge_length"],
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_xplus.ngc
+        if self.ocode("o<psng_xplus> call") == -1:
+            return
+        # Calculate X result
+        a = self.probed_position_with_offsets()
+        xres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
 
-             # move X - edge_length Y - xy_clearance
-             tmpxy = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
-             s = """G91
-             G1 X-%f Y%f
-             G90""" % (
-                 tmpxy,
-                 tmpxy,
-             )
-             if self.gcode(s) == -1:
-                 return
-             # Start psng_yplus.ngc
-             if self.ocode("o<psng_yplus> call") == -1:
-                 return
-             # show Y result
-             a = self.probed_position_with_offsets()
-             yres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_yp(yres)
-             self.length_y()
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "XpLxYpLy",
-                 0,
-                 0,
-                 xres,
-                 self.length_x(),
-                 0,
-                 0,
-                 yres,
-                 self.length_y(),
-                 0,
-                 0,
-                 0,
-             )
-             # move Z to start point
-             if self.z_clearance_up() == -1:
-                 return
-             # move to finded  point
-             s = "G1 X%f Y%f" % (xres, yres)
-             if self.gcode(s) == -1:
-                 return
-             self.set_zerro("XY")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        # move X - edge_length Y - xy_clearance
+        tmpxy = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
+        s = """G91
+        G1 X-%f Y%f
+        G90""" % (
+            tmpxy,
+            tmpxy,
+        )
+        if self.gcode(s) == -1:
+            return
+        # Start psng_yplus.ngc
+        if self.ocode("o<psng_yplus> call") == -1:
+            return
+        # Calculate Y result
+        a = self.probed_position_with_offsets()
+        yres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
+
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "XpLxYpLy",
+            xp=xres,
+            lx=self.length_x(xp=xres),
+            yp=yres,
+            ly=self.length_y(yp=yres),
+        )
+
+        # move Z to start point
+        if self.z_clearance_up() == -1:
+            return
+        # move to finded  point
+        s = "G1 X%f Y%f" % (xres, yres)
+        if self.gcode(s) == -1:
+            return
+        self.set_zerro("XY")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return
 
     # X+Y-
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_xpym1_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             # move Y + edge_length X - xy_clearance
-             s = """G91
-             G1 X-%f Y%f
-             G90""" % (
-                 self.halcomp["ps_xy_clearance"],
-                 self.halcomp["ps_edge_length"],
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_xplus.ngc
-             if self.ocode("o<psng_xplus> call") == -1:
-                 return
-             # show X result
-             a = self.probed_position_with_offsets()
-             xres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_xp(xres)
-             self.length_x()
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        # move Y + edge_length X - xy_clearance
+        s = """G91
+        G1 X-%f Y%f
+        G90""" % (
+            self.halcomp["ps_xy_clearance"],
+            self.halcomp["ps_edge_length"],
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_xplus.ngc
+        if self.ocode("o<psng_xplus> call") == -1:
+            return
+        # Calculate X result
+        a = self.probed_position_with_offsets()
+        xres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
 
-             # move X - edge_length Y + xy_clearance
-             tmpxy = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
-             s = """G91
-             G1 X-%f Y-%f
-             G90""" % (
-                 tmpxy,
-                 tmpxy,
-             )
-             if self.gcode(s) == -1:
-                 return
-             # Start psng_yminus.ngc
-             if self.ocode("o<psng_yminus> call") == -1:
-                 return
-             # show Y result
-             a = self.probed_position_with_offsets()
-             yres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_ym(yres)
-             self.length_y()
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "XpLxYmLy",
-                 0,
-                 0,
-                 xres,
-                 self.length_x(),
-                 yres,
-                 0,
-                 0,
-                 self.length_y(),
-                 0,
-                 0,
-                 0,
-             )
-             # move Z to start point
-             if self.z_clearance_up() == -1:
-                 return
-             # move to finded  point
-             s = "G1 X%f Y%f" % (xres, yres)
-             if self.gcode(s) == -1:
-                 return
-             self.set_zerro("XY")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        # move X - edge_length Y + xy_clearance
+        tmpxy = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
+        s = """G91
+        G1 X-%f Y-%f
+        G90""" % (
+            tmpxy,
+            tmpxy,
+        )
+        if self.gcode(s) == -1:
+            return
+
+        # Start psng_yminus.ngc
+        if self.ocode("o<psng_yminus> call") == -1:
+            return
+
+        # Calculate Y result
+        a = self.probed_position_with_offsets()
+        yres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
+
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "XpLxYmLy",
+            xp=xres,
+            lx=self.length_x(xp=xres),
+            ym=yres,
+            ly=self.length_y(ym=yres),
+        )
+
+        # move Z to start point
+        if self.z_clearance_up() == -1:
+            return
+        # move to finded  point
+        s = "G1 X%f Y%f" % (xres, yres)
+        if self.gcode(s) == -1:
+            return
+        self.set_zerro("XY")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return
 
     # X-Y+
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_xmyp1_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             # move Y - edge_length X + xy_clearance
-             s = """G91
-             G1 X%f Y-%f
-             G90""" % (
-                 self.halcomp["ps_xy_clearance"],
-                 self.halcomp["ps_edge_length"],
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_xminus.ngc
-             if self.ocode("o<psng_xminus> call") == -1:
-                 return
-             # show X result
-             a = self.probed_position_with_offsets()
-             xres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_xm(xres)
-             self.length_x()
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        # move Y - edge_length X + xy_clearance
+        s = """G91
+        G1 X%f Y-%f
+        G90""" % (
+            self.halcomp["ps_xy_clearance"],
+            self.halcomp["ps_edge_length"],
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_xminus.ngc
+        if self.ocode("o<psng_xminus> call") == -1:
+            return
 
-             # move X + edge_length Y - xy_clearance
-             tmpxy = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
-             s = """G91
-             G1 X%f Y%f
-             G90""" % (
-                 tmpxy,
-                 tmpxy,
-             )
-             if self.gcode(s) == -1:
-                 return
-             # Start psng_yplus.ngc
-             if self.ocode("o<psng_yplus> call") == -1:
-                 return
+        # Calculate X result
+        a = self.probed_position_with_offsets()
+        xres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
 
-             # show Y result
-             a = self.probed_position_with_offsets()
-             yres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_yp(yres)
-             self.length_y()
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "XmLxYpLy",
-                 xres,
-                 0,
-                 0,
-                 self.length_x(),
-                 0,
-                 0,
-                 yres,
-                 self.length_y(),
-                 0,
-                 0,
-                 0,
-             )
-             # move Z to start point
-             if self.z_clearance_up() == -1:
-                 return
-             # move to finded  point
-             s = "G1 X%f Y%f" % (xres, yres)
-             if self.gcode(s) == -1:
-                 return
-             self.set_zerro("XY")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        # move X + edge_length Y - xy_clearance
+        tmpxy = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
+        s = """G91
+        G1 X%f Y%f
+        G90""" % (
+            tmpxy,
+            tmpxy,
+        )
+        if self.gcode(s) == -1:
+            return
+
+        # Start psng_yplus.ngc
+        if self.ocode("o<psng_yplus> call") == -1:
+            return
+
+        # Calculate Y result
+        a = self.probed_position_with_offsets()
+        yres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
+
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "XmLxYpLy",
+            xm=xres,
+            lx=self.length_x(xm=xres),
+            yp=yres,
+            ly=self.length_y(yp=yres),
+        )
+
+        # move Z to start point
+        if self.z_clearance_up() == -1:
+            return
+        # move to finded  point
+        s = "G1 X%f Y%f" % (xres, yres)
+        if self.gcode(s) == -1:
+            return
+        self.set_zerro("XY")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return
 
     # X-Y-
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_xmym1_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             # move Y + edge_length X + xy_clearance
-             s = """G91
-             G1 X%f Y%f
-             G90""" % (
-                 self.halcomp["ps_xy_clearance"],
-                 self.halcomp["ps_edge_length"],
-             )
-             if self.gcode(s) == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # Start psng_xminus.ngc
-             if self.ocode("o<psng_xminus> call") == -1:
-                 return
-             # show X result
-             a = self.probed_position_with_offsets()
-             xres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_xm(xres)
-             self.length_x()
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        # move Y + edge_length X + xy_clearance
+        s = """G91
+        G1 X%f Y%f
+        G90""" % (
+            self.halcomp["ps_xy_clearance"],
+            self.halcomp["ps_edge_length"],
+        )
+        if self.gcode(s) == -1:
+            return
+        if self.z_clearance_down() == -1:
+            return
+        # Start psng_xminus.ngc
+        if self.ocode("o<psng_xminus> call") == -1:
+            return
+        # Calculate X result
+        a = self.probed_position_with_offsets()
+        xres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
 
-             # move X + edge_length Y - xy_clearance
-             tmpxy = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
-             s = """G91
-             G1 X%f Y-%f
-             G90""" % (
-                 tmpxy,
-                 tmpxy,
-             )
-             if self.gcode(s) == -1:
-                 return
-             # Start psng_yminus.ngc
-             if self.ocode("o<psng_yminus> call") == -1:
-                 return
-             # show Y result
-             a = self.probed_position_with_offsets()
-             yres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_ym(yres)
-             self.length_y()
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "XmLxYmLy",
-                 xres,
-                 0,
-                 0,
-                 self.length_x(),
-                 yres,
-                 0,
-                 0,
-                 self.length_y(),
-                 0,
-                 0,
-                 0,
-             )
-             # move Z to start point
-             if self.z_clearance_up() == -1:
-                 return
-             # move to finded  point
-             s = "G1 X%f Y%f" % (xres, yres)
-             if self.gcode(s) == -1:
-                 return
-             self.set_zerro("XY")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        # move X + edge_length Y - xy_clearance
+        tmpxy = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
+        s = """G91
+        G1 X%f Y-%f
+        G90""" % (
+            tmpxy,
+            tmpxy,
+        )
+
+        if self.gcode(s) == -1:
+            return
+
+        # Start psng_yminus.ngc
+        if self.ocode("o<psng_yminus> call") == -1:
+            return
+
+        # Calculate Y result
+        a = self.probed_position_with_offsets()
+        yres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
+
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "XmLxYmLy",
+            xm=xres,
+            lx=self.length_x(xm=xres),
+            ym=yres,
+            ly=self.length_y(ym=yres),
+        )
+
+        # move Z to start point
+        if self.z_clearance_up() == -1:
+            return
+        # move to finded  point
+        s = "G1 X%f Y%f" % (xres, yres)
+        if self.gcode(s) == -1:
+            return
+        self.set_zerro("XY")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return
 
     # Hole Xin- Xin+ Yin- Yin+
+    @ProbeScreenBase.ensure_errors_dismissed
     def on_xy_hole_released(self, gtkbutton, data=None):
-        if self.error_poll() == 0:
-             if self.ocode("o<psng_hook> call [7]") == -1:
-                 return
-             if self.ocode("o<psng_config_check> call [1]") == -1:
-                 return
-             if self.z_clearance_down() == -1:
-                 return
-             # move X - edge_length Y + xy_clearance
-             tmpx = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
-             s = """G91
-             G1 X-%f
-             G90""" % (
-                 tmpx
-             )
-             if self.gcode(s) == -1:
-                 return
-             # Start psng_xminus.ngc
-             if self.ocode("o<psng_xminus> call") == -1:
-                 return
-             # show X result
-             a = self.probed_position_with_offsets()
-             xmres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_xm(xmres)
+        if self.ocode("o<backup_status> call") == -1:
+            return
+        if self.ocode("o<psng_hook> call [7]") == -1:
+            return
+        if self.ocode("o<psng_config_check> call") == -1:
+            return                # CHECK HAL VALUE FROM GUI FOR CONSITANCY
+        if self.z_clearance_down() == -1:
+            return
+        # move X - edge_length Y + xy_clearance
+        tmpx = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
+        s = """G91
+        G1 X-%f
+        G90""" % (
+            tmpx
+        )
+        if self.gcode(s) == -1:
+            return
+        # Start psng_xminus.ngc
+        if self.ocode("o<psng_xminus> call") == -1:
+            return
+        # show X result
+        a = self.probed_position_with_offsets()
+        xmres = float(a[0]) - 0.5 * self.halcomp["ps_probe_diam"]
 
-             # move X +2 edge_length - 2 xy_clearance
-             tmpx = 2 * (self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"])
-             s = """G91
-             G1 X%f
-             G90""" % (
-                 tmpx
-             )
-             if self.gcode(s) == -1:
-                 return
-             # Start psng_xplus.ngc
-             if self.ocode("o<psng_xplus> call") == -1:
-                 return
-             # show X result
-             a = self.probed_position_with_offsets()
-             xpres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_xp(xpres)
-             self.length_x()
-             xcres = 0.5 * (xmres + xpres)
-             self.display_result_xc(xcres)
+        # move X +2 edge_length - 2 xy_clearance
+        tmpx = 2 * (self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"])
+        s = """G91
+        G1 X%f
+        G90""" % (
+            tmpx
+        )
+        if self.gcode(s) == -1:
+            return
+        # Start psng_xplus.ngc
+        if self.ocode("o<psng_xplus> call") == -1:
+            return
+        # Calculate X result
+        a = self.probed_position_with_offsets()
+        xpres = float(a[0]) + 0.5 * self.halcomp["ps_probe_diam"]
+        xcres = 0.5 * (xmres + xpres)
 
-             # move X to new center
-             s = """G1 X%f""" % (xcres)
-             if self.gcode(s) == -1:
-                 return
+        # move X to new center
+        s = """G1 X%f""" % (xcres)
+        if self.gcode(s) == -1:
+            return
 
-             # move Y - edge_length + xy_clearance
-             tmpy = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
-             s = """G91
-             G1 Y-%f
-             G90""" % (
-                 tmpy
-             )
-             if self.gcode(s) == -1:
-                 return
-             # Start psng_yminus.ngc
-             if self.ocode("o<psng_yminus> call") == -1:
-                 return
-             # show Y result
-             a = self.probed_position_with_offsets()
-             ymres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_ym(ymres)
+        # move Y - edge_length + xy_clearance
+        tmpy = self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"]
+        s = """G91
+        G1 Y-%f
+        G90""" % (
+            tmpy
+        )
+        if self.gcode(s) == -1:
+            return
+        # Start psng_yminus.ngc
+        if self.ocode("o<psng_yminus> call") == -1:
+            return
+        # Calculate Y result
+        a = self.probed_position_with_offsets()
+        ymres = float(a[1]) - 0.5 * self.halcomp["ps_probe_diam"]
 
-             # move Y +2 edge_length - 2 xy_clearance
-             tmpy = 2 * (self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"])
-             s = """G91
-             G1 Y%f
-             G90""" % (
-                 tmpy
-             )
-             if self.gcode(s) == -1:
-                 return
-             # Start psng_yplus.ngc
-             if self.ocode("o<psng_yplus> call") == -1:
-                 return
-             # show Y result
-             a = self.probed_position_with_offsets()
-             ypres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
-             self.display_result_yp(ypres)
-             self.length_y()
-             # find, show and move to finded  point
-             ycres = 0.5 * (ymres + ypres)
-             self.display_result_yc(ycres)
-             diam = 0.5 * ((xpres - xmres) + (ypres - ymres))
-             self.display_result_d(diam)
-             self.add_history(
-                 gtkbutton.get_tooltip_text(),
-                 "XmXcXpLxYmYcYpLyD",
-                 xmres,
-                 xcres,
-                 xpres,
-                 self.length_x(),
-                 ymres,
-                 ycres,
-                 ypres,
-                 self.length_y(),
-                 0,
-                 diam,
-                 0,
-             )
-             # move to center
-             s = "G1 Y%f" % (ycres)
-             if self.gcode(s) == -1:
-                 return
-             # move Z to start point
-             if self.z_clearance_up() == -1:
-                 return
-             self.set_zerro("XY")
-             if self.ocode("o<psng_hook_end> call") == -1:
-                 return
+        # move Y +2 edge_length - 2 xy_clearance
+        tmpy = 2 * (self.halcomp["ps_edge_length"] - self.halcomp["ps_xy_clearance"])
+        s = """G91
+        G1 Y%f
+        G90""" % (
+            tmpy
+        )
+        if self.gcode(s) == -1:
+            return
+        # Start psng_yplus.ngc
+        if self.ocode("o<psng_yplus> call") == -1:
+            return
+
+        # Calculate Y result
+        a = self.probed_position_with_offsets()
+        ypres = float(a[1]) + 0.5 * self.halcomp["ps_probe_diam"]
+
+        # find, show and move to finded  point
+        ycres = 0.5 * (ymres + ypres)
+        diam = 0.5 * ((xpres - xmres) + (ypres - ymres))
+
+        self.add_history(
+            gtkbutton.get_tooltip_text(),
+            "XmXcXpLxYmYcYpLyD",
+            xm=xmres,
+            xc=xcres,
+            xp=xpres,
+            lx=self.length_x(xm=xmres, xp=xpres),
+            ym=ymres,
+            yc=ycres,
+            yp=ypres,
+            ly=self.length_y(ym=ymres, yp=ypres),
+            d=diam,
+        )
+
+        # move to center
+        s = "G1 Y%f" % (ycres)
+        if self.gcode(s) == -1:
+            return
+        # move Z to start point
+        if self.z_clearance_up() == -1:
+            return
+        self.set_zerro("XY")
+        if self.ocode("o<backup_restore> call [999]") == -1:
+            return

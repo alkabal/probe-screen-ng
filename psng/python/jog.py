@@ -53,15 +53,13 @@ class ProbeScreenJog(ProbeScreenBase):
             jog_increments.insert(0, 0)
         else:
             jog_increments = [0, "1,000", "0,100", "0,010", "0,001"]
-            print(
-                "**** PROBE SCREEN INFO **** \n No default jog increments entry found in [DISPLAY] of INI file"
-            )
+            self.add_history_text("WARNING : No default jog increments entry found in [DISPLAY] of INI file")
 
         self.jog_increments = jog_increments
-        if len(self.jog_increments) > 5:
-            print(_("**** PROBE SCREEN INFO ****"))
-            print(_("**** To many increments given in INI File for this screen ****"))
-            print(_("**** Only the first 5 will be reachable through this screen ****"))
+        if len(self.jog_increments) > 6:
+            print("**** PROBE SCREEN INFO ****")
+            print("**** To many increments given in INI File for this screen ****")
+            print("**** Only the first 5 will be reachable through this screen ****")
             # we shorten the incrementlist to 5 (first is default = 0)
             self.jog_increments = self.jog_increments[0:5]
 
@@ -141,7 +139,7 @@ class ProbeScreenJog(ProbeScreenBase):
 
         axisletter = widget.get_label()[0]
         if not axisletter.lower() in "xyzabcuvw":
-            print("unknown axis %s" % axisletter)
+            self.add_history_text("unknown axis %s" % (axisletter))
             return
 
         # get the axisnumber
@@ -179,7 +177,7 @@ class ProbeScreenJog(ProbeScreenBase):
     def on_btn_jog_released(self, widget, data=None):
         axisletter = widget.get_label()[0]
         if not axisletter.lower() in "xyzabcuvw":
-            print("unknown axis %s" % axisletter)
+            self.add_history_text("unknown axis %s" % (axisletter))
             return
 
         axis = "xyzabcuvw".index(axisletter.lower())
