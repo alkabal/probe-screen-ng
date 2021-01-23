@@ -1,43 +1,46 @@
 o<psng_tool_diameter> sub
 
-o10 if [#<_hal[probe.setterheight]> LE 0]
-     o<psng_hook_end> call
+
+o<psng_load_var_ini> call
+
+o<clear-axis-notif> call
+o30 if [#<_psng_setter_height> LE 0]
     (ABORT,TOOLSETTER HEIGHT NOT PROBED/CONFIGURED)
-o10 endif
+o30 endif
 
 o<psng_goto_toolsensor> call
 
-(cancel all Z offsets)(+ cutter compensation for diameter measurement)
-G92.1                                                                       ; use pause/restore can be better than reset ???
-G49 ;G40
+(cancel Z offsets)
+G49
 
-o<psng_backup_offset> call
-G10 L2 P0 Z0                                                                ; reset G54 offset for correct tool measurement
+o<backup_coord_offset> call                                                 ; backup G54 offset for correct calc tool measurement
 
-o<psng_start_setter_probing> call
-o500 if [#5070 EQ 0]
-     G10 L2 P0     Z#<_backup_offset>
-     o<psng_hook_end> call
-    (ABORT,FAILURE : TOOL SETTER FOR TOOL DIAMETER DOES NOT FOUND THE CONTACT POINT)
-o500 endif
+o<psng_start_z_probing> call
+o40 if [#5070 EQ 0]
+    (ABORT,TOOL SETTER FOR TOOL DIAMETER DOES NOT FOUND THE CONTACT POINT)
+o40 endif
 
-G91
-G1    Z[#<_hal[probe.ps_z_clearance]>*0.7] F#<_hal[probe.ps_searchvel]>     ; macro use ps_z_clearance*0.7 for allow tool to be en contact with setter pad
+G91                    ; For next move we need to manage additional Move away for allow tool to contact tool setter for diameter
+o50 if [#<_current_tool> EQ #<_probe_number>]
+     (DEBUG,USE PROBE DIAM for calc Z clearence)
+     G1 Z[#<_psng_Z_clearance> - #<_psng_latch> - 0.5*#<_psng_tool_diam>] F#<_psng_search_vel>
+o50 else
+     (DEBUG,USE Zclearence - LATCH)
+     G1 Z[0.7*#<_psng_Z_clearance> - #<_psng_latch>] F#<_psng_search_vel>    ; macro use ps_z_clearance*0.7 for allow tool to be en contact with setter pad
+o50 endif
 G90
 
-#<touch_result> = [#5063 - #<_hal[probe.setterheight]>]
-(print, probe Z=#<touch_result>)
 
-G10 L1 P#<_current_tool> Z[#<touch_result>]
-G10 L2 P0     Z#<_backup_offset>
+(print, probe Z=#<_psng_touch_calculated_z> )
 
-; next for x+ x- y+ y- done inside python code
+G10 L1 P#<_current_tool> Z#<_psng_touch_calculated_z>
 
-(start spindle if you use reverse spindle for tool diameter measuring)
- o500 if [#<_current_tool> GT 1 AND #<_hal[probe.use_rotate_spindle]> EQ 1 AND #<_hal[and2.combined-probe.in0]> EQ 1]
-      M4 S#<_ini[TOOLSENSOR]REV_ROTATION_SPEED>
- o500 endif
 
+;(start spindle if you use reverse spindle for tool diameter measuring)
+o60 if [#<_current_tool> GT 0 AND #<_current_tool> NE #<_probe_number> and #<_hal[probe.use_rotate_spindle]> EQ 1 AND #<_hal[and2.combined-probe.in0]> EQ 1]
+     M4 S[#<_ini[TOOLSENSOR]REV_ROT_SPEED>]
+o60 endif
+
+; nothing to do at the end of this ; next for x+ x- y+ y- call inside python code
 o<psng_tool_diameter> endsub
 M2
-

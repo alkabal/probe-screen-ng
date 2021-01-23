@@ -5,14 +5,6 @@ o<psng_manual_change> sub
 ;(DEBUG,in change tool_in_spindle=#<tool_in_spindle> current_pocket=#<current_pocket>)
 ;(DEBUG,selected_tool=#<selected_tool> selected_pocket=#<selected_pocket>)
 
-;otherwise after the M6 this information is gone! but it seem to be unused
-#<tool> = #<selected_tool>
-#<pocket> = #<selected_pocket>
-#<metric_based> = #<_metric>
-    ; TODO convertint to _metric_machine
-#<switch_unit> = 0
-#<absolute> = #<absolute>
-
 ; we must execute this only in the milltask interpreter
 ; or preview will break, so test for '#<_task>' which is 1 for
 ; the milltask interpreter and 0 in the UI's
@@ -21,141 +13,145 @@ o10 if [#<_task> EQ 0]
 o10     return [999]
 o10 endif
 
+  o<psng_load_var_ini> call
+
+
+  o<backup_status> call
+
+;otherwise after the M6 this information is gone! but it seem to be unused
+#<tool> = #<selected_tool>
+#<pocket> = #<selected_pocket>
+
+     o20 if [#<_hal[halui.machine.units-per-mm]> EQ 1]
+         #<_psng_metric_based> = 1
+     o20 else
+         #<_psng_metric_based> = 0
+     o20 endif
+
+     o30 if [#<_hal[probe.use_tool_measurement]> EQ 1]
+         #<_psng_tool_measurement> = 1
+     o30 else
+         #<_psng_tool_measurement> = 0
+     o30 endif
+
 G49  ; cancel tool offset
 
 #<intialX> = #<_X>
 #<intialY> = #<_Y>
+#<intialZ> = #<_Z>
 
-o20 if [#<_current_tool> GT 0]
-    #<intialZ> = #<_Z>
-o20 else
-    #<intialZ> = 0
-o20 endif
+    o40 if [#<_ini[EMCIO]TOOL_CHANGE_WITH_SPINDLE_ON> EQ 1]
+        M5
+    o40 endif
 
-
-o30 if [#<_metric> NE #<metric_based>]
+#<_psng_switch_unit> = 0
+o50 if [#<_metric> NE #<_psng_metric_based>]
     (print,not right Units: #<_metric>)
-     o31 if [#<metric_based> EQ 1]
+     o51 if [#<_psng_metric_based>]> EQ 1]
          (print,switched Units to metric)
          G21
-     o31 else
+     o51 else
          (print,switched Units to imperial)
-         G21
-     o31 endif
-o30 endif
+         G20
+     o51 endif
+     #<_psng_switch_unit> = 1
+o50 endif
 
-o10 if [#<_hal[motion.probe-input]> EQ 1]
-     o<psng_hook_end> call
-    (ABORT,!!! PROBE OR SETTER ALREADY TRIGGERED BEFORE GOTO CHANGEPOS FOR AUTOLENGHT !!!)
-o10 endif
 
 o<psng_goto_changepos> call
 o<clear-axis-notif> call
 
 
 o100 if [#<_hal[probe.use_tool_measurement]> EQ 0 OR #<_selected_tool> EQ 0]
-  o101 if [#<_ini[PROBE_SCREEN]TOOLCHANGE_POPUP_STYLE> EQ 0]
-     o110 if [#<_selected_tool> EQ 0]
+  o110 if [#<_ini[PROBE_SCREEN]TOOLCHANGE_POPUP_STYLE> EQ 0]
+     o111 if [#<_selected_tool> EQ 0]
          (MSG,PLEASE REMOVE TOOL)
          (MSG,NEED TO UNPAUSE OR ABORT)
          M0
          o<clear-axis-notif> call
-     o110 elseif [#<_current_tool> EQ #<_selected_tool>]
+     o111 elseif [#<_current_tool> EQ #<_selected_tool>]
           (MSG,SAME TOOL AS ACTUAL ASKED AND VALIDATED AUTOMATICALLY)
-     o110 elseif [#<_selected_tool> GT 0]
+     o111 elseif [#<_selected_tool> GT 0]
           (DEBUG,PLEASE CHANGE TO TOOL #<_selected_tool>)
           (MSG,NEED TO UNPAUSE OR ABORT)
           M0
           o<clear-axis-notif> call
-     o110 else
+     o111 else
           (DEBUG,UNKNOW ERROR OCCURED FOR TOOLCHANGE WITHOUT AUTOLENGTH)
-     o110 return [-9]
-     o110 endif
-  o101 elseif [#<_current_tool> EQ #<_selected_tool> AND #<_current_tool> GT 0]
+     o111 return [-9]
+     o111 endif
+  o110 elseif [#<_current_tool> EQ #<_selected_tool> AND #<_current_tool> GT 0]
        (MSG,SAME TOOL AS ACTUAL ASKED AND VALIDATED AUTOMATICALLY)
-  o101 endif
-     M6         ; using the code being remapped here means 'use builtin behaviour' used here for M6T0
+  o110 endif
+     M6         ; used here for make possible to cancel the toolchange here for M6T0 or M6TX without autolenght : this line call the python code from PSNG
      G43
 o100 return [3] ; indicate no tool measurement possible with tool 0 or no tool measurement configured
 
 o100 else
-     o130 if [#<_hal[probe.ps_searchvel]> LE 0]
-          (MSG,SEARCH VELOCITY NOT CONFIGURED)
-          (MSG,TOOLCHANGE CANCELED)
-     o130 return [-1] ; indicate searchvel <= 0
-     o130 endif
-
-     o140 if [#<_hal[probe.ps_probevel]> LE 0]
-          (MSG,PROBE VELOCITY NOT CONFIGURED)
-          (MSG,TOOLCHANGE CANCELED)
-     o140 return [-2] ; indicate probevel <= 0
-     o140 endif
-
-     o150 if [#<_hal[probe.setterheight]> LE 0]
+     o120 if [#<_ini[TOOLSENSOR]HEIGHT> LE 0]   ; AT THE END NEED TO CHOOSE #<_hal[probe.setterheight]> or #<_ini[TOOLSENSOR]HEIGHT>
           (MSG,TOOLSETTER HEIGHT NOT CONFIGURED)
           (MSG,TOOLCHANGE CANCELED)
-     o150 return [-3]
-     o150 endif
+     o120 return [-3]
+     o120 endif
 
      o<psng_hook> call [1]                                   ; User macro like pre safe test or probe and setter management etc
 
-     o160 if [#<_value> LT 0]
+     o130 if [#<_value> LT 0]
           (DEBUG, PSNG hook indicated a failure: #<_value>)
-     o160 return [-4]
-     o160 endif
-     
-  o102 if [#<_ini[PROBE_SCREEN]TOOLCHANGE_POPUP_STYLE> EQ 0]
-     o170 if [#<_current_tool> EQ #<_selected_tool>]
+     o130 return [-4]
+     o130 endif
+
+  o140 if [#<_ini[PROBE_SCREEN]TOOLCHANGE_POPUP_STYLE> EQ 0]
+     o141 if [#<_current_tool> EQ #<_selected_tool>]
           (MSG,SAME TOOL AS ACTUAL SO MEASUREMENT START AUTOMATICALLY)
           (MSG,NEED TO UNPAUSE OR ABORT)
           M0
           o<clear-axis-notif> call
-     o170 endif
+     o141 endif
 
-     o200 if [#<_current_tool> NE #<_selected_tool>]
+     o142 if [#<_current_tool> NE #<_selected_tool>]
           (DEBUG,PLEASE CHANGE TO TOOL #<_selected_tool>)
           (MSG,NEED TO UNPAUSE OR ABORT)
           M0
           o<clear-axis-notif> call
-     o200 endif
-  o102 elseif [#<_current_tool> EQ #<_selected_tool> AND #<_current_tool> GT 0]
+     o142 endif
+  o140 elseif [#<_current_tool> EQ #<_selected_tool> AND #<_current_tool> GT 0]
        (MSG,SAME TOOL AS ACTUAL ASKED AND VALIDATED AUTOMATICALLY)
        (MSG,NEED TO UNPAUSE OR ABORT)
        M0                                                                 ; prevent starting move without any popup confirmation !!!!
-  o102 endif
+  o140 endif
 o100 endif
 
-M6   ; using the code being remapped here means 'use builtin behaviour' used here for M6Tx
 
-o<psng_goto_toolsensor> call                                                ; with G90 inside
+M6   ; used here for make possible to cancel the toolchange here for M6TX with autolenght : this line call the python code from PSNG
 
-; cancel G5x offset
-o<psng_backup_offset> call
-G10 L2 P0 Z0                                                                ; reset G54 offset for correct tool measurement
 
-o<psng_start_setter_probing> call
+o<psng_goto_toolsensor> call [1]    ; call 1 = call from manual change for reset tool if error with probing
+o<backup_coord_offset> call
+
+o<psng_start_z_probing> call [1]    ; call 1 = call from manual change for reset tool if error with probing
 o500 if [#5070 EQ 0]
-     G10 L2 P0     Z#<_backup_offset>
-     o<psng_hook_end> call
+     M61Q0                          ; not sure this is usefull and not sure that work or not work but i speak about whole sequence if [#5070 EQ 0]
+     o<backup_restore> call [888]
 o500 return [-6] ; indicate probe contact failure to epilog
 o500 endif
 
-#<touch_result> = [#5063 - #<_hal[probe.setterheight]>]
-(print, probe Z=#<touch_result>)
+(print, probe Z=#<_psng_touch_calculated_z>)
 
-G10 L1 P#<_current_tool> Z[#<touch_result>]
-G10 L2 P0     Z#<_backup_offset>
+G10 L1 P#<_current_tool> Z#<_psng_touch_calculated_z>
+
+G43
 
 (back to Z max position only)
 o600 if [#<_ini[EMCIO]TOOL_CHANGE_QUILL_UP> EQ 1]
-    G53 G0 Z0                                     ; Respecting the traditional linuxcnc behavior
+     G53 G0 Z0                                     ; Respecting the traditional linuxcnc behavior
+O600 else
+     G53 G0 Z#<intialZ>
 o600 endif
-G43
 
-;(DEBUG,Zvalue:#<touch_result> Setter;#<_hal[probe.setterheight]>, Block:#<_hal[probe.blockheight]>)
-(MSG,TODO what about G43 G41 G42 can be saved at macro start and restored at end : see "lathemacro")
+    G53 G0 X#<intialX> Y#<intialY>
 
-o<psng_hook_end> call
+  o<backup_restore> call [888]   ; restore g20/21, g90/g91, feedrate cuter-comp and other using now global _backup_var
 
 ; signal success be returning a value > 0:
 o<psng_manual_change> endsub [1]

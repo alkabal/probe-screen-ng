@@ -22,10 +22,9 @@ o<psng_hook> sub
 ; value "7".
 #<hooked_macro> = #1
 
-
+o<clear-axis-notif> call
 o10 if [#<hooked_macro> GT 7]
-     o<psng_hook_end> call
-    (ABORT, HOOK UNRECOGNIZED : #<hooked_macro>)
+    (ABORT,HOOK UNRECOGNIZED : #<hooked_macro>)
 o10 endif
 
 o<psng_hook> endsub

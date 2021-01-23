@@ -1,0 +1,21 @@
+o<psng_load_var_ini> sub
+
+#<_probe_number>       = #<_ini[PROBE_SCREEN]PROBE_NUMBER>
+#<_psng_switch_unit>   = 0
+#<_psng_Z_clearance>   = #<_ini[TOOLSENSOR]Z_CLEARANCE>
+#<_psng_XY_clearance>  = #<_ini[TOOLSENSOR]XY_CLEARANCE>
+#<_psng_edge_length>   = #<_hal[probe.ps_edge_length]>
+#<_psng_diam>          = #<_ini[TOOLSENSOR]DIAMETER>
+#<_psng_diam_offset>   = #<_ini[TOOLSENSOR]DIAM_OFFSET>
+#<_psng_search_vel>    = #<_ini[TOOLSENSOR]SEARCH_VEL>
+#<_psng_probe_vel>     = #<_ini[TOOLSENSOR]PROBE_VEL>
+#<_psng_latch>         = #<_ini[TOOLSENSOR]LATCH>
+#<_psng_reverse_latch> = #<_ini[TOOLSENSOR]REVERSE_LATCH>
+#<_psng_tool_diam>     = #<_hal[probe.toolchange-diameter]>
+#<_psng_setter_height> = #<_hal[probe.setterheight]>    ; Using setterheight allow to use default ini value or altered value from PSNG GUI
+#<_psng_maxprobeZ>     = #<_ini[TOOLSENSOR]MAXPROBE>
+#<_psng_maxprobeXY>    = #<_ini[TOOLSENSOR]MAXPROBE_XY>
+#<_psng_rapid_speed>   = #<_ini[PROBE_SCREEN]RAPID_SPEED>
+
+o<psng_load_var_ini> endsub
+M2

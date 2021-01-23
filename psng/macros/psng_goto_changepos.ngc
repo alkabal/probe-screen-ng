@@ -1,7 +1,6 @@
 o<psng_goto_changepos> sub
 
-(DEBUG, EMCIO QUILL_UP #<_ini[EMCIO]TOOL_CHANGE_QUILL_UP>)
-(DEBUG, EMCIO POSITION #<_ini[EMCIO]TOOL_CHANGE_POSITION#1>)
+;(DEBUG, EMCIO POSITION #<_ini[EMCIO]TOOL_CHANGE_POSITION>)
 
 ;first go up
 G90
@@ -11,8 +10,6 @@ o20 endif
 
 G53 G0 X[#<_ini[CHANGE_POSITION]X>] Y[#<_ini[CHANGE_POSITION]Y>]
 G53 G0 Z[#<_ini[CHANGE_POSITION]Z>]
-
-
 
 o<psng_goto_changepos> endsub
 M2
