@@ -177,7 +177,6 @@ o<psng_hook> sub
 ; Check if mixed input is ready : DO NOT WORK FINE
 ;o1000 sub
 ;o300 if [#<_hal[motion.probe-input]> EQ 1]
-;     o<psng_hook_end> call
 ;    (ABORT,PROBE OR SETTER ALREADY TRIGGERED BEFORE START)
 ;o300 endif
 ;o1000 endsub
